@@ -12,7 +12,8 @@ datasource db {
 model User {
   id            Int       @id @default(autoincrement())
   name          String    @db.VarChar(100)
-  email         String    @unique @db.VarChar(255)
+  email         String?   @unique @db.VarChar(255)
+  cpf           String?   @unique @db.VarChar(14)
   phone         String    @unique @db.VarChar(20)
   passwordHash  String    @map("password_hash")
   avatarUrl     String?   @map("avatar_url")
@@ -36,6 +37,10 @@ model User {
   friendsB      Friendship[]     @relation("FriendB")
   ownedLeagues  League[]
   leagueMemberships LeagueMember[]
+  leagueBalances    LeagueBalance[]
+  joinRequests      LeagueJoinRequest[]
+  sentTransfers     LeagueTransaction[] @relation("SentTransfers")
+  receivedTransfers LeagueTransaction[] @relation("ReceivedTransfers")
 
   @@map("users")
 }
@@ -197,6 +202,7 @@ model Odd {
 model BetSlip {
   id              Int           @id @default(autoincrement())
   userId          Int           @map("user_id")
+  leagueId        Int?          @map("league_id")
   amount          Int           // total points wagered on the slip
   combinedOdd     Decimal       @map("combined_odd") @db.Decimal(10, 2)
   potentialReturn Int           @map("potential_return")
@@ -204,8 +210,9 @@ model BetSlip {
   settledAt       DateTime?     @map("settled_at")
   createdAt       DateTime      @default(now()) @map("created_at")
 
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  legs Bet[]
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league League?  @relation(fields: [leagueId], references: [id])
+  legs   Bet[]
 
   @@index([userId, status])
   @@index([userId, createdAt])
@@ -302,28 +309,101 @@ enum FriendshipStatus {
 
 model League {
   id          Int      @id @default(autoincrement())
-  ownerId     Int      @map("owner_id")
+  ownerId     Int?     @map("owner_id")
   name        String   @db.VarChar(50)
   inviteCode  String   @unique @map("invite_code") @db.VarChar(10)
+  isOfficial  Boolean  @default(false) @map("is_official")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  owner   User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  members LeagueMember[]
+  owner        User?             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members      LeagueMember[]
+  balances     LeagueBalance[]
+  joinRequests LeagueJoinRequest[]
+  transactions LeagueTransaction[]
+  betSlips     BetSlip[]
 
   @@map("leagues")
 }
 
 model LeagueMember {
-  id       Int      @id @default(autoincrement())
-  leagueId Int      @map("league_id")
-  userId   Int      @map("user_id")
-  joinedAt DateTime @default(now()) @map("joined_at")
+  id       Int            @id @default(autoincrement())
+  leagueId Int            @map("league_id")
+  userId   Int            @map("user_id")
+  role     LeagueMemberRole @default(MEMBER)
+  status   LeagueMemberStatus @default(ACTIVE)
+  joinedAt DateTime       @default(now()) @map("joined_at")
 
   league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([leagueId, userId])
   @@map("league_members")
+}
+
+enum LeagueMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum LeagueMemberStatus {
+  ACTIVE
+  SUSPENDED
+  LEFT
+}
+
+model LeagueBalance {
+  id        Int      @id @default(autoincrement())
+  leagueId  Int      @map("league_id")
+  userId    Int      @map("user_id")
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, userId])
+  @@map("league_balances")
+}
+
+model LeagueJoinRequest {
+  id          Int               @id @default(autoincrement())
+  leagueId    Int               @map("league_id")
+  userId      Int               @map("user_id")
+  status      JoinRequestStatus @default(PENDING)
+  requestedAt DateTime          @default(now()) @map("requested_at")
+  decidedAt   DateTime?         @map("decided_at")
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, userId])
+  @@map("league_join_requests")
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeagueTransaction {
+  id          Int      @id @default(autoincrement())
+  leagueId    Int      @map("league_id")
+  fromUserId  Int?     @map("from_user_id")
+  toUserId    Int      @map("to_user_id")
+  amount      Int
+  type        String   @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  fromUser User?  @relation("SentTransfers", fields: [fromUserId], references: [id])
+  toUser   User   @relation("ReceivedTransfers", fields: [toUserId], references: [id])
+
+  @@index([leagueId, createdAt])
+  @@index([toUserId, leagueId])
+  @@map("league_transactions")
 }
 
 // ─── Admin / Audit ─────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { IsInt, IsArray, ValidateNested, Min, Max, ArrayMinSize, ArrayMaxSize } from 'class-validator';
+import { IsInt, IsArray, ValidateNested, Min, Max, ArrayMinSize, ArrayMaxSize, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -33,4 +33,9 @@ export class CreateBetSlipDto {
   @Min(10, { message: 'Aposta minima: 10 pontos' })
   @Max(10000, { message: 'Aposta maxima: 10.000 pontos' })
   amount: number;
+
+  @ApiProperty({ example: 1, description: 'League ID (optional, defaults to Liga Oficial)' })
+  @IsInt()
+  @IsOptional()
+  leagueId?: number;
 }

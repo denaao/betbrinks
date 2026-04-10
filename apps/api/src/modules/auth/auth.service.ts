@@ -27,13 +27,20 @@ export class AuthService {
   // ─── Register ──────────────────────────────────────────────────────────
 
   async register(dto: RegisterDto) {
+    // Validate CPF format and algorithm
+    if (!this.validateCPF(dto.cpf)) {
+      throw new BadRequestException('CPF invalido. Verifique o formato ou algoritmo de validacao.');
+    }
+
+    const formattedCpf = this.formatCPF(dto.cpf);
+
     const existing = await this.prisma.user.findFirst({
-      where: { OR: [{ email: dto.email.toLowerCase().trim() }, { phone: dto.phone }] },
+      where: { OR: [{ cpf: formattedCpf }, { phone: dto.phone }] },
     });
 
     if (existing) {
-      if (existing.email === dto.email.toLowerCase().trim()) {
-        throw new ConflictException('Email ja cadastrado');
+      if (existing.cpf === formattedCpf) {
+        throw new ConflictException('CPF ja cadastrado');
       }
       throw new ConflictException('Telefone ja cadastrado');
     }
@@ -44,30 +51,68 @@ export class AuthService {
       const newUser = await tx.user.create({
         data: {
           name: dto.name,
-          email: dto.email.toLowerCase().trim(),
+          cpf: formattedCpf,
           phone: dto.phone,
           passwordHash,
+          isVerified: true,
         },
       });
 
       await tx.pointBalance.create({
-        data: { userId: newUser.id, points: 0, diamonds: 0 },
+        data: { userId: newUser.id, points: DEFAULT_INITIAL_POINTS, diamonds: 0 },
+      });
+
+      await tx.pointTransaction.create({
+        data: {
+          userId: newUser.id,
+          type: 'INITIAL_BONUS',
+          amount: DEFAULT_INITIAL_POINTS,
+          balanceAfter: DEFAULT_INITIAL_POINTS,
+          description: `Bonus de boas-vindas: ${DEFAULT_INITIAL_POINTS} pontos`,
+        },
+      });
+
+      // Auto-enroll in Liga Oficial
+      let ligaOficial = await tx.league.findFirst({
+        where: { isOfficial: true },
+      });
+
+      if (!ligaOficial) {
+        ligaOficial = await tx.league.create({
+          data: {
+            name: 'Liga Oficial',
+            inviteCode: 'OFICIAL',
+            isOfficial: true,
+          },
+        });
+      }
+
+      await tx.leagueMember.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId: newUser.id,
+          role: 'MEMBER',
+          status: 'ACTIVE',
+        },
+      });
+
+      await tx.leagueBalance.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId: newUser.id,
+          balance: 1000,
+        },
       });
 
       return newUser;
     });
 
-    // Generate and store OTP (5 min TTL)
-    const otp = this.generateOTP();
-    await this.redis.set(`otp:${dto.phone}`, otp, 300);
-
-    // TODO: Send SMS via Twilio — for now, log in dev
-    console.log(`[OTP] ${dto.phone}: ${otp}`);
+    const tokens = await this.generateTokens(user.id, user.cpf || '');
 
     return {
-      message: 'Conta criada! Verifique seu telefone com o codigo SMS.',
-      userId: user.id,
-      ...(this.config.get('NODE_ENV') === 'development' ? { devOtp: otp } : {}),
+      message: 'Conta criada com sucesso!',
+      ...tokens,
+      user: this.sanitizeUser(user),
     };
   }
 
@@ -87,7 +132,7 @@ export class AuthService {
     if (!user) throw new BadRequestException('Usuario nao encontrado.');
     if (user.isVerified) throw new BadRequestException('Telefone ja verificado.');
 
-    // Verify + credit initial points atomically
+    // Verify + credit initial points + auto-enroll in Liga Oficial atomically
     await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: user.id },
@@ -108,11 +153,45 @@ export class AuthService {
           description: `Bonus de boas-vindas: ${DEFAULT_INITIAL_POINTS} pontos`,
         },
       });
+
+      // Find or create Liga Oficial
+      let ligaOficial = await tx.league.findFirst({
+        where: { isOfficial: true },
+      });
+
+      if (!ligaOficial) {
+        ligaOficial = await tx.league.create({
+          data: {
+            name: 'Liga Oficial',
+            inviteCode: 'OFICIAL',
+            isOfficial: true,
+          },
+        });
+      }
+
+      // Create LeagueMember
+      await tx.leagueMember.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId: user.id,
+          role: 'MEMBER',
+          status: 'ACTIVE',
+        },
+      });
+
+      // Create LeagueBalance with 1000 points
+      await tx.leagueBalance.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId: user.id,
+          balance: 1000,
+        },
+      });
     });
 
     await this.redis.del(`otp:${dto.phone}`);
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.cpf || '');
 
     return {
       message: `Telefone verificado! Voce recebeu ${DEFAULT_INITIAL_POINTS} pontos.`,
@@ -124,20 +203,23 @@ export class AuthService {
   // ─── Login ─────────────────────────────────────────────────────────────
 
   async login(dto: LoginDto) {
+    const formattedCpf = this.formatCPF(dto.cpf);
+
     const user = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase().trim() },
+      where: { cpf: formattedCpf },
     });
 
-    if (!user) throw new UnauthorizedException('Email ou senha incorretos.');
+    if (!user) throw new UnauthorizedException('CPF ou senha incorretos.');
 
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Email ou senha incorretos.');
+    if (!valid) throw new UnauthorizedException('CPF ou senha incorretos.');
 
+    // Auto-verify on login for dev/testing
     if (!user.isVerified) {
-      const otp = this.generateOTP();
-      await this.redis.set(`otp:${user.phone}`, otp, 300);
-      console.log(`[OTP] ${user.phone}: ${otp}`);
-      throw new UnauthorizedException('Telefone nao verificado. Novo codigo SMS enviado.');
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true },
+      });
     }
 
     await this.prisma.user.update({
@@ -145,7 +227,7 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.cpf || '');
 
     return {
       ...tokens,
@@ -167,7 +249,9 @@ export class AuthService {
       // Blacklist old token (7 days TTL)
       await this.redis.set(`blacklist:${dto.refreshToken}`, '1', 7 * 24 * 3600);
 
-      return await this.generateTokens(payload.userId, payload.email);
+      // Support both cpf (new) and email (legacy) from payload
+      const identifier = payload.cpf || payload.email;
+      return await this.generateTokens(payload.userId, identifier);
     } catch {
       throw new UnauthorizedException('Refresh token invalido ou expirado.');
     }
@@ -175,12 +259,39 @@ export class AuthService {
 
   // ─── Helpers ───────────────────────────────────────────────────────────
 
+  private validateCPF(cpf: string): boolean {
+    // Strip formatting
+    const cleaned = cpf.replace(/\D/g, '');
+    if (cleaned.length !== 11) return false;
+    if (/^(\d)\1+$/.test(cleaned)) return false; // all same digits
+
+    // Validate check digits (mod 11 algorithm)
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(cleaned[i]) * (10 - i);
+    let check = 11 - (sum % 11);
+    if (check >= 10) check = 0;
+    if (parseInt(cleaned[9]) !== check) return false;
+
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += parseInt(cleaned[i]) * (11 - i);
+    check = 11 - (sum % 11);
+    if (check >= 10) check = 0;
+    if (parseInt(cleaned[10]) !== check) return false;
+
+    return true;
+  }
+
+  private formatCPF(cpf: string): string {
+    const cleaned = cpf.replace(/\D/g, '');
+    return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
+  }
+
   private generateOTP(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  private async generateTokens(userId: number, email: string) {
-    const payload = { userId, email };
+  private async generateTokens(userId: number, identifier: string) {
+    const payload = { userId, cpf: identifier };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('JWT_SECRET'),
@@ -194,11 +305,11 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private sanitizeUser(user: { id: number; name: string; email: string; phone: string; avatarUrl: string | null; isVerified: boolean }) {
+  private sanitizeUser(user: { id: number; name: string; cpf: string | null; phone: string; avatarUrl: string | null; isVerified: boolean }) {
     return {
       id: user.id,
       name: user.name,
-      email: user.email,
+      cpf: user.cpf,
       phone: user.phone,
       avatarUrl: user.avatarUrl,
       isVerified: user.isVerified,

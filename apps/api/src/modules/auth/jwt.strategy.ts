@@ -28,9 +28,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       };
     }
 
-    if (payload.userId && payload.email) {
+    // Support both cpf (new) and email (legacy) identifiers for user tokens
+    if (payload.userId && (payload.cpf || payload.email)) {
       return {
         userId: payload.userId,
+        cpf: payload.cpf,
         email: payload.email,
       };
     }

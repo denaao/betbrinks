@@ -1,4 +1,4 @@
-import { IsInt, Min, Max } from 'class-validator';
+import { IsInt, Min, Max, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateBetDto {
@@ -15,4 +15,9 @@ export class CreateBetDto {
   @Min(10, { message: 'Aposta minima: 10 pontos' })
   @Max(10000, { message: 'Aposta maxima: 10.000 pontos' })
   amount: number;
+
+  @ApiProperty({ example: 1, description: 'League ID (optional, defaults to Liga Oficial)' })
+  @IsInt()
+  @IsOptional()
+  leagueId?: number;
 }

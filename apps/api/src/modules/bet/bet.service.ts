@@ -10,6 +10,7 @@ import { RedisService } from '../../common/redis/redis.service';
 import { CreateBetDto } from './dto/create-bet.dto';
 import { CreateBetSlipDto } from './dto/create-bet-slip.dto';
 const MAX_DAILY_BETS = 50;
+const OFFICIAL_LEAGUE_ID = 1; // Default league
 
 @Injectable()
 export class BetService {
@@ -27,7 +28,23 @@ export class BetService {
     // 1. Check daily bet limit
     await this.checkDailyLimit(userId);
 
-    // 2. Validate fixture exists and is NOT_STARTED
+    // 2. Determine league (default to Liga Oficial if not provided)
+    const leagueId = dto.leagueId || OFFICIAL_LEAGUE_ID;
+
+    // 3. Verify user is a member of the league
+    const leagueMember = await this.prisma.leagueMember.findFirst({
+      where: {
+        leagueId,
+        userId,
+        status: 'ACTIVE',
+      },
+    });
+
+    if (!leagueMember) {
+      throw new BadRequestException('Voce nao esta em uma liga ativa para fazer apostas.');
+    }
+
+    // 4. Validate fixture exists and is NOT_STARTED
     const fixture = await this.prisma.fixture.findUnique({
       where: { id: dto.fixtureId },
     });
@@ -37,7 +54,7 @@ export class BetService {
       throw new BadRequestException('Apostas so podem ser feitas antes do jogo iniciar.');
     }
 
-    // 3. Validate odd exists and is active
+    // 5. Validate odd exists and is active
     const odd = await this.prisma.odd.findUnique({
       where: { id: dto.oddId },
       include: { market: true },
@@ -51,7 +68,7 @@ export class BetService {
       throw new BadRequestException('Mercado suspenso. Tente outro.');
     }
 
-    // 4. Check for duplicate bet (same user, same odd)
+    // 6. Check for duplicate bet (same user, same odd)
     const existingBet = await this.prisma.bet.findFirst({
       where: {
         userId,
@@ -64,19 +81,25 @@ export class BetService {
       throw new BadRequestException('Voce ja tem uma aposta pendente nesta odd.');
     }
 
-    // 5. Calculate potential return
+    // 7. Calculate potential return
     const oddValue = parseFloat(odd.value.toString());
     const potentialReturn = Math.floor(dto.amount * oddValue);
 
-    // 6. Debit points
-    await this.pointsService.debitPoints(
+    // 8. Check league balance
+    const leagueBalance = await this.getLeagueBalance(userId, leagueId);
+    if (leagueBalance < dto.amount) {
+      throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+    }
+
+    // 9. Debit from league balance
+    await this.debitLeagueBalance(
       userId,
+      leagueId,
       dto.amount,
-      'BET_PLACED',
       `Aposta: ${fixture.homeTeam} vs ${fixture.awayTeam} - ${odd.name} @${oddValue}`,
     );
 
-    // 7. Create bet record
+    // 10. Create bet record
     const bet = await this.prisma.bet.create({
       data: {
         userId,
@@ -97,18 +120,34 @@ export class BetService {
       },
     });
 
-    // 8. Increment daily counter
+    // 11. Increment daily counter
     await this.incrementDailyCount(userId);
 
-    this.logger.log(`Bet #${bet.id} created: user ${userId}, ${dto.amount} pts @${oddValue}`);
+    this.logger.log(`Bet #${bet.id} created: user ${userId}, ${dto.amount} pts @${oddValue}, league ${leagueId}`);
 
-    return this.mapBetResponse(bet);
+    return this.mapBetResponse(bet, leagueId);
   }
 
   // ─── Create Bet Slip (Bilhete) ─────────────────────────────────────────
 
   async createBetSlip(userId: number, dto: CreateBetSlipDto) {
     await this.checkDailyLimit(userId);
+
+    // Determine league (default to Liga Oficial if not provided)
+    const leagueId = dto.leagueId || OFFICIAL_LEAGUE_ID;
+
+    // Verify user is a member of the league
+    const leagueMember = await this.prisma.leagueMember.findFirst({
+      where: {
+        leagueId,
+        userId,
+        status: 'ACTIVE',
+      },
+    });
+
+    if (!leagueMember) {
+      throw new BadRequestException('Voce nao esta em uma liga ativa para fazer apostas.');
+    }
 
     // Validate all selections
     const validatedSelections: Array<{
@@ -157,18 +196,25 @@ export class BetService {
     const combinedOdd = validatedSelections.reduce((acc, s) => acc * s.oddValue, 1);
     const potentialReturn = Math.floor(dto.amount * combinedOdd);
 
-    // Debit points ONCE for the entire slip
+    // Check league balance
+    const leagueBalance = await this.getLeagueBalance(userId, leagueId);
+    if (leagueBalance < dto.amount) {
+      throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+    }
+
+    // Debit from league balance ONCE for the entire slip
     const desc = validatedSelections.length === 1
       ? `Aposta: ${validatedSelections[0].homeTeam} vs ${validatedSelections[0].awayTeam}`
       : `Bilhete multiplo (${validatedSelections.length} selecoes)`;
 
-    await this.pointsService.debitPoints(userId, dto.amount, 'BET_PLACED', desc);
+    await this.debitLeagueBalance(userId, leagueId, dto.amount, desc);
 
     // Create slip + legs in a transaction
     const slip = await this.prisma.$transaction(async (tx) => {
       const betSlip = await tx.betSlip.create({
         data: {
           userId,
+          leagueId,
           amount: dto.amount,
           combinedOdd,
           potentialReturn,
@@ -208,7 +254,7 @@ export class BetService {
 
     await this.incrementDailyCount(userId);
 
-    this.logger.log(`BetSlip #${slip!.id} created: user ${userId}, ${dto.amount} pts, ${validatedSelections.length} legs, combined @${combinedOdd.toFixed(2)}`);
+    this.logger.log(`BetSlip #${slip!.id} created: user ${userId}, ${dto.amount} pts, ${validatedSelections.length} legs, combined @${combinedOdd.toFixed(2)}, league ${leagueId}`);
 
     return this.mapSlipResponse(slip!);
   }
@@ -300,12 +346,12 @@ export class BetService {
 
     // Update slip status
     if (allWon) {
-      await this.pointsService.creditPoints(
+      const leagueId = slip.leagueId || OFFICIAL_LEAGUE_ID;
+      await this.creditLeagueBalance(
         slip.userId,
+        leagueId,
         slip.potentialReturn,
-        'BET_WON',
         `Bilhete #${slip.id} ganho! +${slip.potentialReturn} pontos`,
-        `slip:${slip.id}`,
       );
     }
 
@@ -319,9 +365,13 @@ export class BetService {
 
   // ─── Get Active Bets ───────────────────────────────────────────────────
 
-  async getActiveBets(userId: number) {
+  async getActiveBets(userId: number, leagueId?: number) {
     const bets = await this.prisma.bet.findMany({
-      where: { userId, status: 'PENDING' },
+      where: {
+        userId,
+        status: 'PENDING',
+        betSlip: leagueId ? { leagueId } : undefined,
+      },
       include: {
         fixture: {
           select: { homeTeam: true, awayTeam: true, homeLogo: true, awayLogo: true, leagueName: true, startAt: true, status: true, scoreHome: true, scoreAway: true },
@@ -329,21 +379,28 @@ export class BetService {
         odd: {
           include: { market: { select: { type: true } } },
         },
+        betSlip: {
+          select: { leagueId: true },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    return bets.map((b) => this.mapBetResponse(b));
+    return bets.map((b) => this.mapBetResponse(b, b.betSlip?.leagueId));
   }
 
   // ─── Get Bet History ───────────────────────────────────────────────────
 
-  async getBetHistory(userId: number, page = 1, limit = 20) {
+  async getBetHistory(userId: number, leagueId?: number, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
 
     const [bets, total] = await Promise.all([
       this.prisma.bet.findMany({
-        where: { userId, status: { not: 'PENDING' } },
+        where: {
+          userId,
+          status: { not: 'PENDING' },
+          betSlip: leagueId ? { leagueId } : undefined,
+        },
         include: {
           fixture: {
             select: { homeTeam: true, awayTeam: true, homeLogo: true, awayLogo: true, leagueName: true, startAt: true, status: true, scoreHome: true, scoreAway: true },
@@ -351,16 +408,25 @@ export class BetService {
           odd: {
             include: { market: { select: { type: true } } },
           },
+          betSlip: {
+            select: { leagueId: true },
+          },
         },
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip,
       }),
-      this.prisma.bet.count({ where: { userId, status: { not: 'PENDING' } } }),
+      this.prisma.bet.count({
+        where: {
+          userId,
+          status: { not: 'PENDING' },
+          betSlip: leagueId ? { leagueId } : undefined,
+        },
+      }),
     ]);
 
     return {
-      data: bets.map((b) => this.mapBetResponse(b)),
+      data: bets.map((b) => this.mapBetResponse(b, b.betSlip?.leagueId)),
       total,
       page,
       limit,
@@ -433,6 +499,9 @@ export class BetService {
         odd: {
           include: { market: true },
         },
+        betSlip: {
+          select: { leagueId: true },
+        },
       },
     });
 
@@ -447,13 +516,13 @@ export class BetService {
       const isWon = bet.odd.name === winningName;
 
       if (isWon) {
-        // Credit winnings
-        await this.pointsService.creditPoints(
+        // Credit winnings to league balance
+        const leagueId = bet.betSlip?.leagueId || OFFICIAL_LEAGUE_ID;
+        await this.creditLeagueBalance(
           bet.userId,
+          leagueId,
           bet.potentialReturn,
-          'BET_WON',
           `Aposta ganha! +${bet.potentialReturn} pontos`,
-          `bet:${bet.id}`,
         );
 
         await this.prisma.bet.update({
@@ -499,6 +568,134 @@ export class BetService {
     };
   }
 
+  // ─── Private: League Balance Helpers ───────────────────────────────────
+
+  private async getLeagueBalance(userId: number, leagueId: number): Promise<number> {
+    const balance = await this.prisma.leagueBalance.findUnique({
+      where: {
+        leagueId_userId: {
+          leagueId,
+          userId,
+        },
+      },
+    });
+
+    return balance?.balance || 0;
+  }
+
+  private async debitLeagueBalance(
+    userId: number,
+    leagueId: number,
+    amount: number,
+    description: string,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      // Get or create balance
+      let balance = await tx.leagueBalance.findUnique({
+        where: {
+          leagueId_userId: {
+            leagueId,
+            userId,
+          },
+        },
+      });
+
+      if (!balance) {
+        balance = await tx.leagueBalance.create({
+          data: {
+            leagueId,
+            userId,
+            balance: 0,
+          },
+        });
+      }
+
+      // Check balance
+      if (balance.balance < amount) {
+        throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+      }
+
+      // Debit balance
+      await tx.leagueBalance.update({
+        where: {
+          leagueId_userId: {
+            leagueId,
+            userId,
+          },
+        },
+        data: {
+          balance: { decrement: amount },
+        },
+      });
+
+      // Create transaction record
+      await tx.leagueTransaction.create({
+        data: {
+          leagueId,
+          fromUserId: null,
+          toUserId: userId,
+          amount: -amount,
+          type: 'BET_PLACED',
+          description,
+        },
+      });
+    });
+  }
+
+  private async creditLeagueBalance(
+    userId: number,
+    leagueId: number,
+    amount: number,
+    description: string,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      // Get or create balance
+      let balance = await tx.leagueBalance.findUnique({
+        where: {
+          leagueId_userId: {
+            leagueId,
+            userId,
+          },
+        },
+      });
+
+      if (!balance) {
+        balance = await tx.leagueBalance.create({
+          data: {
+            leagueId,
+            userId,
+            balance: 0,
+          },
+        });
+      }
+
+      // Credit balance
+      await tx.leagueBalance.update({
+        where: {
+          leagueId_userId: {
+            leagueId,
+            userId,
+          },
+        },
+        data: {
+          balance: { increment: amount },
+        },
+      });
+
+      // Create transaction record
+      await tx.leagueTransaction.create({
+        data: {
+          leagueId,
+          fromUserId: null,
+          toUserId: userId,
+          amount,
+          type: 'BET_WON',
+          description,
+        },
+      });
+    });
+  }
+
   // ─── Private: Daily Limit ─────────────────────────────────────────────
 
   private async checkDailyLimit(userId: number) {
@@ -520,10 +717,11 @@ export class BetService {
 
   // ─── Private: Helpers ─────────────────────────────────────────────────
 
-  private mapBetResponse(bet: any) {
+  private mapBetResponse(bet: any, leagueId?: number | null) {
     return {
       id: bet.id,
       fixtureId: bet.fixtureId,
+      leagueId: leagueId || OFFICIAL_LEAGUE_ID,
       fixture: {
         homeTeam: bet.fixture.homeTeam,
         awayTeam: bet.fixture.awayTeam,

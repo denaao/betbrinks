@@ -4,6 +4,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { DiamondService } from './diamond.service';
 import { PurchaseDiamondDto } from './dto/purchase-diamond.dto';
+import { ConvertDiamondsToLeagueDto } from './dto/convert-diamonds-to-league.dto';
 
 @ApiTags('Diamonds')
 @Controller('diamonds')
@@ -42,5 +43,15 @@ export class DiamondController {
       page ? parseInt(page) : 1,
       limit ? parseInt(limit) : 20,
     );
+  }
+
+  @Post('convert-to-league')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Convert diamonds to league balance' })
+  async convertToLeague(
+    @CurrentUser('userId') userId: number,
+    @Body() dto: ConvertDiamondsToLeagueDto,
+  ) {
+    return this.diamondService.convertDiamondsToLeague(userId, dto.leagueId, dto.diamonds);
   }
 }

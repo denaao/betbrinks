@@ -7,11 +7,13 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { PurchaseDiamondDto } from './dto/purchase-diamond.dto';
+import { ConvertDiamondsToLeagueDto } from './dto/convert-diamonds-to-league.dto';
+
 const DIAMOND_PACKAGES = [
-  { id: 'starter', name: 'Starter', diamonds: 100, points: 500, priceBRL: 4.90 },
-  { id: 'popular', name: 'Popular', diamonds: 500, points: 2500, priceBRL: 19.90 },
-  { id: 'pro', name: 'Pro', diamonds: 1200, points: 6000, priceBRL: 39.90 },
-  { id: 'vip', name: 'VIP', diamonds: 3000, points: 15000, priceBRL: 79.90 },
+  { id: 'starter', name: 'Starter', diamonds: 100, bonusPoints: 500, priceBRL: 4.9, priceFormatted: 'R$ 4,90' },
+  { id: 'popular', name: 'Popular', diamonds: 500, bonusPoints: 2500, priceBRL: 19.9, priceFormatted: 'R$ 19,90' },
+  { id: 'pro', name: 'Pro', diamonds: 1200, bonusPoints: 6000, priceBRL: 39.9, priceFormatted: 'R$ 39,90' },
+  { id: 'vip', name: 'VIP', diamonds: 3000, bonusPoints: 15000, priceBRL: 79.9, priceFormatted: 'R$ 79,90' },
 ];
 
 @Injectable()
@@ -30,10 +32,105 @@ export class DiamondService {
       id: pkg.id,
       name: pkg.name,
       diamonds: pkg.diamonds,
-      bonusPoints: pkg.points,
+      bonusPoints: pkg.bonusPoints,
       priceBRL: pkg.priceBRL,
-      priceFormatted: `R$ ${pkg.priceBRL.toFixed(2).replace('.', ',')}`,
+      priceFormatted: pkg.priceFormatted,
     }));
+  }
+
+  // ─── Convert Diamonds to League Balance ────────────────────────────────
+
+  async convertDiamondsToLeague(
+    userId: number,
+    leagueId: number,
+    diamonds: number,
+  ): Promise<{ pointsAdded: number; newBalance: number }> {
+    // Validate user has enough diamonds
+    const balance = await this.prisma.pointBalance.findUnique({
+      where: { userId },
+    });
+
+    if (!balance) {
+      throw new NotFoundException('Saldo nao encontrado.');
+    }
+
+    if (balance.diamonds < diamonds) {
+      throw new BadRequestException(
+        `Diamantes insuficientes. Voce tem ${balance.diamonds}, precisa de ${diamonds}.`,
+      );
+    }
+
+    // Validate league exists and user is a member
+    const member = await this.prisma.leagueMember.findUnique({
+      where: {
+        leagueId_userId: { leagueId, userId },
+      },
+    });
+
+    if (!member) {
+      throw new BadRequestException('Usuario nao e membro da liga.');
+    }
+
+    // Get conversion rate from SystemConfig
+    const configRate = await this.prisma.systemConfig.findUnique({
+      where: { key: 'DIAMOND_TO_POINTS_RATE' },
+    });
+
+    const RATE = configRate ? parseInt(configRate.value) : 5;
+    const pointsToAdd = diamonds * RATE;
+
+    // Atomic transaction
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. Deduct diamonds from PointBalance
+      const updatedBalance = await tx.pointBalance.update({
+        where: { userId },
+        data: {
+          diamonds: { decrement: diamonds },
+        },
+      });
+
+      // 2. Credit points to LeagueBalance
+      let leagueBalance = await tx.leagueBalance.findUnique({
+        where: {
+          leagueId_userId: { leagueId, userId },
+        },
+      });
+
+      if (!leagueBalance) {
+        leagueBalance = await tx.leagueBalance.create({
+          data: {
+            leagueId,
+            userId,
+            balance: pointsToAdd,
+          },
+        });
+      } else {
+        leagueBalance = await tx.leagueBalance.update({
+          where: { id: leagueBalance.id },
+          data: {
+            balance: { increment: pointsToAdd },
+          },
+        });
+      }
+
+      // 3. Create LeagueTransaction record
+      await tx.leagueTransaction.create({
+        data: {
+          leagueId,
+          toUserId: userId,
+          amount: pointsToAdd,
+          type: 'DIAMOND_CONVERSION',
+          description: `Conversao: ${diamonds} diamantes -> ${pointsToAdd} pontos`,
+        },
+      });
+
+      return {
+        pointsAdded: pointsToAdd,
+        newBalance: leagueBalance.balance,
+      };
+    });
+
+    return result;
   }
 
   // ─── Purchase History ──────────────────────────────────────────────────
@@ -159,15 +256,33 @@ export class DiamondService {
   // ─── Private: Credit Diamonds ──────────────────────────────────────────
 
   private async creditDiamonds(purchaseId: number, userId: number, diamonds: number) {
+    // Get the package to find bonusPoints
+    const purchase = await this.prisma.diamondPurchase.findUnique({
+      where: { id: purchaseId },
+    });
+
+    if (!purchase) {
+      throw new NotFoundException('Compra nao encontrada.');
+    }
+
+    const pkg = DIAMOND_PACKAGES.find((p) => p.id === purchase.packageId);
+    if (!pkg) {
+      throw new NotFoundException('Pacote nao encontrado.');
+    }
+
     await this.prisma.$transaction(async (tx) => {
       await tx.diamondPurchase.update({
         where: { id: purchaseId },
         data: { status: 'VERIFIED' },
       });
 
+      // Credit both diamonds and bonus points
       await tx.pointBalance.update({
         where: { userId },
-        data: { diamonds: { increment: diamonds } },
+        data: {
+          diamonds: { increment: diamonds },
+          points: { increment: pkg.bonusPoints },
+        },
       });
     });
   }

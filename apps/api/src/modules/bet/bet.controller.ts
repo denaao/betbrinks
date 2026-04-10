@@ -88,4 +88,33 @@ export class BetController {
   ) {
     return this.betService.getBetById(id, userId);
   }
+
+  // ─── League-Scoped Endpoints ────────────────────────────────────────────
+
+  @Get('league/:leagueId/active')
+  @ApiOperation({ summary: 'Get all pending bets for a specific league' })
+  async getActiveBetsByLeague(
+    @CurrentUser('userId') userId: number,
+    @Param('leagueId', ParseIntPipe) leagueId: number,
+  ) {
+    return this.betService.getActiveBets(userId, leagueId);
+  }
+
+  @Get('league/:leagueId/history')
+  @ApiOperation({ summary: 'Get settled bet history for a specific league' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  async getBetHistoryByLeague(
+    @CurrentUser('userId') userId: number,
+    @Param('leagueId', ParseIntPipe) leagueId: number,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.betService.getBetHistory(
+      userId,
+      leagueId,
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 20,
+    );
+  }
 }

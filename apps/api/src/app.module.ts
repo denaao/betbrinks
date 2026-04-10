@@ -18,6 +18,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { LeagueModule } from './modules/league/league.module';
+import { UserLeagueModule } from './modules/user-league/user-league.module';
 import { SportModule } from './modules/sport/sport.module';
 
 @Module({
@@ -67,6 +68,7 @@ import { SportModule } from './modules/sport/sport.module';
     GamificationModule,
     AdminModule,
     LeagueModule,
+    UserLeagueModule,
     SportModule,
   ],
   providers: [

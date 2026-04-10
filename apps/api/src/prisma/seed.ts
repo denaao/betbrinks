@@ -60,41 +60,86 @@ async function main() {
   }
   console.log(`  ✅ ${achievements.length} achievements created`);
 
-  // Test user (dev only)
+  // ─── Liga Oficial (singleton) ─────────────────────────────────────
+  let ligaOficial = await prisma.league.findFirst({ where: { isOfficial: true } });
+  if (!ligaOficial) {
+    ligaOficial = await prisma.league.create({
+      data: {
+        name: 'Liga Oficial',
+        inviteCode: 'OFICIAL',
+        isOfficial: true,
+        ownerId: null,
+      },
+    });
+  }
+  console.log(`  ✅ Liga Oficial created (ID: ${ligaOficial.id})`);
+
+  // ─── Test user (dev only) ─────────────────────────────────────────
   const userHash = await bcryptjs.hash('teste123', 12);
-  const user = await prisma.user.upsert({
-    where: { email: 'teste@betbrinks.com' },
-    update: {},
-    create: {
-      name: 'Usuario Teste',
-      email: 'teste@betbrinks.com',
-      phone: '+5511999999999',
-      passwordHash: userHash,
-      isVerified: true,
-    },
+  const testCpf = '529.982.247-25'; // valid test CPF
+
+  // Try to find existing test user by phone or CPF
+  let user = await prisma.user.findFirst({
+    where: { OR: [{ phone: '+5511999999999' }, { cpf: testCpf }] },
   });
 
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        name: 'Estefani',
+        cpf: testCpf,
+        email: 'teste@betbrinks.com',
+        phone: '+5511999999999',
+        passwordHash: userHash,
+        isVerified: true,
+      },
+    });
+  } else {
+    // Update existing user to add CPF if missing
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        cpf: testCpf,
+        passwordHash: userHash,
+        isVerified: true,
+      },
+    });
+  }
+
+  // Global point balance
   await prisma.pointBalance.upsert({
     where: { userId: user.id },
     update: {},
     create: {
       userId: user.id,
       points: 1000,
-      diamonds: 0,
+      diamonds: 100,
     },
   });
 
-  await prisma.pointTransaction.create({
-    data: {
+  // Enroll in Liga Oficial
+  await prisma.leagueMember.upsert({
+    where: { leagueId_userId: { leagueId: ligaOficial.id, userId: user.id } },
+    update: {},
+    create: {
+      leagueId: ligaOficial.id,
       userId: user.id,
-      type: 'INITIAL_BONUS',
-      amount: 1000,
-      balanceAfter: 1000,
-      description: 'Bonus de boas-vindas',
+      role: 'MEMBER',
+      status: 'ACTIVE',
     },
   });
-  console.log('  ✅ Test user created (teste@betbrinks.com / teste123)');
 
+  await prisma.leagueBalance.upsert({
+    where: { leagueId_userId: { leagueId: ligaOficial.id, userId: user.id } },
+    update: {},
+    create: {
+      leagueId: ligaOficial.id,
+      userId: user.id,
+      balance: 1000,
+    },
+  });
+
+  console.log(`  ✅ Test user created (CPF: ${testCpf} / senha: teste123)`);
   console.log('🌱 Seed complete!');
 }
 
