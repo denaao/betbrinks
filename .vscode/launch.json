@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug API (NestJS)",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/apps/api/src/main.ts"],
+      "envFile": "${workspaceFolder}/.env",
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/apps/api",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug API Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--inspect-brk", "${workspaceFolder}/node_modules/.bin/jest", "--runInBand"],
+      "cwd": "${workspaceFolder}/apps/api",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "React Native (Android)",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "android",
+      "cwd": "${workspaceFolder}/apps/mobile"
+    },
+    {
+      "name": "React Native (iOS)",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "ios",
+      "cwd": "${workspaceFolder}/apps/mobile"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "betbrinks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "betbrinks - Apostas com pontos virtuais",
+  "scripts": {
+    "dev": "concurrently -n api,back -c blue,magenta \"pnpm dev:api\" \"pnpm dev:backoffice\"",
+    "dev:api": "pnpm --filter @betbrinks/api dev",
+    "dev:mobile": "pnpm --filter @betbrinks/mobile start",
+    "dev:backoffice": "pnpm --filter @betbrinks/backoffice dev",
+    "build": "pnpm build:shared && pnpm build:api && pnpm build:backoffice",
+    "build:shared": "pnpm --filter @betbrinks/shared build",
+    "build:api": "pnpm --filter @betbrinks/api build",
+    "build:backoffice": "pnpm --filter @betbrinks/backoffice build",
+    "test": "pnpm -r test",
+    "test:api": "pnpm --filter @betbrinks/api test",
+    "test:e2e": "pnpm --filter @betbrinks/api test:e2e",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate": "cd apps/api && npx prisma migrate dev",
+    "db:push": "cd apps/api && npx prisma db push",
+    "db:seed": "cd apps/api && npx prisma db seed",
+    "db:studio": "cd apps/api && npx prisma studio",
+    "db:reset": "cd apps/api && npx prisma migrate reset",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
+    "docker:prod": "docker compose -f docker/docker-compose.prod.yml up -d --build",
+    "test:api-football": "npx tsx scripts/test-api-football.ts",
+    "setup": "node scripts/setup-check.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

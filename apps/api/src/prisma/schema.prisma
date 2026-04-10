@@ -1,0 +1,410 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User ──────────────────────────────────────────────────────────────────
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(100)
+  email         String    @unique @db.VarChar(255)
+  phone         String    @unique @db.VarChar(20)
+  passwordHash  String    @map("password_hash")
+  avatarUrl     String?   @map("avatar_url")
+  isVerified    Boolean   @default(false) @map("is_verified")
+  role          UserRole  @default(USER)
+  level         Int       @default(1)
+  xp            Int       @default(0)
+  deviceId      String?   @map("device_id") @db.VarChar(255)
+  lastLoginAt   DateTime? @map("last_login_at")
+  lastBonusAt   DateTime? @map("last_bonus_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  balance       PointBalance?
+  bets          Bet[]
+  betSlips      BetSlip[]
+  transactions  PointTransaction[]
+  purchases     DiamondPurchase[]
+  achievements  UserAchievement[]
+  friendsA      Friendship[]     @relation("FriendA")
+  friendsB      Friendship[]     @relation("FriendB")
+  ownedLeagues  League[]
+  leagueMemberships LeagueMember[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ─── Point Balance ─────────────────────────────────────────────────────────
+
+model PointBalance {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique @map("user_id")
+  points    Int      @default(0)
+  diamonds  Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("point_balances")
+}
+
+// ─── Point Transaction ─────────────────────────────────────────────────────
+
+model PointTransaction {
+  id           Int             @id @default(autoincrement())
+  userId       Int             @map("user_id")
+  type         TransactionType
+  amount       Int             // positive = credit, negative = debit
+  balanceAfter Int             @map("balance_after")
+  description  String?         @db.VarChar(255)
+  referenceId  String?         @map("reference_id") @db.VarChar(100) // bet_id, purchase_id, etc.
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("point_transactions")
+}
+
+enum TransactionType {
+  INITIAL_BONUS
+  DAILY_BONUS
+  BET_PLACED
+  BET_WON
+  BET_VOID
+  DIAMOND_CONVERSION
+  REFERRAL_REWARD
+  RANKING_REWARD
+  ACHIEVEMENT_REWARD
+  ADMIN_ADJUSTMENT
+}
+
+// ─── Diamond Purchase ──────────────────────────────────────────────────────
+
+model DiamondPurchase {
+  id           Int                   @id @default(autoincrement())
+  userId       Int                   @map("user_id")
+  packageId    String                @map("package_id") @db.VarChar(50)
+  diamonds     Int
+  priceBrl     Decimal               @map("price_brl") @db.Decimal(10, 2)
+  platform     String                @db.VarChar(20) // 'google_play' | 'app_store'
+  storeReceipt String?               @map("store_receipt") @db.Text
+  status       DiamondPurchaseStatus @default(PENDING)
+  createdAt    DateTime              @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("diamond_purchases")
+}
+
+enum DiamondPurchaseStatus {
+  PENDING
+  VERIFIED
+  FAILED
+  REFUNDED
+}
+
+// ─── Fixture (Match) ───────────────────────────────────────────────────────
+
+model Fixture {
+  id             Int           @id @default(autoincrement())
+  apiFootballId  Int           @unique @map("api_football_id")
+  leagueId       Int           @map("league_id")
+  leagueName     String        @map("league_name") @db.VarChar(100)
+  leagueLogo     String?       @map("league_logo") @db.VarChar(500)
+  homeTeam       String        @map("home_team") @db.VarChar(100)
+  homeLogo       String?       @map("home_logo") @db.VarChar(500)
+  awayTeam       String        @map("away_team") @db.VarChar(100)
+  awayLogo       String?       @map("away_logo") @db.VarChar(500)
+  startAt        DateTime      @map("start_at")
+  status         FixtureStatus @default(NOT_STARTED)
+  scoreHome      Int?          @map("score_home")
+  scoreAway      Int?          @map("score_away")
+  isSettled      Boolean       @default(false) @map("is_settled")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  markets Market[]
+  bets    Bet[]
+
+  @@index([startAt, status])
+  @@index([leagueId])
+  @@map("fixtures")
+}
+
+enum FixtureStatus {
+  NOT_STARTED
+  FIRST_HALF
+  HALFTIME
+  SECOND_HALF
+  EXTRA_TIME
+  PENALTIES
+  FINISHED
+  POSTPONED
+  CANCELLED
+}
+
+// ─── Market ────────────────────────────────────────────────────────────────
+
+model Market {
+  id        Int        @id @default(autoincrement())
+  fixtureId Int        @map("fixture_id")
+  type      MarketType
+  status    String     @default("active") @db.VarChar(20) // active, suspended, settled
+  result    String?    @db.VarChar(50) // winning outcome name
+
+  fixture Fixture @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  odds    Odd[]
+
+  @@unique([fixtureId, type])
+  @@map("markets")
+}
+
+enum MarketType {
+  MATCH_WINNER
+  OVER_UNDER_25
+  BOTH_TEAMS_SCORE
+}
+
+// ─── Odd ───────────────────────────────────────────────────────────────────
+
+model Odd {
+  id       Int     @id @default(autoincrement())
+  marketId Int     @map("market_id")
+  name     String  @db.VarChar(50) // Home, Draw, Away, Over, Under, Yes, No
+  value    Decimal @db.Decimal(6, 2) // e.g., 2.45
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  bets   Bet[]
+
+  @@unique([marketId, name])
+  @@map("odds")
+}
+
+// ─── Bet Slip (Bilhete) ───────────────────────────────────────────────────
+
+model BetSlip {
+  id              Int           @id @default(autoincrement())
+  userId          Int           @map("user_id")
+  amount          Int           // total points wagered on the slip
+  combinedOdd     Decimal       @map("combined_odd") @db.Decimal(10, 2)
+  potentialReturn Int           @map("potential_return")
+  status          BetStatus     @default(PENDING)
+  settledAt       DateTime?     @map("settled_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  legs Bet[]
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@map("bet_slips")
+}
+
+// ─── Bet (Leg of a Slip) ──────────────────────────────────────────────────
+
+model Bet {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  betSlipId       Int?      @map("bet_slip_id")
+  fixtureId       Int       @map("fixture_id")
+  oddId           Int       @map("odd_id")
+  amount          Int       // points wagered
+  oddValue        Decimal   @map("odd_value") @db.Decimal(6, 2) // odd at time of placement
+  potentialReturn Int       @map("potential_return")
+  status          BetStatus @default(PENDING)
+  settledAt       DateTime? @map("settled_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  betSlip BetSlip? @relation(fields: [betSlipId], references: [id], onDelete: Cascade)
+  fixture Fixture  @relation(fields: [fixtureId], references: [id])
+  odd     Odd      @relation(fields: [oddId], references: [id])
+
+  @@index([userId, status])
+  @@index([fixtureId, status])
+  @@index([userId, createdAt])
+  @@index([betSlipId])
+  @@map("bets")
+}
+
+enum BetStatus {
+  PENDING
+  WON
+  LOST
+  VOID
+  CASHOUT
+}
+
+// ─── Achievement ───────────────────────────────────────────────────────────
+
+model Achievement {
+  id          Int    @id @default(autoincrement())
+  key         String @unique @db.VarChar(50) // 'first_bet', 'lucky_3', 'faithful_7'
+  name        String @db.VarChar(100)
+  description String @db.VarChar(255)
+  xpReward    Int    @default(50) @map("xp_reward")
+  pointReward Int    @default(0) @map("point_reward")
+  iconUrl     String? @map("icon_url") @db.VarChar(500)
+
+  users UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  achievementId Int      @map("achievement_id")
+  unlockedAt    DateTime @default(now()) @map("unlocked_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+// ─── Social ────────────────────────────────────────────────────────────────
+
+model Friendship {
+  id        Int              @id @default(autoincrement())
+  userIdA   Int              @map("user_id_a")
+  userIdB   Int              @map("user_id_b")
+  status    FriendshipStatus @default(PENDING)
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  userA User @relation("FriendA", fields: [userIdA], references: [id], onDelete: Cascade)
+  userB User @relation("FriendB", fields: [userIdB], references: [id], onDelete: Cascade)
+
+  @@unique([userIdA, userIdB])
+  @@map("friendships")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+// ─── League (Private) ──────────────────────────────────────────────────────
+
+model League {
+  id          Int      @id @default(autoincrement())
+  ownerId     Int      @map("owner_id")
+  name        String   @db.VarChar(50)
+  inviteCode  String   @unique @map("invite_code") @db.VarChar(10)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  owner   User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members LeagueMember[]
+
+  @@map("leagues")
+}
+
+model LeagueMember {
+  id       Int      @id @default(autoincrement())
+  leagueId Int      @map("league_id")
+  userId   Int      @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, userId])
+  @@map("league_members")
+}
+
+// ─── Admin / Audit ─────────────────────────────────────────────────────────
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash")
+  name         String    @db.VarChar(100)
+  role         AdminRole @default(ANALYST)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  auditLogs AuditLog[]
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  FINANCIAL_MANAGER
+  CRM_MANAGER
+  ANALYST
+  MODERATOR
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  adminUserId Int      @map("admin_user_id")
+  action      String   @db.VarChar(100) // 'user.block', 'config.update', etc.
+  targetType  String?  @map("target_type") @db.VarChar(50) // 'user', 'config', etc.
+  targetId    String?  @map("target_id") @db.VarChar(50)
+  details     String?  @db.Text // JSON details
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id])
+
+  @@index([adminUserId, createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ─── Sport / Modality ─────────────────────────────────────────────────
+
+model Sport {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(80)
+  icon      String?  @db.VarChar(500)   // URL or emoji/SVG identifier
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  leagues ActiveLeague[]
+
+  @@map("sports")
+}
+
+// ─── Active League ────────────────────────────────────────────────────
+
+model ActiveLeague {
+  id             Int      @id @default(autoincrement())
+  apiFootballId  Int      @unique @map("api_football_id")
+  name           String   @db.VarChar(150)
+  country        String   @db.VarChar(100)
+  logo           String?  @db.VarChar(500)
+  isActive       Boolean  @default(true) @map("is_active")
+  sportId        Int?     @map("sport_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  sport Sport? @relation(fields: [sportId], references: [id])
+
+  @@map("active_leagues")
+}
+
+// ─── System Config ─────────────────────────────────────────────────────────
+
+model SystemConfig {
+  id    Int    @id @default(autoincrement())
+  key   String @unique @db.VarChar(100)
+  value String @db.Text
+  type  String @default("string") @db.VarChar(20) // string, number, boolean, json
+
+  @@map("system_configs")
+}

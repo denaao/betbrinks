@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check shared
+        run: pnpm --filter @betbrinks/shared typecheck
+
+      - name: Lint API
+        run: pnpm --filter api lint
+
+      - name: Type check API
+        run: pnpm --filter api typecheck
+
+  test-api:
+    name: API Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: betbrinks
+          POSTGRES_PASSWORD: betbrinks_test
+          POSTGRES_DB: betbrinks_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: apps/api
+        run: npx prisma generate
+
+      - name: Run migrations
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://betbrinks:betbrinks_test@localhost:5432/betbrinks_test
+        run: npx prisma migrate deploy
+
+      - name: Run tests
+        working-directory: apps/api
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://betbrinks:betbrinks_test@localhost:5432/betbrinks_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_jwt_secret_for_ci_pipeline_only
+          JWT_REFRESH_SECRET: test_refresh_secret_for_ci_pipeline_only
+          API_FOOTBALL_KEY: test_key
+        run: pnpm test -- --coverage --ci
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/api/coverage/
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: apps/api
+        run: npx prisma generate
+
+      - name: Build API
+        run: pnpm --filter api build

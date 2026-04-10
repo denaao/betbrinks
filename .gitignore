@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+
+# Docker
+docker/data/
+
+# React Native
+apps/mobile/android/
+apps/mobile/ios/
+.expo/
+*.apk
+*.aab
+*.ipa
+apps/mobile/*.jks
+apps/mobile/google-services.json
+apps/mobile/GoogleService-Info.plist
+apps/mobile/play-store-key.json
+
+# Prisma
+apps/api/src/prisma/generated/
+
+# Firebase
+firebase-adminsdk*.json
+
+# Secrets
+*.pem
+*.key

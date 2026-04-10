@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "Prisma.prisma",
+    "eamodio.gitlens",
+    "firsttris.vscode-jest-runner",
+    "ms-azuretools.vscode-docker",
+    "msjsdiag.vscode-react-native",
+    "usernamehw.errorlens",
+    "bradlc.vscode-tailwindcss",
+    "rangav.vscode-thunder-client"
+  ]
+}

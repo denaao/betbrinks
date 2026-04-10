@@ -1,0 +1,48 @@
+{
+  "app": {
+    "name": "BetBrinks",
+    "subtitle": "Apostas esportivas com pontos",
+    "category": "Entertainment",
+    "contentRating": "12+",
+    "company": "BETREX GROUP LLC",
+    "website": "https://betbrinks.com",
+    "supportEmail": "suporte@betbrinks.com",
+    "privacyPolicyUrl": "https://betbrinks.com/privacy",
+    "termsOfServiceUrl": "https://betbrinks.com/terms"
+  },
+  "locales": {
+    "pt-BR": {
+      "title": "BetBrinks - Apostas com Pontos",
+      "shortDescription": "Aposte em jogos de futebol usando pontos virtuais. Sem dinheiro real!",
+      "fullDescription": "BetBrinks e o app de apostas esportivas recreativas onde voce aposta usando pontos virtuais, sem envolver dinheiro real!\n\nDestaques:\n- Odds reais de jogos de futebol ao redor do mundo\n- Comece com 1.000 pontos gratis\n- Bonus diario de 50 pontos\n- 3 tipos de mercado: Resultado, Mais/Menos 2.5 gols, Ambos Marcam\n- Rankings global, semanal e mensal\n- 15 niveis de experiencia com conquistas\n- Diamantes para turbinar sua experiencia\n- Acompanhe jogos ao vivo com odds atualizadas\n\nCompita com amigos e suba no ranking sem arriscar nada! BetBrinks e pura diversao.\n\nIMPORTANTE: Este aplicativo NAO envolve apostas com dinheiro real. Todos os pontos sao virtuais e nao possuem valor monetario. Diamantes sao itens cosmeticos/de conveniencia.",
+      "keywords": "apostas,futebol,pontos,ranking,esportes,odds,virtual,gratis,jogos,competicao",
+      "whatsNew": "Versao 1.0.0 - Lancamento oficial!\n- Apostas com pontos virtuais\n- Odds ao vivo\n- Rankings e conquistas\n- Loja de diamantes"
+    },
+    "en-US": {
+      "title": "BetBrinks - Points Betting",
+      "shortDescription": "Bet on football matches using virtual points. No real money!",
+      "fullDescription": "BetBrinks is the recreational sports betting app where you bet using virtual points, no real money involved!\n\nHighlights:\n- Real odds from football matches worldwide\n- Start with 1,000 free points\n- Daily bonus of 50 points\n- 3 market types: Match Winner, Over/Under 2.5, Both Teams Score\n- Global, weekly, and monthly rankings\n- 15 experience levels with achievements\n- Diamonds to boost your experience\n- Follow live matches with updated odds\n\nCompete with friends and climb the rankings risk-free! BetBrinks is pure fun.\n\nIMPORTANT: This app does NOT involve real money betting. All points are virtual and have no monetary value. Diamonds are cosmetic/convenience items.",
+      "keywords": "betting,football,points,ranking,sports,odds,virtual,free,games,competition",
+      "whatsNew": "Version 1.0.0 - Official launch!\n- Virtual points betting\n- Live odds\n- Rankings and achievements\n- Diamond store"
+    }
+  },
+  "screenshots": {
+    "required": [
+      "home-screen.png",
+      "match-detail.png",
+      "my-bets.png",
+      "ranking.png",
+      "diamond-store.png",
+      "profile.png"
+    ],
+    "sizes": {
+      "iphone_6_5": "1284x2778",
+      "iphone_5_5": "1242x2208",
+      "ipad_12_9": "2048x2732",
+      "android_phone": "1080x1920",
+      "android_7inch": "1200x1920",
+      "android_10inch": "1600x2560"
+    }
+  },
+  "reviewNotes": "Este aplicativo usa APENAS pontos virtuais para apostas recreativas. Nao ha envolvimento de dinheiro real em nenhum momento. Os diamantes comprados via IAP sao convertidos em pontos virtuais (taxa 5:1) e nao podem ser sacados. O app se enquadra na categoria de entretenimento/simulacao, nao de jogos de azar."
+}
