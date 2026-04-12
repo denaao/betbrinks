@@ -117,4 +117,31 @@ export class BetController {
       limit ? parseInt(limit) : 20,
     );
   }
+
+  @Get('slips/league/:leagueId/active')
+  @ApiOperation({ summary: 'Get pending bet slips for a specific league' })
+  async getActiveSlipsByLeague(
+    @CurrentUser('userId') userId: number,
+    @Param('leagueId', ParseIntPipe) leagueId: number,
+  ) {
+    return this.betService.getActiveSlips(userId, leagueId);
+  }
+
+  @Get('slips/league/:leagueId/history')
+  @ApiOperation({ summary: 'Get settled bet slip history for a specific league' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  async getSlipHistoryByLeague(
+    @CurrentUser('userId') userId: number,
+    @Param('leagueId', ParseIntPipe) leagueId: number,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.betService.getSlipHistory(
+      userId,
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 20,
+      leagueId,
+    );
+  }
 }

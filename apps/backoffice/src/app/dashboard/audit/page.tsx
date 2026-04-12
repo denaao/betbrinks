@@ -32,10 +32,12 @@ export default function AuditLogPage() {
   const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/admin/audit-logs', { params: { page, limit } });
-      const res = data.data || data;
-      setLogs(res.logs || res.items || []);
-      setTotal(res.total || 0);
+      const { data: axiosData } = await api.get('/admin/audit-logs', { params: { page, limit } });
+      // API: { success, data: { data: [...], total, totalPages } }
+      const wrapped = axiosData.data || axiosData;
+      const list = wrapped.data || wrapped.logs || wrapped.items || wrapped;
+      setLogs(Array.isArray(list) ? list : []);
+      setTotal(wrapped.total || 0);
     } catch {
       // silent
     } finally {

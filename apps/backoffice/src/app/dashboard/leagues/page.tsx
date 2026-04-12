@@ -32,29 +32,41 @@ export default function LeaguesPage() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  const loadSports = useCallback(async () => {
     try {
-      const [leaguesRes, sportsRes] = await Promise.all([
-        api.get('/admin/leagues'),
-        api.get('/admin/sports'),
-      ]);
-      const lr = leaguesRes.data.data || leaguesRes.data;
+      const sportsRes = await api.get('/admin/sports');
       const sr = sportsRes.data.data || sportsRes.data;
-      setLeagues(Array.isArray(lr) ? lr : []);
       const sportsList = Array.isArray(sr) ? sr.map((s: any) => ({ id: s.id, name: s.name, icon: s.icon })) : [];
       setSports(sportsList);
       if (sportsList.length && !selectedSport) setSelectedSport(sportsList[0]);
+      return sportsList;
     } catch {
-      // silent
+      return [];
+    }
+  }, []);
+
+  const loadLeagues = useCallback(async (sportId?: number) => {
+    setLoading(true);
+    try {
+      const url = sportId ? `/admin/leagues?sportId=${sportId}` : '/admin/leagues';
+      const leaguesRes = await api.get(url);
+      const lr = leaguesRes.data.data || leaguesRes.data;
+      setLeagues(Array.isArray(lr) ? lr : []);
+    } catch {
+      setLeagues([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Load sports once, then leagues are loaded when selectedSport changes
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadSports();
+  }, [loadSports]);
+
+  useEffect(() => {
+    if (selectedSport) loadLeagues(selectedSport.id);
+  }, [selectedSport, loadLeagues]);
 
   // ─── Derived data ──────────────────────────────────────────────────
 
@@ -85,6 +97,26 @@ export default function LeaguesPage() {
   }, [leagues, search, filterCountry, filterStatus]);
 
   const enabledCount = leagues.filter((l) => l.isEnabled).length;
+  const [sportEnabledCounts, setSportEnabledCounts] = useState<Record<number, number>>({});
+
+  // Load enabled counts per sport for the tab badges
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.get('/admin/leagues/enabled');
+        const data = res.data.data || res.data;
+        if (Array.isArray(data)) {
+          const counts: Record<number, number> = {};
+          data.forEach((l: any) => {
+            if (l.isActive && l.sportId) {
+              counts[l.sportId] = (counts[l.sportId] || 0) + 1;
+            }
+          });
+          setSportEnabledCounts(counts);
+        }
+      } catch { /* silent */ }
+    })();
+  }, [leagues]);
 
   // ─── Actions ───────────────────────────────────────────────────────
 
@@ -171,7 +203,7 @@ export default function LeaguesPage() {
               <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                 selectedSport?.id === s.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
               }`}>
-                {leagues.filter((l) => l.isEnabled && l.sportId === s.id).length}
+                {sportEnabledCounts[s.id] || 0}
               </span>
             </button>
           ))}
@@ -187,9 +219,7 @@ export default function LeaguesPage() {
         <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
           <p className="text-xs text-green-600 font-medium uppercase">Habilitadas{selectedSport ? ` (${selectedSport.name})` : ''}</p>
           <p className="text-2xl font-bold text-green-600 mt-1">
-            {selectedSport
-              ? leagues.filter((l) => l.isEnabled && l.sportId === selectedSport.id).length
-              : enabledCount}
+            {enabledCount}
           </p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">

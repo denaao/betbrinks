@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PointsService } from '../points/points.service';
+import { CashboxService } from '../user-league/cashbox.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { CreateBetDto } from './dto/create-bet.dto';
 import { CreateBetSlipDto } from './dto/create-bet-slip.dto';
@@ -19,6 +20,7 @@ export class BetService {
   constructor(
     private prisma: PrismaService,
     private pointsService: PointsService,
+    private cashboxService: CashboxService,
     private redis: RedisService,
   ) {}
 
@@ -89,6 +91,12 @@ export class BetService {
     const leagueBalance = await this.getLeagueBalance(userId, leagueId);
     if (leagueBalance < dto.amount) {
       throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+    }
+
+    // 8b. Check league cashbox can cover potential payout (private leagues only)
+    const cashboxCheck = await this.cashboxService.canAcceptBet(leagueId, potentialReturn);
+    if (!cashboxCheck.ok) {
+      throw new BadRequestException(cashboxCheck.reason);
     }
 
     // 9. Debit from league balance
@@ -261,10 +269,11 @@ export class BetService {
 
   // ─── Get Active Slips ─────────────────────────────────────────────────
 
-  async getActiveSlips(userId: number) {
+  async getActiveSlips(userId: number, leagueId?: number) {
     const slips = await this.prisma.betSlip.findMany({
-      where: { userId, status: 'PENDING' },
+      where: { userId, status: 'PENDING', ...(leagueId ? { leagueId } : {}) },
       include: {
+        league: { select: { id: true, name: true, isOfficial: true } },
         legs: {
           include: {
             fixture: {
@@ -281,12 +290,13 @@ export class BetService {
 
   // ─── Get Slip History ─────────────────────────────────────────────────
 
-  async getSlipHistory(userId: number, page = 1, limit = 20) {
+  async getSlipHistory(userId: number, page = 1, limit = 20, leagueId?: number) {
     const skip = (page - 1) * limit;
     const [slips, total] = await Promise.all([
       this.prisma.betSlip.findMany({
-        where: { userId, status: { not: 'PENDING' } },
+        where: { userId, status: { not: 'PENDING' }, ...(leagueId ? { leagueId } : {}) },
         include: {
+          league: { select: { id: true, name: true, isOfficial: true } },
           legs: {
             include: {
               fixture: {
@@ -300,7 +310,7 @@ export class BetService {
         take: limit,
         skip,
       }),
-      this.prisma.betSlip.count({ where: { userId, status: { not: 'PENDING' } } }),
+      this.prisma.betSlip.count({ where: { userId, status: { not: 'PENDING' }, ...(leagueId ? { leagueId } : {}) } }),
     ]);
     return {
       data: slips.map(s => this.mapSlipResponse(s)),
@@ -515,9 +525,10 @@ export class BetService {
       const winningName = winningOutcomes[marketType];
       const isWon = bet.odd.name === winningName;
 
+      const leagueId = bet.betSlip?.leagueId || OFFICIAL_LEAGUE_ID;
+
       if (isWon) {
-        // Credit winnings to league balance
-        const leagueId = bet.betSlip?.leagueId || OFFICIAL_LEAGUE_ID;
+        // Credit winnings to league balance (player)
         await this.creditLeagueBalance(
           bet.userId,
           leagueId,
@@ -525,12 +536,26 @@ export class BetService {
           `Aposta ganha! +${bet.potentialReturn} pontos`,
         );
 
+        // Debit cashbox: pays the profit (potentialReturn - amount, since amount was already deducted at bet time)
+        try {
+          await this.cashboxService.onBetWon(leagueId, bet.potentialReturn, bet.betSlipId || undefined);
+        } catch (e: any) {
+          this.logger.error(`Cashbox debit failed for league ${leagueId}: ${e.message}`);
+        }
+
         await this.prisma.bet.update({
           where: { id: bet.id },
           data: { status: 'WON', settledAt: new Date() },
         });
         wonCount++;
       } else {
+        // Cashbox receives bet amount minus 10% platform fee
+        try {
+          await this.cashboxService.onBetLost(leagueId, bet.amount, bet.betSlipId || undefined);
+        } catch (e: any) {
+          this.logger.error(`Cashbox credit failed for league ${leagueId}: ${e.message}`);
+        }
+
         await this.prisma.bet.update({
           where: { id: bet.id },
           data: { status: 'LOST', settledAt: new Date() },
@@ -748,6 +773,8 @@ export class BetService {
     return {
       id: slip.id,
       type: slip.legs.length === 1 ? 'SIMPLE' : 'MULTIPLE',
+      leagueId: slip.leagueId || OFFICIAL_LEAGUE_ID,
+      league: slip.league ? { id: slip.league.id, name: slip.league.isOfficial ? 'Liga BetBrincadeira' : slip.league.name, isOfficial: slip.league.isOfficial } : null,
       amount: slip.amount,
       combinedOdd: parseFloat(slip.combinedOdd.toString()),
       potentialReturn: slip.potentialReturn,

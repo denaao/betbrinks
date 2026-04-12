@@ -72,7 +72,7 @@ export class AuthService {
         },
       });
 
-      // Auto-enroll in Liga Oficial
+      // Auto-enroll in Liga BetBrincadeira
       let ligaOficial = await tx.league.findFirst({
         where: { isOfficial: true },
       });
@@ -80,7 +80,7 @@ export class AuthService {
       if (!ligaOficial) {
         ligaOficial = await tx.league.create({
           data: {
-            name: 'Liga Oficial',
+            name: 'Liga BetBrincadeira',
             inviteCode: 'OFICIAL',
             isOfficial: true,
           },
@@ -132,7 +132,7 @@ export class AuthService {
     if (!user) throw new BadRequestException('Usuario nao encontrado.');
     if (user.isVerified) throw new BadRequestException('Telefone ja verificado.');
 
-    // Verify + credit initial points + auto-enroll in Liga Oficial atomically
+    // Verify + credit initial points + auto-enroll in Liga BetBrincadeira atomically
     await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: user.id },
@@ -154,7 +154,7 @@ export class AuthService {
         },
       });
 
-      // Find or create Liga Oficial
+      // Find or create Liga BetBrincadeira
       let ligaOficial = await tx.league.findFirst({
         where: { isOfficial: true },
       });
@@ -162,7 +162,7 @@ export class AuthService {
       if (!ligaOficial) {
         ligaOficial = await tx.league.create({
           data: {
-            name: 'Liga Oficial',
+            name: 'Liga BetBrincadeira',
             inviteCode: 'OFICIAL',
             isOfficial: true,
           },
@@ -226,6 +226,41 @@ export class AuthService {
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
     });
+
+    // Auto-enroll in Liga BetBrincadeira if not already a member
+    let ligaOficial = await this.prisma.league.findFirst({
+      where: { isOfficial: true },
+    });
+
+    if (!ligaOficial) {
+      ligaOficial = await this.prisma.league.create({
+        data: {
+          name: 'Liga BetBrincadeira',
+          inviteCode: 'OFICIAL',
+          isOfficial: true,
+        },
+      });
+    }
+
+    const existingMember = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId: ligaOficial.id, userId: user.id } },
+    });
+
+    if (!existingMember) {
+      await this.prisma.leagueMember.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId: user.id,
+          role: 'MEMBER',
+          status: 'ACTIVE',
+        },
+      });
+      await this.prisma.leagueBalance.upsert({
+        where: { leagueId_userId: { leagueId: ligaOficial.id, userId: user.id } },
+        create: { leagueId: ligaOficial.id, userId: user.id, balance: 1000 },
+        update: {},
+      });
+    }
 
     const tokens = await this.generateTokens(user.id, user.cpf || '');
 

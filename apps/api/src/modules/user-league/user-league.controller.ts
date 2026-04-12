@@ -13,6 +13,7 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { UserLeagueService } from './user-league.service';
+import { CashboxService } from './cashbox.service';
 import { CreateLeagueDto } from './dto/create-league.dto';
 import { JoinLeagueDto } from './dto/join-league.dto';
 import { TransferBalanceDto } from './dto/transfer-balance.dto';
@@ -22,7 +23,10 @@ import { ConvertDiamondsLeagueDto } from './dto/convert-diamonds.dto';
 @ApiBearerAuth()
 @Controller('user-leagues')
 export class UserLeagueController {
-  constructor(private userLeagueService: UserLeagueService) {}
+  constructor(
+    private userLeagueService: UserLeagueService,
+    private cashboxService: CashboxService,
+  ) {}
 
   // ─── Get User's Leagues ────────────────────────────────────────────────
 
@@ -178,6 +182,41 @@ export class UserLeagueController {
   ) {
     await this.userLeagueService.convertDiamondsToBalance(userId, id, dto);
     return { message: `${dto.diamonds} diamantes convertidos com sucesso` };
+  }
+
+  // ─── Cashbox (Caixa da Liga) ─────────────────────────────────────────────
+
+  @Get(':id/cashbox')
+  @ApiOperation({ summary: 'Ver informações do caixa da liga (membros da liga)' })
+  async getCashbox(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    // Verify membership
+    await this.userLeagueService.getLeagueBalance(userId, id);
+    return this.cashboxService.getCashboxInfo(id);
+  }
+
+  @Post(':id/cashbox/deposit')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Depositar diamantes no caixa da liga (owner only)' })
+  async depositToCashbox(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { diamonds: number },
+  ) {
+    return this.cashboxService.depositToCashbox(userId, id, body.diamonds);
+  }
+
+  @Post(':id/cashbox/withdraw')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sacar do caixa da liga para diamantes (owner only)' })
+  async withdrawFromCashbox(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { amount: number },
+  ) {
+    return this.cashboxService.withdrawFromCashbox(userId, id, body.amount);
   }
 
   // ─── Remove Member ─────────────────────────────────────────────────────

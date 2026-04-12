@@ -3,39 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>BetBrinks - Preview</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  /* Using Verdana - system font, no import needed */
 
   :root {
-    --primary: #5B9A8B; --primary-50: #F0F7F5; --primary-100: #DCEEEa;
-    --primary-200: #C2E0D9; --primary-500: #6BA89C; --primary-600: #4E8A7B;
-    --primary-700: #5B9A8B; --primary-800: #3D7568;
-    --accent: #E07A5F; --accent-light: #FDEEE9; --accent-dark: #C96A52;
-    --bg: #F5F1EB; --card: #FFFFFF;
-    --text: #2D3436; --text-sec: #7B8794; --text-light: #A4AEB8;
-    --border: #E8E3DC; --border-light: #F0ECE6;
-    --success: #5B9A8B; --success-bg: #F0F7F5;
-    --error: #E07A5F; --error-bg: #FDEEE9;
-    --warning: #E2B866; --warning-bg: #FDF6E8;
-    --shadow-sm: 0 1px 3px rgba(45,52,54,0.04);
+    --primary: #C4956A; --primary-50: rgba(196,149,106,0.08); --primary-100: rgba(196,149,106,0.15);
+    --primary-200: rgba(196,149,106,0.25); --primary-500: #D4A87A; --primary-600: #B8845C;
+    --primary-700: #C4956A; --primary-800: #A07350;
+    --accent: #D4A574; --accent-light: #FBF5F0; --accent-dark: #B8845C;
+    --bg: #14142B; --card: #1E1E38;
+    --text: #F0EAE0; --text-sec: #9A94A8; --text-light: #6E6880;
+    --border: #2A2A45; --border-light: #232340;
+    --success: #6BCB77; --success-bg: rgba(107,203,119,0.12);
+    --error: #E07A5F; --error-bg: rgba(224,122,95,0.12);
+    --warning: #E2B866; --warning-bg: rgba(226,184,102,0.12);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
     --shadow-md: 0 4px 12px rgba(45,52,54,0.06);
     --shadow-lg: 0 8px 30px rgba(45,52,54,0.08);
     --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    background: #E8E3DC; display: flex; justify-content: center;
+    font-family: 'Verdana', Geneva, sans-serif;
+    background: #0d0d1f; display: flex; justify-content: center;
     align-items: center; min-height: 100vh; padding: 20px;
   }
 
   .phone {
     width: 390px; height: 844px; background: var(--bg);
     border-radius: 48px; overflow: hidden;
-    box-shadow: 0 0 0 3px #C2B9AD, 0 30px 80px rgba(0,0,0,0.25);
+    box-shadow: 0 0 0 3px #2a2a45, 0 30px 80px rgba(0,0,0,0.5);
     position: relative; display: flex; flex-direction: column;
   }
 
@@ -44,12 +47,12 @@
     justify-content: space-between; align-items: center;
     position: relative; z-index: 20; flex-shrink: 0;
   }
-  .status-bar.dark { background: var(--primary); }
+  .status-bar.dark { background: #1a1a35; }
   .status-bar.light { background: var(--bg); }
   .status-time { font-size: 15px; font-weight: 700; }
   .status-icons { display: flex; gap: 4px; align-items: center; font-size: 12px; }
   .dynamic-island {
-    width: 126px; height: 36px; background: #2D3436;
+    width: 126px; height: 36px; background: #0a0a1a;
     border-radius: 20px; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
   }
 
@@ -79,7 +82,7 @@
     color: var(--text); background: var(--bg); font-family: inherit;
     outline: none; transition: all 0.2s;
   }
-  .field input:focus { border-color: var(--primary-500); background: white; box-shadow: 0 0 0 3px var(--primary-100); }
+  .field input:focus { border-color: var(--primary-500); background: var(--card); box-shadow: 0 0 0 3px var(--primary-100); }
 
   .btn {
     width: 100%; height: 54px; border: none; border-radius: var(--radius-sm);
@@ -88,25 +91,25 @@
   }
   .btn-primary {
     background: var(--primary); color: white;
-    box-shadow: 0 4px 14px rgba(91,154,139,0.3);
+    box-shadow: 0 4px 14px rgba(196,149,106,0.3);
   }
   .btn-primary:hover { background: var(--primary-600); transform: translateY(-1px); }
   .btn-primary:active { transform: translateY(0); }
   .btn-primary:disabled { opacity: 0.5; transform: none; }
-  .btn-green { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(91,154,139,0.3); }
+  .btn-green { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(196,149,106,0.3); }
 
   .login-footer { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-sec); }
   .login-footer a { color: var(--primary); font-weight: 700; text-decoration: none; cursor: pointer; }
 
   /* ===== APP HEADER ===== */
   .app-header {
-    background: var(--primary); padding: 0 24px 20px;
-    border-radius: 0 0 28px 28px; position: relative;
+    background: #1a1a35; padding: 0 24px 20px;
+    border-radius: 0 0 28px 28px; position: relative; flex-shrink: 0;
   }
   .header-row { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
   .header-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
   .header-back { background: rgba(255,255,255,0.15); border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; }
-  .greeting { font-size: 22px; font-weight: 800; color: white; }
+  .greeting { font-size: 16px; font-weight: 800; color: white; }
   .header-sub { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 2px; }
   .header-right { display: flex; align-items: center; gap: 8px; }
   .header-icons { display: flex; gap: 8px; }
@@ -136,7 +139,7 @@
     padding: 10px 16px; background: var(--bg);
   }
   .league-box {
-    background: white; border-radius: 16px; padding: 14px;
+    background: var(--card); border-radius: 16px; padding: 14px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--border-light);
   }
   .league-box-header {
@@ -144,12 +147,12 @@
   }
   .league-box-title { font-size: 14px; font-weight: 700; color: var(--text); }
   .league-box-count {
-    font-size: 11px; font-weight: 700; color: var(--primary); background: rgba(107,142,118,0.12);
+    font-size: 11px; font-weight: 700; color: var(--primary); background: rgba(196,149,106,0.12);
     padding: 2px 8px; border-radius: 10px;
   }
   .games-header {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
-    background: white; border-bottom: 1px solid var(--border-light);
+    background: var(--card); border-bottom: 1px solid var(--border-light);
   }
   .games-back {
     width: 32px; height: 32px; border: none; background: var(--bg); border-radius: 10px;
@@ -161,13 +164,13 @@
   #gamesSection { flex-direction: column; }
   .league-sel-item {
     display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-    background: white; border-radius: 12px; cursor: pointer;
+    background: var(--card); border-radius: 12px; cursor: pointer;
     border: 1.5px solid var(--border-light); margin-bottom: 6px; transition: all 0.2s;
   }
-  .league-sel-item.active { border-color: var(--primary); background: rgba(107,142,118,0.06); }
+  .league-sel-item.active { border-color: var(--primary); background: rgba(196,149,106,0.06); }
   .league-sel-item:active { transform: scale(0.98); }
   .league-sel-crest {
-    width: 36px; height: 36px; border-radius: 50%; background: rgba(107,142,118,0.12);
+    width: 36px; height: 36px; border-radius: 50%; background: rgba(196,149,106,0.12);
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 14px; color: var(--primary); flex-shrink: 0;
   }
@@ -175,33 +178,33 @@
   .league-sel-name { font-weight: 700; font-size: 13px; color: var(--text); }
   .league-sel-sub { font-size: 11px; color: var(--text-light); margin-top: 1px; }
   .league-sel-actions { display: flex; gap: 8px; margin-top: 4px; }
-  .btn-league-action {
+  .btn-league-action { background: rgba(196,149,106,0.25);
     flex: 1; padding: 8px; border: 1.5px dashed var(--border-light); border-radius: 10px;
     background: transparent; font-size: 12px; font-weight: 600; color: var(--primary);
     cursor: pointer; transition: all 0.2s;
   }
-  .btn-league-action:active { background: rgba(107,142,118,0.08); }
+  .btn-league-action:active { background: rgba(196,149,106,0.35); }
   .league-sel-code {
     display: flex; align-items: center; gap: 4px; padding: 4px 8px;
-    background: rgba(107,142,118,0.08); border-radius: 8px; cursor: pointer;
+    background: rgba(196,149,106,0.08); border-radius: 8px; cursor: pointer;
     flex-shrink: 0; transition: all 0.2s;
   }
-  .league-sel-code:active { background: rgba(107,142,118,0.18); }
+  .league-sel-code:active { background: rgba(196,149,106,0.18); }
   .code-text { font-size: 11px; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
   .league-sel-manage {
     display: flex; align-items: center; justify-content: center;
     width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
-    background: rgba(107,142,118,0.08); flex-shrink: 0; transition: all 0.2s;
+    background: rgba(196,149,106,0.08); flex-shrink: 0; transition: all 0.2s;
   }
-  .league-sel-manage:active { background: rgba(107,142,118,0.18); }
+  .league-sel-manage:active { background: rgba(196,149,106,0.18); }
   .panel-section { margin-bottom: 16px; }
   .panel-section-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; display:flex; align-items:center; justify-content:space-between; }
   .panel-member {
     display: flex; align-items: center; gap: 10px; padding: 10px;
-    background: white; border-radius: 10px; border: 1px solid var(--border-light); margin-bottom: 6px;
+    background: var(--card); border-radius: 10px; border: 1px solid var(--border-light); margin-bottom: 6px;
   }
   .panel-member-av {
-    width: 34px; height: 34px; border-radius: 50%; background: rgba(107,142,118,0.12);
+    width: 34px; height: 34px; border-radius: 50%; background: rgba(196,149,106,0.12);
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 13px; color: var(--primary); flex-shrink: 0;
   }
@@ -213,35 +216,35 @@
     padding: 5px 10px; border-radius: 8px; border: none; font-size: 11px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
   }
-  .panel-btn-approve { background: rgba(107,142,118,0.15); color: var(--primary); }
+  .panel-btn-approve { background: rgba(196,149,106,0.15); color: var(--primary); }
   .panel-btn-reject { background: rgba(198,65,65,0.1); color: var(--error); }
-  .panel-btn-send { background: rgba(107,142,118,0.15); color: var(--primary); }
+  .panel-btn-send { background: rgba(196,149,106,0.15); color: var(--primary); }
   .panel-btn-remove { background: rgba(198,65,65,0.1); color: var(--error); }
   .panel-btn:active { opacity: 0.7; }
   .panel-code-row {
     display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-    background: rgba(107,142,118,0.06); border-radius: 10px; margin-bottom: 8px;
+    background: rgba(196,149,106,0.06); border-radius: 10px; margin-bottom: 8px;
   }
   .panel-code { font-size: 18px; font-weight: 700; letter-spacing: 3px; color: var(--primary); flex: 1; }
   .panel-code-copy { cursor: pointer; padding: 4px; }
   .sport-tabs {
-    display: flex; align-items: center; justify-content: center; padding: 8px 16px;
-    flex-shrink: 0; flex-wrap: wrap; gap: 0;
+    display: flex; align-items: center; justify-content: center; padding: 4px 4px;
+    flex-shrink: 0; flex-wrap: nowrap; gap: 2px; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .sport-tabs::-webkit-scrollbar { display: none; }
   .sport-tab {
-    display: flex; align-items: center; gap: 4px; padding: 6px 12px;
-    font-size: 12px; font-weight: 600; color: var(--text-light);
+    display: flex; align-items: center; gap: 3px; padding: 5px 6px;
+    font-size: 10px; font-weight: 600; color: var(--text-light);
     border: none; background: none; cursor: pointer; white-space: nowrap;
     font-family: inherit; transition: all 0.2s; position: relative;
-    border-right: 2px solid var(--text-light);
-    border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+    border-radius: 8px; flex-shrink: 0;
   }
-  .sport-tab:last-child { border-right: none; }
   .sport-tab.active {
     color: var(--primary); font-weight: 700;
+    background: rgba(196,149,106,0.1);
   }
-  .sport-tab .sport-icon { font-size: 14px; }
+  .sport-tab .sport-icon { font-size: 13px; }
 
   /* ===== FILTERS ===== */
   .filters {
@@ -249,16 +252,16 @@
   }
   .filter-pill {
     padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
-    border: 1.5px solid var(--border); background: white; color: var(--text-sec);
+    border: 1.5px solid var(--border); background: var(--card); color: var(--text-sec);
     cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s;
   }
   .filter-pill.active {
     background: var(--primary); color: white; border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(91,154,139,0.25);
+    box-shadow: 0 2px 8px rgba(196,149,106,0.25);
   }
 
   /* ===== CONTENT ===== */
-  .content { flex: 1; overflow-y: auto; }
+  .content { flex: 1; overflow-y: auto; min-height: 0; }
   .content-inner { padding: 8px 20px 20px; }
 
   .section-title {
@@ -274,7 +277,7 @@
     text-transform: uppercase; letter-spacing: 0.3px;
   }
   .match-card {
-    background: white; border-radius: var(--radius); padding: 12px 14px;
+    background: var(--card); border-radius: var(--radius); padding: 12px 14px;
     margin-bottom: 8px; box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light); transition: all 0.2s;
   }
@@ -316,7 +319,8 @@
   }
   .odd-expand:active { opacity: 0.8; }
   .odd-expand svg { transition: transform 0.2s; }
-  .odd-expand.open svg { transform: rotate(45deg); }
+  .odd-expand.open { background: var(--primary-200); border: 1.5px solid var(--primary); }
+  .odd-expand.open svg { transform: rotate(45deg); stroke: var(--primary); }
 
   /* ===== EXPANDED ODDS ===== */
   .odds-expanded {
@@ -338,7 +342,7 @@
   /* ===== BET SLIP ===== */
   .bet-slip {
     display: none; position: absolute; bottom: 72px; left: 0; right: 0;
-    background: white; border-radius: 20px 20px 0 0; padding: 0;
+    background: var(--card); border-radius: 20px 20px 0 0; padding: 0;
     z-index: 15; box-shadow: 0 -8px 40px rgba(45,52,54,0.15);
     border: 1px solid var(--border); border-bottom: none;
     transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -377,6 +381,7 @@
     flex: 1; height: 48px; border: 1.5px solid var(--border);
     border-radius: var(--radius-xs); padding: 0 14px; font-size: 16px;
     font-family: inherit; outline: none; font-weight: 600;
+    background: var(--bg); color: var(--text);
   }
   .bs-amount input:focus { border-color: var(--primary-500); }
   .bs-return { font-size: 13px; font-weight: 700; color: var(--success); white-space: nowrap; }
@@ -407,7 +412,7 @@
   .bs-combined-val { font-size: 18px; font-weight: 800; color: var(--primary); }
 
   .bs-summary {
-    background: var(--primary-50); border-radius: var(--radius-xs); padding: 12px;
+    background: rgba(196,149,106,0.1); border: 1px solid rgba(196,149,106,0.2); border-radius: var(--radius-xs); padding: 12px;
     margin-bottom: 14px;
   }
   .bs-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 13px; }
@@ -417,7 +422,7 @@
 
   /* ===== BET CARD ===== */
   .bet-card {
-    background: white; border-radius: var(--radius); padding: 16px;
+    background: var(--card); border-radius: var(--radius); padding: 16px;
     margin-bottom: 10px; box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s;
   }
@@ -468,7 +473,7 @@
   /* ===== RANKING ===== */
   .rank-card {
     display: flex; align-items: center; gap: 14px; padding: 14px 16px;
-    background: white; border-radius: var(--radius); margin-bottom: 8px;
+    background: var(--card); border-radius: var(--radius); margin-bottom: 8px;
     box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
   }
   .rank-num { font-size: 18px; font-weight: 800; width: 30px; text-align: center; }
@@ -486,23 +491,30 @@
   .profile-top .pt-email { font-size: 13px; color: var(--text-sec); }
 
   .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 16px; }
-  .stat-box { background: white; border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+  .stat-box { background: var(--card); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
   .stat-box .sb-val { font-size: 24px; font-weight: 800; color: var(--primary); }
   .stat-box .sb-lbl { font-size: 11px; font-weight: 600; color: var(--text-sec); margin-top: 2px; text-transform: uppercase; }
 
   .menu-row {
     display: flex; align-items: center; gap: 14px; padding: 15px 20px;
-    margin: 0 20px 8px; background: white; border-radius: var(--radius-sm);
+    margin: 0 20px 8px; background: var(--card); border-radius: var(--radius-sm);
     cursor: pointer; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
   }
   .menu-row .mr-icon { font-size: 22px; }
   .menu-row .mr-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
   .menu-row .mr-arrow { color: var(--text-light); font-size: 14px; }
 
+  .lang-btn {
+    flex:1; padding:8px 4px; border:1.5px solid var(--border); border-radius:var(--radius-xs);
+    background:var(--bg); color:var(--text-sec); font-size:12px; font-weight:600;
+    font-family:inherit; cursor:pointer; transition:all 0.15s;
+  }
+  .lang-btn.active { border-color:var(--primary); background:rgba(196,149,106,0.15); color:var(--primary); }
+
   /* ===== LEAGUE CARD ===== */
   .league-card {
     display: flex; align-items: center; gap: 14px; padding: 14px 16px;
-    background: white; border-radius: var(--radius); margin-bottom: 8px;
+    background: var(--card); border-radius: var(--radius); margin-bottom: 8px;
     box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); cursor: pointer;
   }
   .league-crest { width: 40px; height: 40px; border-radius: 12px; background: var(--bg); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border); }
@@ -515,24 +527,26 @@
   /* ===== MODAL & BOTTOM SHEET ===== */
   .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.4); z-index: 50; cursor: pointer;
+    background: rgba(0,0,0,0.6); z-index: 50; cursor: pointer;
   }
   .modal-overlay.active { display: flex; align-items: flex-end; }
 
   .modal {
     display: none; position: absolute; bottom: 0; left: 0; right: 0;
-    background: white; border-radius: 24px 24px 0 0; padding: 20px; z-index: 50;
+    background: var(--card); border-radius: 24px 24px 0 0; padding: 20px; z-index: 50;
     max-height: 80vh; overflow-y: auto; width: 100%;
   }
   .modal.active { display: block; }
   .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-  .modal-close { position:absolute; top:14px; right:14px; width:30px; height:30px; border:none; background:rgba(0,0,0,0.06); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--text-light); transition:all 0.2s; }
-  .modal-close:active { background:rgba(0,0,0,0.12); }
+  .modal-close { position:absolute; top:14px; right:14px; width:30px; height:30px; border:none; background:rgba(255,255,255,0.08); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--text-light); transition:all 0.2s; }
+  .modal-close:active { background:rgba(255,255,255,0.15); }
   .modal-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 16px; }
+  .modal input { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: var(--radius-xs); padding: 0 14px; height: 48px; font-size: 15px; font-family: inherit; outline: none; width: 100%; box-sizing: border-box; }
+  .modal input:focus { border-color: var(--primary-500); }
 
   /* ===== TAB BAR ===== */
   .tab-bar {
-    display: flex; height: 72px; background: white; padding-bottom: 12px;
+    display: flex; height: 72px; background: var(--card); padding-bottom: 12px;
     border-top: 1px solid var(--border); flex-shrink: 0; z-index: 20;
   }
   .tab {
@@ -558,8 +572,8 @@
     animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1);
     box-shadow: var(--shadow-lg);
   }
-  .toast.success { background: var(--success-bg); color: #065F46; display: block; border: 1px solid #A7F3D0; }
-  .toast.error { background: var(--error-bg); color: #991B1B; display: block; border: 1px solid #FECACA; }
+  .toast.success { background: #1a2e1a; color: #6BCB77; display: block; border: 1px solid rgba(107,203,119,0.3); }
+  .toast.error { background: #2e1a1a; color: #E07A5F; display: block; border: 1px solid rgba(224,122,95,0.3); }
   @keyframes slideIn { from { transform: translateY(-16px); opacity:0; } }
 
   .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
@@ -576,7 +590,7 @@
   .home-indicator { width: 134px; height: 5px; background: var(--text); opacity: 0.15; border-radius: 3px; margin: 0 auto; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); }
 
   .diamond-package {
-    background: white; border-radius: var(--radius); padding: 14px; text-align: center;
+    background: var(--card); border-radius: var(--radius); padding: 14px; text-align: center;
     border: 1.5px solid var(--border); margin-bottom: 10px; cursor: pointer; transition: all 0.2s;
   }
   .diamond-package:hover { border-color: var(--primary); background: var(--primary-50); }
@@ -600,8 +614,7 @@
     </div>
     <div class="login-content">
       <div class="login-brand">
-        <h1>betbrinks</h1>
-        <p>Aposte por diversao, sem risco!</p>
+        <img src="logo.png" alt="BET Brincadeira" style="width:200px;height:200px;object-fit:contain;margin-bottom:8px;border-radius:20px">
       </div>
       <div class="form-card">
         <div class="field">
@@ -627,7 +640,7 @@
     </div>
     <div class="login-content">
       <div class="login-brand">
-        <h1>betbrinks</h1>
+        <img src="logo.png" alt="BET Brincadeira" style="width:150px;height:150px;object-fit:contain;margin-bottom:8px;border-radius:16px">
         <p>Crie sua conta</p>
       </div>
       <div class="form-card">
@@ -667,57 +680,78 @@
       <div class="header-row">
         <div class="header-left" id="headerLeft" style="flex:1">
           <div>
-            <div class="greeting" id="greetingText">Boa tarde!</div>
-            <div class="header-sub" id="headerSub">Jogos de hoje</div>
+            <div class="greeting" id="greetingText">Olá!</div>
           </div>
         </div>
-        <div class="header-right">
-          <div class="header-icons">
-            <button class="header-icon-btn" id="minhasLigasBtn" onclick="showMyLeagues()" title="Minhas Ligas"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></button>
-            <button onclick="refreshFixtures()" id="refreshBtn" class="header-icon-btn" title="Atualizar jogos"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+        <div class="header-right" style="display:flex;align-items:center;gap:8px">
+          <div id="activeLeagueBadge" onclick="switchTab('jogos',document.querySelector('.tab'))" style="display:none;cursor:pointer;background:rgba(196,149,106,0.15);border:1px solid rgba(196,149,106,0.3);border-radius:6px;padding:4px 10px;max-width:140px">
+            <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:0.5px" data-i18n="active_league">Liga ativa</div>
+            <div id="activeLeagueName" style="font-size:11px;font-weight:700;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
           </div>
-          <div class="header-avatar" id="headerAvatar">U</div>
+          <div class="header-icons">
+            <button onclick="refreshFixtures()" id="refreshBtn" class="header-icon-btn" title="Atualizar jogos" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+          </div>
         </div>
       </div>
       <div class="balance-row">
         <div class="balance-chip">
           <span class="bc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg></span>
-          <div><div class="bc-val" id="userPoints">1.000</div><div class="bc-lbl">saldo</div></div>
+          <div><div class="bc-val" id="userPoints">1.000</div><div class="bc-lbl" data-i18n="balance">saldo</div></div>
         </div>
-        <div class="balance-chip">
+        <div class="balance-chip" style="position:relative;cursor:pointer" onclick="openDiamondConvertScreen()">
           <span class="bc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-          <div><div class="bc-val" id="userDiamonds">0</div><div class="bc-lbl">diamantes</div></div>
+          <div><div class="bc-val" id="userDiamonds">0</div><div class="bc-lbl" data-i18n="diamonds">diamantes</div></div>
+          <span id="diamondGearIcon" style="display:none;margin-left:6px;cursor:pointer" onclick="event.stopPropagation();openDiamondConvertScreen()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
         </div>
       </div>
     </div>
-    <div class="content" id="leagueSelector" style="display:none">
+    <div class="content" id="leagueSelector" style="display:none; flex-direction:column;">
       <div style="padding: 10px 16px;">
         <div class="league-box">
           <div class="league-box-header">
-            <span class="league-box-title">Minhas Ligas</span>
+            <span class="league-box-title" data-i18n="my_leagues">Minhas Ligas</span>
             <span class="league-box-count" id="leagueCount">0</span>
           </div>
           <div id="leagueListInline"></div>
           <div class="league-sel-actions">
-            <button class="btn-league-action" onclick="showCreateLeagueModal()">+ Criar Liga</button>
-            <button class="btn-league-action" onclick="showJoinLeagueModal()">Entrar em Liga</button>
+            <button class="btn-league-action" onclick="showCreateLeagueModal()" data-i18n="create_league">+ Criar Liga</button>
+            <button class="btn-league-action" onclick="showJoinLeagueModal()" data-i18n="join_league">Entrar em Liga</button>
           </div>
         </div>
       </div>
+      <div style="flex:1"></div>
+      <div id="officialLeagueBox" style="padding:0 16px 8px;"></div>
     </div>
-    <div id="gamesSection" class="content" style="display:none">
+    <div id="gamesSection" class="content" style="display:none;flex-direction:column">
       <div class="games-header" style="flex-shrink:0">
         <button class="games-back" onclick="backToLeagues()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
-        <span class="games-league-name" id="gamesLeagueName">Liga Oficial</span>
+        <span class="games-league-name" id="gamesLeagueName">Liga BetBrincadeira</span>
         <span class="games-league-bal" id="gamesLeagueBal">0 pts</span>
       </div>
       <div class="sport-tabs" id="sportTabs" style="flex-shrink:0"></div>
       <div class="filters" id="filtersBar" style="flex-shrink:0">
-        <button class="filter-pill active" onclick="filterFix('NOT_STARTED',this)">Pré-jogo</button>
-        <button class="filter-pill" onclick="filterFix('live',this)">Ao vivo</button>
-        <button class="filter-pill" onclick="filterFix('FINISHED',this)">Encerrado</button>
+        <button class="filter-pill active" onclick="filterFix('NOT_STARTED',this)" data-i18n="pre_match">Pré-jogo</button>
+        <button class="filter-pill" onclick="filterFix('live',this)" data-i18n="live">Ao vivo</button>
+        <button class="filter-pill" onclick="filterFix('FINISHED',this)" data-i18n="finished">Encerrado</button>
+      </div>
+      <div id="searchBar" style="display:none;flex-shrink:0;padding:6px 16px 2px">
+        <div style="position:relative">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="fixtureSearchInput" data-i18n-placeholder="search_placeholder" placeholder="Buscar país ou liga..." oninput="onFixtureSearch(this.value)" style="width:100%;height:34px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:0 10px 0 30px;font-size:12px;color:var(--text);font-family:inherit;outline:none;box-sizing:border-box">
+        </div>
       </div>
       <div class="content-inner" id="mainContent" style="flex:1;overflow-y:auto;padding:8px 20px 20px"></div>
+    </div>
+
+    <!-- League Management Page -->
+    <div id="leagueManagePage" class="content" style="display:none; flex-direction:column;">
+      <div class="games-header" style="flex-shrink:0">
+        <button class="games-back" onclick="closeLeagueManagePage()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+        <span class="games-league-name" id="managePageTitle" style="flex:1">Gerenciar Liga</span>
+        <span id="managePageCode" style="display:none;font-size:12px;font-weight:700;color:var(--primary);letter-spacing:2px;cursor:pointer;background:rgba(196,149,106,0.1);padding:4px 10px;border-radius:8px;white-space:nowrap;" onclick="copyCode(this.dataset.code)"><span id="managePageCodeText"></span> <svg style="display:inline;vertical-align:middle;margin-left:2px" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+        <button onclick="closeLeagueManagePage()" style="background:none;border:none;color:var(--text-sec);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1">✕</button>
+      </div>
+      <div id="managePageContent" style="flex:1;overflow-y:auto;padding:12px 16px 20px;"></div>
     </div>
 
     <div class="bet-slip" id="betSlip">
@@ -725,7 +759,7 @@
       <div class="bs-preview" onclick="toggleBetSlip()">
         <div class="bs-preview-left">
           <div class="bs-preview-dot"></div>
-          <span class="bs-preview-text" id="bsPreviewText">1 selecao</span>
+          <span class="bs-preview-text" id="bsPreviewText">1 seleção</span>
         </div>
         <span class="bs-preview-odd" id="bsPreviewOdd">@ 1.00</span>
       </div>
@@ -736,22 +770,35 @@
         </div>
         <div id="bsSelections" class="bs-selections"></div>
         <div class="bs-combined">
-          <div class="bs-combined-row"><span class="bs-combined-label">Odd combinada</span><span class="bs-combined-val" id="bsCombinedOdd">1.00</span></div>
+          <div class="bs-combined-row"><span class="bs-combined-label" data-i18n="combined_odd">Odd combinada</span><span class="bs-combined-val" id="bsCombinedOdd">1.00</span></div>
         </div>
         <div class="bs-amount">
-          <input type="number" id="betAmount" placeholder="Valor do bilhete" value="100" min="10" max="10000" oninput="updateReturn()">
+          <input type="number" id="betAmount" placeholder="Valor do bilhete" value="100" min="10" max="10000" oninput="updateReturn()" style="flex:1">
         </div>
         <div class="bs-summary" id="bsSummary"></div>
-        <button class="btn btn-green" onclick="placeBet()" id="bsConfirmBtn">Confirmar Aposta</button>
+        <button class="btn btn-green" onclick="openLeaguePicker()" id="bsConfirmBtn" data-i18n="confirm_bet">Confirmar Aposta</button>
+      </div>
+      <!-- League picker step -->
+      <div id="bsLeaguePicker" style="display:none;padding:16px 16px 20px;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <button onclick="closeLeaguePicker()" style="background:none;border:none;color:var(--text-sec);font-size:22px;cursor:pointer;padding:0;line-height:1">←</button>
+          <h4 style="font-size:15px;font-weight:700;color:var(--text);margin:0;flex:1;text-align:center">Escolha a liga</h4>
+          <button onclick="closeBetSlip()" style="background:none;border:none;color:var(--text-sec);font-size:18px;cursor:pointer;padding:0;line-height:1">✕</button>
+        </div>
+        <div id="bsPickerSummary" style="background:rgba(196,149,106,0.08);border-radius:var(--radius-xs);padding:10px 12px;font-size:12px;color:var(--text-sec);display:flex;justify-content:space-between">
+          <span id="bsPickerSelCount"></span>
+          <span id="bsPickerOdd" style="color:var(--primary);font-weight:700"></span>
+        </div>
+        <div id="bsLeagueList" style="flex:1;overflow-y:auto;border-radius:var(--radius-xs)"></div>
       </div>
     </div>
 
     <div class="tab-bar">
-      <button class="tab active" onclick="switchTab('jogos',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span>Jogos</button>
-      <button class="tab" onclick="switchTab('explorar',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span>Explorar</button>
-      <button class="tab" onclick="switchTab('apostas',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 15a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><line x1="6" y1="7" x2="6" y2="4"/><line x1="18" y1="7" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="17"/><line x1="18" y1="20" x2="18" y2="17"/></svg></span>Apostas</button>
-      <button class="tab" onclick="switchTab('ranking',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 6 7 6 7z"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 18 7 18 7z"/><path d="M4 22h16"/><path d="M10 22V8a4 4 0 0 1 4 0v14"/><path d="M8 9h8l-1 13H9z"/></svg></span>Ranking</button>
-      <button class="tab" onclick="switchTab('perfil',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Perfil</button>
+      <button class="tab active" onclick="switchTab('jogos',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span><span data-i18n="tab_leagues">Ligas</span></button>
+      <button class="tab" onclick="requireLeague('explorar',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span><span data-i18n="tab_games">Jogos</span></button>
+      <button class="tab" onclick="requireLeague('apostas',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 15a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><line x1="6" y1="7" x2="6" y2="4"/><line x1="18" y1="7" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="17"/><line x1="18" y1="20" x2="18" y2="17"/></svg></span><span data-i18n="tab_bets">Apostas</span></button>
+      <button class="tab" onclick="requireLeague('ranking',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 6 7 6 7z"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 18 7 18 7z"/><path d="M4 22h16"/><path d="M10 22V8a4 4 0 0 1 4 0v14"/><path d="M8 9h8l-1 13H9z"/></svg></span><span data-i18n="tab_ranking">Ranking</span></button>
+      <button class="tab" onclick="switchTab('perfil',this)"><span class="tab-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span data-i18n="tab_profile">Perfil</span></button>
     </div>
     <div class="home-indicator"></div>
   </div>
@@ -761,7 +808,7 @@
 
   <div class="modal" id="myLeaguesModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">Minhas Ligas</div>
+    <div class="modal-title" data-i18n="my_leagues">Minhas Ligas</div>
     <div id="leaguesListContent" style="margin-bottom:20px"></div>
     <div style="display:flex;gap:10px">
       <button class="btn btn-primary" style="flex:1" onclick="showCreateLeagueModal()">Criar Liga</button>
@@ -771,17 +818,48 @@
 
   <div class="modal" id="createLeagueModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">Criar Nova Liga</div>
-    <div class="field" style="margin-bottom:20px">
+    <div class="modal-title" data-i18n="create_new_league">Criar Nova Liga</div>
+    <div class="field" style="margin-bottom:12px">
       <label>Nome da Liga</label>
       <input type="text" id="createLeagueName" placeholder="Seu time, seus amigos...">
     </div>
-    <button class="btn btn-primary" onclick="handleCreateLeague()">Criar</button>
+    <div class="field" style="margin-bottom:12px">
+      <label>Diamantes para o Caixa Inicial</label>
+      <input type="number" id="createLeagueDiamonds" placeholder="Ex: 200" min="1" value="200">
+      <div style="font-size:11px;color:var(--text-light);margin-top:4px">1 diamante = 5 fichas. 200 diamantes = 1.000 fichas no caixa.</div>
+    </div>
+    <button class="btn btn-primary" onclick="handleCreateLeague()">Criar Liga</button>
+  </div>
+
+  <!-- Cashbox Deposit Modal -->
+  <div class="modal" id="cashboxDepositModal">
+    <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">Depositar no Caixa</div>
+    <div style="text-align:center;margin-bottom:12px;font-size:13px;color:var(--text-sec)">Seus diamantes serao convertidos em fichas para o caixa da liga (1 diamante = 5 fichas)</div>
+    <div class="field" style="margin-bottom:16px">
+      <label>Diamantes</label>
+      <input type="number" id="cashboxDepositAmount" placeholder="Ex: 100" min="1">
+      <div id="cashboxDepositPreview" style="font-size:12px;color:var(--primary);margin-top:4px"></div>
+    </div>
+    <button class="btn btn-primary" onclick="handleCashboxDeposit()">Depositar</button>
+  </div>
+
+  <!-- Cashbox Withdraw Modal -->
+  <div class="modal" id="cashboxWithdrawModal">
+    <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
+    <div class="modal-title">Sacar do Caixa</div>
+    <div style="text-align:center;margin-bottom:12px;font-size:13px;color:var(--text-sec)">Fichas do caixa serao convertidas em diamantes para voce (5 fichas = 1 diamante)</div>
+    <div class="field" style="margin-bottom:16px">
+      <label>Fichas para sacar</label>
+      <input type="number" id="cashboxWithdrawAmount" placeholder="Ex: 500" min="5">
+      <div id="cashboxWithdrawPreview" style="font-size:12px;color:var(--primary);margin-top:4px"></div>
+    </div>
+    <button class="btn btn-primary" style="background:var(--error)" onclick="handleCashboxWithdraw()">Sacar</button>
   </div>
 
   <div class="modal" id="joinLeagueModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">Entrar em Liga</div>
+    <div class="modal-title" data-i18n="join_a_league">Entrar em Liga</div>
     <div class="field" style="margin-bottom:20px">
       <label>Codigo da Liga</label>
       <input type="text" id="joinLeagueCode" placeholder="000000" maxlength="6">
@@ -791,7 +869,7 @@
 
   <div class="modal" id="inviteCodeModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title" style="margin-bottom:20px">Liga Criada!</div>
+    <div class="modal-title" data-i18n="league_created" style="margin-bottom:20px">Liga Criada!</div>
     <div style="background:var(--primary-50);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:20px">
       <div style="font-size:13px;color:var(--text-sec);margin-bottom:10px">Codigo de Convite</div>
       <div id="inviteCodeDisplay" style="font-size:28px;font-weight:800;color:var(--primary);font-family:monospace;letter-spacing:4px">000000</div>
@@ -802,24 +880,24 @@
 
   <div class="modal" id="leaguePanelModal" style="max-height:85vh;overflow-y:auto">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title" id="leaguePanelTitle">Gerenciar Liga</div>
+    <div class="modal-title" id="leaguePanelTitle" data-i18n="manage_league">Gerenciar Liga</div>
     <div id="leaguePanelContent"></div>
   </div>
 
   <div class="modal" id="balanceActionModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title" id="balActionTitle">Enviar Saldo</div>
-    <div style="margin-bottom:12px;font-size:13px">Para: <span id="balActionTarget" style="font-weight:600"></span></div>
+    <div class="modal-title" id="balActionTitle" data-i18n="send_balance">Enviar Saldo</div>
+    <div style="margin-bottom:12px;font-size:13px"><span data-i18n="send">Enviar</span>: <span id="balActionTarget" style="font-weight:600"></span></div>
     <div class="field" style="margin-bottom:16px">
-      <label>Quantidade de pontos</label>
+      <label data-i18n="points_amount">Quantidade de pontos</label>
       <input type="number" id="balActionAmount" placeholder="100" min="1">
     </div>
-    <button class="btn btn-primary" id="balActionBtn" onclick="handleBalanceAction()">Enviar</button>
+    <button class="btn btn-primary" id="balActionBtn" onclick="handleBalanceAction()" data-i18n="send">Enviar</button>
   </div>
 
   <div class="modal" id="diamondStoreModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
-    <div class="modal-title">Loja de Diamantes</div>
+    <div class="modal-title" data-i18n="diamond_store">Loja de Diamantes</div>
     <div id="diamondPackagesContent" style="margin:20px 0"></div>
     <div id="diamondConvertContent" style="display:none;padding:20px;background:var(--success-bg);border-radius:var(--radius);text-align:center;margin-top:20px">
       <div style="font-size:13px;color:var(--text-sec);margin-bottom:12px">Voce ganhou diamantes!</div>
@@ -831,7 +909,259 @@
 <script>
 const API='http://localhost:3000';
 let token=null,user=null,fixtures=[],bets=[],selections=[],curFilter='NOT_STARTED',sports=[],curSportId=null;
-let curLeagueId=null,curLeague=null,allLeagues=[];
+let curLeagueId=null,curLeague=null,allLeagues=[],betFromExplorar=false;
+let appLang=localStorage.getItem('appLang')||'pt';
+let fixtureSearch='';
+
+const I18N={
+  pt:{
+    // Tabs
+    tab_leagues:'Ligas', tab_games:'Jogos', tab_bets:'Apostas', tab_ranking:'Ranking', tab_profile:'Perfil',
+    // Header
+    hello:'Olá', active_league:'Liga ativa', balance:'saldo', diamonds:'diamantes',
+    // League selector
+    my_leagues:'Minhas Ligas', create_league:'+ Criar Liga', join_league:'Entrar em Liga',
+    // Filters
+    pre_match:'Pré-jogo', live:'Ao vivo', finished:'Encerrado',
+    search_placeholder:'Buscar país ou liga...',
+    // Games
+    games_updated:'Jogos atualizados', error_loading:'Erro ao carregar',
+    home:'Casa', draw:'Empate', away:'Fora',
+    fighter1:'Lutador 1', fighter2:'Lutador 2', winner:'Vencedor',
+    race:'Corrida', circuit:'Circuito', drivers:'Pilotos',
+    more_odds:'Mais odds', goals:'Gols', corners:'Escanteios', cards:'Cartões',
+    both_score:'Ambas marcam', yes:'Sim', no:'Não',
+    over:'Acima', under:'Abaixo',
+    // Bet slip
+    selection:'seleção', selections:'seleções', combined_odd:'Odd combinada',
+    bet_amount:'Valor do bilhete', potential_return:'Retorno potencial',
+    confirm_bet:'Confirmar Aposta', confirm_slip:'Confirmar Bilhete',
+    choose_league:'Escolha a liga', insufficient:'insuficiente',
+    min_points:'Mínimo: 10 pontos', max_points:'Máximo: 10.000 pontos',
+    please_choose_league:'Por favor escolha a liga',
+    // Bets tab
+    no_bets:'Nenhuma aposta', first_bet:'Faça sua primeira aposta na aba Jogos!',
+    pending:'Pendente', won:'Ganhou', lost:'Perdeu', void_bet:'Anulada', cashout:'Cashout',
+    // Ranking
+    only_player:'Único jogador por enquanto!', invite_friends:'Convide amigos para competir!',
+    // Profile
+    active_days:'Dias ativos', language:'Idioma',
+    diamond_store:'Loja de diamantes', achievements:'Conquistas', logout:'Sair',
+    see_you:'Até logo!',
+    // Diamond store
+    buy:'Comprar', diamonds_available:'diamantes disponíveis',
+    convert_to_balance:'Converter para Saldo', converting:'Convertendo...',
+    diamonds_added:'diamantes adicionados!', convert_league_balance:'Converter para saldo da liga',
+    use_for_upgrades:'Usar para upgrades no clube', choose_diamond_use:'O que deseja fazer com seus diamantes?',
+    diamonds_bought:'diamantes comprados!', diamonds_converted:'diamantes convertidos!',
+    converted_remaining:'Convertido! Restam', convert_more:'Converta mais diamantes em saldo para a liga ativa',
+    select_league_first:'Selecione uma liga primeiro', enter_amount:'Informe a quantidade',
+    you_only_have:'Você tem apenas',
+    // League manage
+    manage:'Gerenciar', manage_league:'Gerenciar Liga', members:'membros', member:'membro',
+    send_balance:'Enviar Saldo', withdraw_balance:'Retirar Saldo', points_amount:'Quantidade de pontos',
+    send:'Enviar', owner:'Dono', admin:'Admin', points_sent:'pontos enviados', points_withdrawn:'pontos retirados',
+    how_it_works:'<b>Como funciona:</b> Membros iniciam com saldo 0. Você pode enviar saldo para eles ou eles podem comprar diamantes na loja e converter em saldo para esta liga.',
+    // Require league
+    require_league_msg:'Selecione uma liga na aba Ligas para acessar jogos, apostas e ranking',
+    go_to_leagues:'Ir para Ligas',
+    // Bet details
+    simple:'Simples', multiple:'Múltipla', slip_type:'Bilhete',
+    match_result:'Resultado', goals_25:'Gols +/- 2.5', both_score_label:'Ambos marcam',
+    combined_odd_label:'Odd combinada', bet_amount_label:'Valor apostado',
+    potential_return_label:'Retorno potencial', placed_at:'Feita em', code:'Código',
+    type:'Tipo', bet_label:'Aposta', game_num:'Jogo #', wins:'vitórias',
+    // League manage
+    pending_requests:'Solicitações Pendentes', none_lbl:'nenhuma',
+    awaiting_approval:'Aguardando aprovação', approve:'Aprovar', reject_btn:'Rejeitar',
+    no_members_yet:'Nenhum membro ainda. Compartilhe o código!',
+    you_label:'você', send_btn:'+ Enviar', withdraw_btn:'- Retirar', remove:'Remover',
+    player:'Jogador', no_private_leagues:'Nenhuma liga privada ainda',
+    // Toasts & errors
+    enter_valid_value:'Digite um valor válido', error_label:'Erro',
+    error_convert:'Erro ao converter', try_again:'tente novamente',
+    now_convert:'Agora converta seus diamantes em saldo para a liga ativa',
+    code_copied:'Código copiado!', copy_error:'Erro ao copiar',
+    enter_league_name:'Digite o nome da liga', request_sent:'Solicitação enviada!',
+    enter_valid_code:'Digite um código válido de 6 dígitos', approved:'Aprovado!',
+    rejected:'Rejeitado', removed:'removido', remove_confirm:'Remover da liga?',
+    // Modals
+    create_new_league:'Criar Nova Liga', join_a_league:'Entrar em Liga', league_created:'Liga Criada!',
+    // Empty states
+    no_games:'Sem jogos', no_games_filter:'Não há jogos disponíveis neste filtro',
+    no_results:'Nenhum resultado', try_other_search:'Tente buscar por outro país ou liga',
+    // General
+    soon:'Em breve!', pts:'pts', close:'Fechar',
+  },
+  en:{
+    tab_leagues:'Leagues', tab_games:'Games', tab_bets:'Bets', tab_ranking:'Ranking', tab_profile:'Profile',
+    hello:'Hello', active_league:'Active league', balance:'balance', diamonds:'diamonds',
+    my_leagues:'My Leagues', create_league:'+ Create League', join_league:'Join League',
+    pre_match:'Pre-match', live:'Live', finished:'Finished',
+    search_placeholder:'Search country or league...',
+    games_updated:'Games updated', error_loading:'Error loading',
+    home:'Home', draw:'Draw', away:'Away',
+    fighter1:'Fighter 1', fighter2:'Fighter 2', winner:'Winner',
+    race:'Race', circuit:'Circuit', drivers:'Drivers',
+    more_odds:'More odds', goals:'Goals', corners:'Corners', cards:'Cards',
+    both_score:'Both teams score', yes:'Yes', no:'No',
+    over:'Over', under:'Under',
+    selection:'selection', selections:'selections', combined_odd:'Combined odd',
+    bet_amount:'Bet amount', potential_return:'Potential return',
+    confirm_bet:'Confirm Bet', confirm_slip:'Confirm Slip',
+    choose_league:'Choose league', insufficient:'insufficient',
+    min_points:'Minimum: 10 points', max_points:'Maximum: 10,000 points',
+    please_choose_league:'Please choose a league',
+    no_bets:'No bets yet', first_bet:'Place your first bet in the Games tab!',
+    pending:'Pending', won:'Won', lost:'Lost', void_bet:'Void', cashout:'Cashout',
+    only_player:'Only player so far!', invite_friends:'Invite friends to compete!',
+    active_days:'Active days', language:'Language',
+    diamond_store:'Diamond store', achievements:'Achievements', logout:'Log out',
+    see_you:'See you!',
+    buy:'Buy', diamonds_available:'diamonds available',
+    convert_to_balance:'Convert to Balance', converting:'Converting...',
+    diamonds_added:'diamonds added!', convert_league_balance:'Convert to league balance',
+    use_for_upgrades:'Use for club upgrades', choose_diamond_use:'What would you like to do with your diamonds?',
+    diamonds_bought:'diamonds bought!', diamonds_converted:'diamonds converted!',
+    converted_remaining:'Converted! Remaining', convert_more:'Convert more diamonds to balance for the active league',
+    select_league_first:'Select a league first', enter_amount:'Enter the amount',
+    you_only_have:'You only have',
+    manage:'Manage', manage_league:'Manage League', members:'members', member:'member',
+    send_balance:'Send Balance', withdraw_balance:'Withdraw Balance', points_amount:'Points amount',
+    send:'Send', owner:'Owner', admin:'Admin', points_sent:'points sent', points_withdrawn:'points withdrawn',
+    how_it_works:'<b>How it works:</b> Members start with 0 balance. You can send balance to them or they can buy diamonds in the store and convert to balance for this league.',
+    require_league_msg:'Select a league in the Leagues tab to access games, bets and ranking',
+    go_to_leagues:'Go to Leagues',
+    simple:'Single', multiple:'Multiple', slip_type:'Slip',
+    match_result:'Result', goals_25:'Goals +/- 2.5', both_score_label:'Both teams score',
+    combined_odd_label:'Combined odd', bet_amount_label:'Amount wagered',
+    potential_return_label:'Potential return', placed_at:'Placed at', code:'Code',
+    type:'Type', bet_label:'Bet', game_num:'Game #', wins:'wins',
+    pending_requests:'Pending Requests', none_lbl:'none',
+    awaiting_approval:'Awaiting approval', approve:'Approve', reject_btn:'Reject',
+    no_members_yet:'No members yet. Share the code!',
+    you_label:'you', send_btn:'+ Send', withdraw_btn:'- Withdraw', remove:'Remove',
+    player:'Player', no_private_leagues:'No private leagues yet',
+    enter_valid_value:'Enter a valid amount', error_label:'Error',
+    error_convert:'Error converting', try_again:'try again',
+    now_convert:'Now convert your diamonds to balance for the active league',
+    code_copied:'Code copied!', copy_error:'Error copying',
+    enter_league_name:'Enter the league name', request_sent:'Request sent!',
+    enter_valid_code:'Enter a valid 6-digit code', approved:'Approved!',
+    rejected:'Rejected', removed:'removed', remove_confirm:'Remove from league?',
+    create_new_league:'Create New League', join_a_league:'Join League', league_created:'League Created!',
+    no_games:'No games', no_games_filter:'No games available for this filter',
+    no_results:'No results', try_other_search:'Try searching another country or league',
+    soon:'Coming soon!', pts:'pts', close:'Close',
+  },
+  es:{
+    tab_leagues:'Ligas', tab_games:'Juegos', tab_bets:'Apuestas', tab_ranking:'Ranking', tab_profile:'Perfil',
+    hello:'Hola', active_league:'Liga activa', balance:'saldo', diamonds:'diamantes',
+    my_leagues:'Mis Ligas', create_league:'+ Crear Liga', join_league:'Unirse a Liga',
+    pre_match:'Pre-partido', live:'En vivo', finished:'Finalizado',
+    search_placeholder:'Buscar país o liga...',
+    games_updated:'Juegos actualizados', error_loading:'Error al cargar',
+    home:'Local', draw:'Empate', away:'Visitante',
+    fighter1:'Luchador 1', fighter2:'Luchador 2', winner:'Ganador',
+    race:'Carrera', circuit:'Circuito', drivers:'Pilotos',
+    more_odds:'Más cuotas', goals:'Goles', corners:'Córners', cards:'Tarjetas',
+    both_score:'Ambos marcan', yes:'Sí', no:'No',
+    over:'Más de', under:'Menos de',
+    selection:'selección', selections:'selecciones', combined_odd:'Cuota combinada',
+    bet_amount:'Monto de apuesta', potential_return:'Retorno potencial',
+    confirm_bet:'Confirmar Apuesta', confirm_slip:'Confirmar Boleto',
+    choose_league:'Elige la liga', insufficient:'insuficiente',
+    min_points:'Mínimo: 10 puntos', max_points:'Máximo: 10.000 puntos',
+    please_choose_league:'Por favor elige una liga',
+    no_bets:'Sin apuestas', first_bet:'¡Haz tu primera apuesta en Juegos!',
+    pending:'Pendiente', won:'Ganó', lost:'Perdió', void_bet:'Anulada', cashout:'Cashout',
+    only_player:'¡Único jugador por ahora!', invite_friends:'¡Invita amigos a competir!',
+    active_days:'Días activos', language:'Idioma',
+    diamond_store:'Tienda de diamantes', achievements:'Logros', logout:'Salir',
+    see_you:'¡Hasta luego!',
+    buy:'Comprar', diamonds_available:'diamantes disponibles',
+    convert_to_balance:'Convertir a Saldo', converting:'Convirtiendo...',
+    diamonds_added:'diamantes añadidos!', convert_league_balance:'Convertir a saldo de la liga',
+    use_for_upgrades:'Usar para mejoras del club', choose_diamond_use:'¿Qué deseas hacer con tus diamantes?',
+    diamonds_bought:'diamantes comprados!', diamonds_converted:'diamantes convertidos!',
+    converted_remaining:'¡Convertido! Quedan', convert_more:'Convierte más diamantes en saldo para la liga activa',
+    select_league_first:'Selecciona una liga primero', enter_amount:'Ingresa la cantidad',
+    you_only_have:'Solo tienes',
+    manage:'Gestionar', manage_league:'Gestionar Liga', members:'miembros', member:'miembro',
+    send_balance:'Enviar Saldo', withdraw_balance:'Retirar Saldo', points_amount:'Cantidad de puntos',
+    send:'Enviar', owner:'Dueño', admin:'Admin', points_sent:'puntos enviados', points_withdrawn:'puntos retirados',
+    how_it_works:'<b>Cómo funciona:</b> Los miembros inician con saldo 0. Puedes enviarles saldo o ellos pueden comprar diamantes en la tienda y convertir en saldo para esta liga.',
+    require_league_msg:'Selecciona una liga en la pestaña Ligas para acceder a juegos, apuestas y ranking',
+    go_to_leagues:'Ir a Ligas',
+    simple:'Simple', multiple:'Múltiple', slip_type:'Boleto',
+    match_result:'Resultado', goals_25:'Goles +/- 2.5', both_score_label:'Ambos marcan',
+    combined_odd_label:'Cuota combinada', bet_amount_label:'Monto apostado',
+    potential_return_label:'Retorno potencial', placed_at:'Realizada', code:'Código',
+    type:'Tipo', bet_label:'Apuesta', game_num:'Juego #', wins:'victorias',
+    pending_requests:'Solicitudes Pendientes', none_lbl:'ninguna',
+    awaiting_approval:'Esperando aprobación', approve:'Aprobar', reject_btn:'Rechazar',
+    no_members_yet:'Aún no hay miembros. ¡Comparte el código!',
+    you_label:'tú', send_btn:'+ Enviar', withdraw_btn:'- Retirar', remove:'Eliminar',
+    player:'Jugador', no_private_leagues:'Aún no hay ligas privadas',
+    enter_valid_value:'Ingresa un valor válido', error_label:'Error',
+    error_convert:'Error al convertir', try_again:'intenta de nuevo',
+    now_convert:'Ahora convierte tus diamantes en saldo para la liga activa',
+    code_copied:'¡Código copiado!', copy_error:'Error al copiar',
+    enter_league_name:'Ingresa el nombre de la liga', request_sent:'¡Solicitud enviada!',
+    enter_valid_code:'Ingresa un código válido de 6 dígitos', approved:'¡Aprobado!',
+    rejected:'Rechazado', removed:'eliminado', remove_confirm:'¿Eliminar de la liga?',
+    create_new_league:'Crear Nueva Liga', join_a_league:'Unirse a Liga', league_created:'¡Liga Creada!',
+    no_games:'Sin juegos', no_games_filter:'No hay juegos disponibles para este filtro',
+    no_results:'Sin resultados', try_other_search:'Intenta buscar otro país o liga',
+    soon:'¡Próximamente!', pts:'pts', close:'Cerrar',
+  }
+};
+const COUNTRY_NAMES={
+  pt:{
+    'ENGLAND':'Inglaterra','SPAIN':'Espanha','GERMANY':'Alemanha','ITALY':'Itália','FRANCE':'França',
+    'PORTUGAL':'Portugal','BRAZIL':'Brasil','ARGENTINA':'Argentina','NETHERLANDS':'Holanda',
+    'BELGIUM':'Bélgica','TURKEY':'Turquia','SCOTLAND':'Escócia','AUSTRIA':'Áustria',
+    'SWITZERLAND':'Suíça','GREECE':'Grécia','CZECH-REPUBLIC':'República Tcheca','CROATIA':'Croácia',
+    'DENMARK':'Dinamarca','SWEDEN':'Suécia','NORWAY':'Noruega','POLAND':'Polônia','ROMANIA':'Romênia',
+    'UKRAINE':'Ucrânia','RUSSIA':'Rússia','JAPAN':'Japão','SOUTH-KOREA':'Coreia do Sul',
+    'CHINA':'China','USA':'Estados Unidos','MEXICO':'México','COLOMBIA':'Colômbia','CHILE':'Chile',
+    'URUGUAY':'Uruguai','PARAGUAY':'Paraguai','PERU':'Peru','ECUADOR':'Equador','BOLIVIA':'Bolívia',
+    'SAUDI-ARABIA':'Arábia Saudita','UNITED-ARAB-EMIRATES':'Emirados Árabes','QATAR':'Catar',
+    'AUSTRALIA':'Austrália','EGYPT':'Egito','SOUTH-AFRICA':'África do Sul','MOROCCO':'Marrocos',
+    'TUNISIA':'Tunísia','ALGERIA':'Argélia','NIGERIA':'Nigéria','SERBIA':'Sérvia',
+    'HUNGARY':'Hungria','BULGARIA':'Bulgária','ISRAEL':'Israel','CYPRUS':'Chipre',
+    'IRELAND':'Irlanda','WALES':'País de Gales','ICELAND':'Islândia','FINLAND':'Finlândia',
+    'INDIA':'Índia','INDONESIA':'Indonésia','MALAYSIA':'Malásia','THAILAND':'Tailândia',
+    'VIETNAM':'Vietnã','COSTA-RICA':'Costa Rica','HONDURAS':'Honduras','PANAMA':'Panamá',
+    'VENEZUELA':'Venezuela','WORLD':'Mundial',
+  },
+  en:{},
+  es:{
+    'ENGLAND':'Inglaterra','SPAIN':'España','GERMANY':'Alemania','ITALY':'Italia','FRANCE':'Francia',
+    'PORTUGAL':'Portugal','BRAZIL':'Brasil','ARGENTINA':'Argentina','NETHERLANDS':'Países Bajos',
+    'BELGIUM':'Bélgica','TURKEY':'Turquía','UNITED-ARAB-EMIRATES':'Emiratos Árabes','SAUDI-ARABIA':'Arabia Saudita',
+    'JAPAN':'Japón','SOUTH-KOREA':'Corea del Sur','USA':'Estados Unidos','MEXICO':'México',
+    'COLOMBIA':'Colombia','WORLD':'Mundial',
+  }
+};
+function t(key){return (I18N[appLang]||I18N.pt)[key]||(I18N.pt)[key]||key;}
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{el.placeholder=t(el.dataset.i18nPlaceholder);});
+}
+
+function translateCountry(name){
+  if(!name)return name;
+  const parts=name.split(' - ');
+  if(parts.length<2)return name;
+  const country=parts[0].trim().toUpperCase();
+  const league=parts.slice(1).join(' - ').trim();
+  const dict=COUNTRY_NAMES[appLang]||{};
+  const translated=dict[country];
+  if(translated) return translated+' - '+league;
+  // Fallback: capitalize
+  return name;
+}
 let pendingDiamonds=0;
 
 function maskCPF(v){
@@ -873,12 +1203,18 @@ async function handleLogin(){
     if(!r.ok)throw new Error(Array.isArray(j.message)?j.message.join(', '):j.message||'Erro');
     token=j.data.accessToken;user=j.data.user;
     console.log('[LOGIN] Success! Token:', token?.slice(0,20)+'...', 'User:', user?.name);
+    curLeagueId=null;curLeague=null;
     showScreen('loadingScreen');
     try{await loadLeagues();}catch(e){console.error('leagues:',e);}
     try{await loadSports();}catch(e){console.error('sports:',e);}
     try{await loadBalance();}catch(e){console.error('balance:',e);}
+    document.getElementById('userPoints').textContent='--';
+    updateActiveLeagueBadge();
     document.getElementById('gamesSection').style.display='none';
-    updateGreeting();showScreen('mainScreen');showToast('Bem-vindo!','success');
+    document.getElementById('leagueSelector').style.display='flex';
+    document.getElementById('refreshBtn').style.display='none';
+    updateLeagueSelector();
+    updateGreeting();applyTranslations();showScreen('mainScreen');
   }catch(e){console.error('[LOGIN] Error:', e);showToast(e.message,'error');showScreen('loginScreen');}finally{btn.disabled=false;btn.textContent='Entrar';}
 }
 
@@ -901,7 +1237,10 @@ async function handleRegister(){
     try{await loadSports();}catch(e){console.error('sports:',e);}
     try{await loadBalance();}catch(e){console.error('balance:',e);}
     document.getElementById('gamesSection').style.display='none';
-    updateGreeting();showScreen('mainScreen');showToast('Bem-vindo, '+((user?.name||'').split(' ')[0]||'Jogador')+'!','success');
+    document.getElementById('leagueSelector').style.display='flex';
+    document.getElementById('refreshBtn').style.display='none';
+    updateLeagueSelector();
+    updateGreeting();applyTranslations();showScreen('mainScreen');
   }catch(e){showToast(e.message,'error');}finally{btn.disabled=false;btn.textContent='Criar conta';}
 }
 
@@ -922,33 +1261,45 @@ async function loadLeagues(){
     allLeagues=await api('/user-leagues');
     console.log('[LEAGUES] Result:', JSON.stringify(allLeagues));
     if(!Array.isArray(allLeagues))allLeagues=[];
-    if(!curLeagueId && allLeagues.length)curLeagueId=allLeagues[0].id;
+    // Do NOT auto-select league — user must choose explicitly
     if(curLeagueId)curLeague=allLeagues.find(l=>l.id===curLeagueId);
   }catch(e){console.error('[LEAGUES] Error:',e);allLeagues=[];}
   updateLeagueSelector();
 }
 
+function renderLeagueItem(l,officialStyle){
+  const isActive=l.id===curLeagueId;
+  const code=l.inviteCode||'';
+  const isOwner=l.role==='OWNER';
+  const displayName=l.isOfficial?'Liga BetBrincadeira':l.name;
+  const extraStyle=officialStyle?'style="background:rgba(196,149,106,0.1);border:none;"':'';
+  return '<div class="league-sel-item'+(isActive?' active':'')+'" '+extraStyle+' onclick="switchLeague('+l.id+')">'+
+    '<div class="league-sel-crest">'+displayName[0]+'</div>'+
+    '<div class="league-sel-info"><div class="league-sel-name">'+displayName+(isOwner?' <span style="font-size:10px;color:var(--primary);font-weight:400">👑 '+t('owner')+'</span>':'')+'</div>'+
+    '<div class="league-sel-sub">'+t('balance')+': '+(l.balance||0).toLocaleString('pt-BR')+' · '+(l.memberCount||0)+' '+((l.memberCount||0)===1?t('member'):t('members'))+
+    (!l.isOfficial?' · '+(l.isOpen?'<span style="color:var(--success)">Aberta</span>':'<span style="color:var(--error)">Fechada</span>'):'')+'</div></div>'+
+    (isOwner?'<div class="league-sel-manage" onclick="event.stopPropagation();openLeaguePanel('+l.id+')" style="display:flex;flex-direction:column;align-items:center;gap:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span style="font-size:9px;color:var(--primary);font-weight:600">'+t('manage')+'</span></div>':'')+
+    (code&&!l.isOfficial&&!isOwner?'<div class="league-sel-code" onclick="event.stopPropagation();copyCode(&quot;'+code+'&quot;)"><span class="code-text">'+code+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>':'')+
+    '</div>';
+}
+
 function updateLeagueSelector(){
   const sel=document.getElementById('leagueSelector');
-  sel.style.display='block';
-  document.getElementById('leagueCount').textContent=allLeagues.length;
+  sel.style.display='flex';
+  const privateLeagues=allLeagues.filter(l=>!l.isOfficial);
+  const officialLeague=allLeagues.find(l=>l.isOfficial);
+  document.getElementById('leagueCount').textContent=privateLeagues.length;
   const listEl=document.getElementById('leagueListInline');
-  if(allLeagues.length>0){
-    listEl.innerHTML=allLeagues.map(l=>{
-      const isActive=l.id===curLeagueId;
-      const code=l.inviteCode||'';
-      const isOwner=l.role==='OWNER';
-      return '<div class="league-sel-item'+(isActive?' active':'')+'" onclick="switchLeague('+l.id+')">'+
-        '<div class="league-sel-crest">'+l.name[0]+'</div>'+
-        '<div class="league-sel-info"><div class="league-sel-name">'+l.name+(isOwner?' <span style="font-size:10px;color:var(--primary);font-weight:400">👑 Dono</span>':'')+'</div>'+
-        '<div class="league-sel-sub">Saldo: '+(l.balance||0).toLocaleString('pt-BR')+' · '+(l.memberCount||0)+' membros</div></div>'+
-        (isOwner?'<div class="league-sel-manage" onclick="event.stopPropagation();openLeaguePanel('+l.id+')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></div>':'')+
-        (code&&!l.isOfficial&&!isOwner?'<div class="league-sel-code" onclick="event.stopPropagation();copyCode(&quot;'+code+'&quot;)"><span class="code-text">'+code+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>':'')+
-        '</div>';
-    }).join('');
+  if(privateLeagues.length>0){
+    listEl.innerHTML=privateLeagues.map(l=>renderLeagueItem(l)).join('');
   } else {
-    listEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--text-light);font-size:13px">Nenhuma liga encontrada</div>';
+    listEl.innerHTML='<div style="text-align:center;padding:8px;color:var(--text-light);font-size:13px">'+t('no_private_leagues')+'</div>';
   }
+  // Official league at bottom with green background
+  const offBox=document.getElementById('officialLeagueBox');
+  if(officialLeague&&offBox){
+    offBox.innerHTML=renderLeagueItem(officialLeague,true);
+  } else if(offBox){offBox.innerHTML='';}
 }
 
 async function loadLeagueBalance(){
@@ -959,6 +1310,8 @@ async function loadLeagueBalance(){
       const val=(b.balance||0).toLocaleString('pt-BR');
       document.getElementById('userPoints').textContent=val;
       document.getElementById('gamesLeagueBal').textContent=val+' pts';
+      // Update curLeague balance in memory
+      if(curLeague)curLeague.balance=b.balance||0;
     }
   }catch{}
 }
@@ -967,19 +1320,27 @@ async function loadSports(){
   try{
     sports=await api('/sports');
     if(!sports||!sports.length){sports=[];curSportId=null;}
-    else if(!curSportId)curSportId=sports[0].id;
+    else{
+      sports.sort((a,b)=>sportSortKey(a)-sportSortKey(b));
+      curSportId=sports[0].id; // sempre inicia em Futebol (primeiro da lista ordenada)
+    }
     renderSportTabs();
   }catch{sports=[];}
 }
+
+const SPORT_ORDER={'futebol':1,'football':1,'basquete':2,'basketball':2,'vôlei':3,'volei':3,'volleyball':3,'mma':4,'fórmula 1':5,'formula 1':5,'formula1':5,'f1':5};
+function sportSortKey(s){return SPORT_ORDER[(s.key||s.name||'').toLowerCase()]||SPORT_ORDER[(s.name||'').toLowerCase()]||99;}
 
 function renderSportTabs(){
   const c=document.getElementById('sportTabs');if(!c)return;
   if(!sports.length){c.style.display='none';return;}
   c.style.display='flex';
+  sports.sort((a,b)=>sportSortKey(a)-sportSortKey(b));
   c.innerHTML=sports.map(s=>{
     const active=s.id===curSportId?'active':'';
-    const icon=s.icon?(s.icon.startsWith('http')?'<img src="'+s.icon+'" class="sport-icon" style="width:15px;height:15px">':'<span class="sport-icon">'+s.icon+'</span>'):'';
-    return '<button class="sport-tab '+active+'" onclick="pickSport('+s.id+',this)">'+icon+s.name+'</button>';
+    const defaultIcons={football:'⚽',basketball:'🏀',volleyball:'🏐',mma:'🥊',formula1:'🏎️'};
+    const icon=s.icon?(s.icon.startsWith('http')?'<img src="'+s.icon+'" class="sport-icon" style="width:15px;height:15px">':'<span class="sport-icon">'+s.icon+'</span>'):'<span class="sport-icon">'+(defaultIcons[s.key]||'🏆')+'</span>';
+    return '<button class="sport-tab '+active+'" onclick="pickSport('+s.id+',this)">'+icon+' '+s.name+'</button>';
   }).join('');
 }
 
@@ -995,30 +1356,79 @@ async function loadFixtures(){try{const q=curSportId?'/odds/fixtures?fresh=1&spo
 async function refreshFixtures(){
   const btn=document.getElementById('refreshBtn');
   if(btn){btn.style.animation='spin 0.8s linear infinite';btn.disabled=true;}
-  try{await loadFixtures();showToast('Jogos atualizados','success');}catch{}
+  try{await loadFixtures();showToast(t('games_updated'),'success');}catch{}
   finally{if(btn){btn.style.animation='';btn.disabled=false;}}
 }
+let userDiamondsCount=0;
 async function loadBalance(){
   try{
     const b=await api('/points/balance');
-    document.getElementById('userDiamonds').textContent=(b.diamonds||0).toLocaleString('pt-BR');
+    userDiamondsCount=b.diamonds||0;
+    document.getElementById('userDiamonds').textContent=userDiamondsCount.toLocaleString('pt-BR');
+    // Show/hide gear icon on diamond chip
+    const gearIcon=document.getElementById('diamondGearIcon');
+    if(gearIcon) gearIcon.style.display=userDiamondsCount>0?'inline-flex':'none';
   }catch{}
   await loadLeagueBalance();
 }
 
 async function loadBets(){
   try{
-    const a=await api('/bets/slips/active'),h=await api('/bets/slips/history?limit=20');
+    const lid=curLeagueId;
+    const base=lid?'/bets/slips/league/'+lid:'/bets/slips';
+    const a=await api(base+'/active'),h=await api(base+'/history?limit=20');
     bets=[...(a||[]),...(h.data||h||[])];
   }catch{
-    try{const a=await api('/bets/active'),h=await api('/bets/history?limit=20');bets=[...(a||[]),...(h.data||h||[])];}catch{bets=[];}
+    try{
+      const lid=curLeagueId;
+      const base=lid?'/bets/league/'+lid:'/bets';
+      const a=await api(base+'/active'),h=await api(base+'/history?limit=20');
+      bets=[...(a||[]),...(h.data||h||[])];
+    }catch{bets=[];}
   }
 }
 
 function filterFix(f,el){curFilter=f;document.querySelectorAll('.filter-pill').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');renderFixtures();}
+function onFixtureSearch(val){fixtureSearch=val.toLowerCase().trim();renderFixtures();}
 
-const MARKET_NAMES={'MATCH_WINNER':'Resultado Final','OVER_UNDER_25':'Gols +/- 2.5','BOTH_TEAMS_SCORE':'Ambas Marcam','DOUBLE_CHANCE':'Dupla Chance','GOALS_ODD_EVEN':'Gols Par/Impar','FIRST_HALF_WINNER':'1o Tempo','EXACT_SCORE':'Placar Exato'};
-function friendlyMarket(type){return MARKET_NAMES[type]||type.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());}
+const MARKET_NAMES={
+  pt:{
+    'MATCH_WINNER':'Resultado Final','OVER_UNDER_25':'Gols +/- 2.5','BOTH_TEAMS_SCORE':'Ambas Marcam',
+    'DOUBLE_CHANCE':'Dupla Chance','GOALS_ODD_EVEN':'Gols Par/Ímpar','FIRST_HALF_WINNER':'1º Tempo','EXACT_SCORE':'Placar Exato',
+    // Basketball
+    'BASKETBALL_WINNER':'Vencedor','BASKETBALL_SPREAD':'Handicap','BASKETBALL_TOTAL':'Total de Pontos',
+    // Volleyball
+    'VOLLEYBALL_WINNER':'Vencedor','VOLLEYBALL_TOTAL_SETS':'Total de Sets','VOLLEYBALL_HANDICAP':'Handicap Sets',
+    // MMA
+    'MMA_FIGHT_WINNER':'Vencedor da Luta','MMA_METHOD_OF_VICTORY':'Método de Vitória','MMA_TOTAL_ROUNDS':'Total de Rounds',
+    // F1
+    'F1_RACE_WINNER':'Vencedor da Corrida','F1_PODIUM_FINISH':'Pódio','F1_FASTEST_LAP':'Volta Mais Rápida',
+  },
+  en:{
+    'MATCH_WINNER':'Match Winner','OVER_UNDER_25':'Goals +/- 2.5','BOTH_TEAMS_SCORE':'Both Teams Score',
+    'DOUBLE_CHANCE':'Double Chance','GOALS_ODD_EVEN':'Goals Odd/Even','FIRST_HALF_WINNER':'1st Half','EXACT_SCORE':'Exact Score',
+    'BASKETBALL_WINNER':'Winner','BASKETBALL_SPREAD':'Spread','BASKETBALL_TOTAL':'Total Points',
+    'VOLLEYBALL_WINNER':'Winner','VOLLEYBALL_TOTAL_SETS':'Total Sets','VOLLEYBALL_HANDICAP':'Set Handicap',
+    'MMA_FIGHT_WINNER':'Fight Winner','MMA_METHOD_OF_VICTORY':'Method of Victory','MMA_TOTAL_ROUNDS':'Total Rounds',
+    'F1_RACE_WINNER':'Race Winner','F1_PODIUM_FINISH':'Podium Finish','F1_FASTEST_LAP':'Fastest Lap',
+  },
+  es:{
+    'MATCH_WINNER':'Resultado Final','OVER_UNDER_25':'Goles +/- 2.5','BOTH_TEAMS_SCORE':'Ambos Marcan',
+    'DOUBLE_CHANCE':'Doble Oportunidad','GOALS_ODD_EVEN':'Goles Par/Impar','FIRST_HALF_WINNER':'1er Tiempo','EXACT_SCORE':'Marcador Exacto',
+    'BASKETBALL_WINNER':'Ganador','BASKETBALL_SPREAD':'Hándicap','BASKETBALL_TOTAL':'Total de Puntos',
+    'VOLLEYBALL_WINNER':'Ganador','VOLLEYBALL_TOTAL_SETS':'Total de Sets','VOLLEYBALL_HANDICAP':'Hándicap Sets',
+    'MMA_FIGHT_WINNER':'Ganador de la Pelea','MMA_METHOD_OF_VICTORY':'Método de Victoria','MMA_TOTAL_ROUNDS':'Total de Rounds',
+    'F1_RACE_WINNER':'Ganador de la Carrera','F1_PODIUM_FINISH':'Podio','F1_FASTEST_LAP':'Vuelta Más Rápida',
+  }
+};
+function friendlyMarket(type){return (MARKET_NAMES[appLang]||MARKET_NAMES.pt)[type]||type.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());}
+
+// All live statuses across all sports
+const LIVE_STATUSES=new Set(['LIVE','FIRST_HALF','HALFTIME','SECOND_HALF','EXTRA_TIME','PENALTIES','QUARTER_1','QUARTER_2','QUARTER_3','QUARTER_4','OVERTIME','BREAK','SET_1','SET_2','SET_3','SET_4','SET_5','ROUND_1','ROUND_2','ROUND_3','ROUND_4','ROUND_5','IN_PROGRESS']);
+
+function isFixtureLive(f,eff){
+  return LIVE_STATUSES.has(f.status)||eff==='STARTED_PENDING';
+}
 
 function renderFixtures(){
   const c=document.getElementById('mainContent');
@@ -1031,60 +1441,107 @@ function renderFixtures(){
 
   let filtered=fixtures;
   if(curFilter==='NOT_STARTED')filtered=fixtures.filter(f=>getEffective(f)!=='STARTED_PENDING'&&f.status==='NOT_STARTED');
-  else if(curFilter==='live')filtered=fixtures.filter(f=>f.status==='LIVE'||getEffective(f)==='STARTED_PENDING');
+  else if(curFilter==='live')filtered=fixtures.filter(f=>isFixtureLive(f,getEffective(f)));
   else if(curFilter==='FINISHED')filtered=fixtures.filter(f=>f.status==='FINISHED');
 
-  if(!filtered.length){c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div><h3>Sem jogos</h3><p>Nao ha jogos disponiveis neste filtro</p></div>';return;}
+  if(!filtered.length){c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div><h3>'+t('no_games')+'</h3><p>'+t('no_games_filter')+'</p></div>';return;}
+
+  // Apply search filter
+  if(fixtureSearch){
+    filtered=filtered.filter(f=>{
+      const ln=translateCountry(f.leagueName||'').toLowerCase();
+      const teams=((f.homeTeam||'')+' '+(f.awayTeam||'')).toLowerCase();
+      return ln.includes(fixtureSearch)||teams.includes(fixtureSearch);
+    });
+    if(!filtered.length){c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>'+t('no_results')+'</h3><p>'+t('try_other_search')+'</p></div>';return;}
+  }
 
   // Group by league
   const grouped={};
   filtered.forEach(f=>{
-    const ln=f.leagueName||'Liga';
+    const ln=translateCountry(f.leagueName||'Liga');
     if(!grouped[ln])grouped[ln]=[];
     grouped[ln].push(f);
   });
 
   let html='';
+  // Sport icon helper
+  const sportIcon=(sk)=>({football:'⚽',basketball:'🏀',volleyball:'🏐',mma:'🥊',formula1:'🏎️'}[sk]||'⚽');
+
   Object.keys(grouped).forEach(ln=>{
-    html+='<div class="match-league-header">'+ln+'</div>';
+    const firstSK=grouped[ln][0]?.sportKey||'football';
+    html+='<div class="match-league-header">'+sportIcon(firstSK)+' '+ln+'</div>';
     grouped[ln].forEach(f=>{
-      const isLive=f.status==='LIVE'||getEffective(f)==='STARTED_PENDING';
+      const eff=getEffective(f);
+      const isLive=isFixtureLive(f,eff);
       const isFin=f.status==='FINISHED';
+      const sk=f.sportKey||'football';
       const time=f.startAt?new Date(f.startAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
       const homeTeam=f.homeTeam||'Time A',awayTeam=f.awayTeam||'Time B';
       const sh=(isLive||isFin)&&f.scoreHome!==undefined&&f.scoreHome!==null?f.scoreHome:'';
       const sa=(isLive||isFin)&&f.scoreAway!==undefined&&f.scoreAway!==null?f.scoreAway:'';
       const markets=f.markets||[];
-      const mainMarket=markets.find(m=>m.type==='MATCH_WINNER')||markets[0];
+      // Find the main market based on sport
+      const mainMarketTypes={football:'MATCH_WINNER',basketball:'BASKETBALL_WINNER',volleyball:'VOLLEYBALL_WINNER',mma:'MMA_FIGHT_WINNER',formula1:'F1_RACE_WINNER'};
+      const mainType=mainMarketTypes[sk]||'MATCH_WINNER';
+      const mainMarket=markets.find(m=>m.type===mainType)||markets[0];
       const extraMarkets=markets.filter(m=>m!==mainMarket);
       const matchStr=homeTeam+' vs '+awayTeam;
 
-      // Top row (time/status)
+      // Top row (time/status + league short name)
+      const rawLN=f.leagueName||'';
+      const dashIdx=rawLN.indexOf(' - ');
+      const leagueShort=dashIdx>=0?rawLN.substring(dashIdx+3).trim():rawLN;
+      // Status label with sport-specific period info
+      const statusLabels={'FIRST_HALF':'1T','HALFTIME':'HT','SECOND_HALF':'2T','EXTRA_TIME':'ET','PENALTIES':'PEN','QUARTER_1':'Q1','QUARTER_2':'Q2','QUARTER_3':'Q3','QUARTER_4':'Q4','OVERTIME':'OT','BREAK':'BRK','SET_1':'S1','SET_2':'S2','SET_3':'S3','SET_4':'S4','SET_5':'S5','ROUND_1':'R1','ROUND_2':'R2','ROUND_3':'R3','ROUND_4':'R4','ROUND_5':'R5','IN_PROGRESS':t('live')};
+      const liveLabel=statusLabels[f.status]||t('live');
       let topRow='';
-      if(isLive) topRow='<span class="match-top-live"><span class="live-dot"></span> Ao vivo</span>';
-      else if(isFin) topRow='<span class="match-top-fin">Encerrado</span>';
+      if(isLive) topRow='<span class="match-top-live"><span class="live-dot"></span> '+liveLabel+'</span>';
+      else if(isFin) topRow='<span class="match-top-fin">'+t('finished')+'</span>';
       else topRow='<span class="match-top-time">'+time+'</span>';
+      topRow+='<span style="font-size:9px;color:var(--text-light);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+leagueShort+'</span>';
 
-      // Main 3 odds (Casa/Empate/Fora) — hide if finished
+      // Main odds — sport-aware labels. Hide if live or finished
+      const canBet=!isFin&&!isLive;
       let mainOddsHtml='';
-      if(!isFin&&mainMarket&&mainMarket.odds){
-        const labels=['Casa','Empate','Fora'];
-        mainMarket.odds.slice(0,3).forEach((o,i)=>{
+      if(canBet&&mainMarket&&mainMarket.odds){
+        let labels;
+        const oddsCount=mainMarket.odds.length;
+        if(sk==='football') labels=[t('home'),t('draw'),t('away')];
+        else if(sk==='basketball'||sk==='volleyball') labels=[t('home'),t('away')];
+        else if(sk==='mma') labels=[homeTeam.split(' ').pop(),awayTeam.split(' ').pop()];
+        else if(sk==='formula1') labels=mainMarket.odds.map(o=>o.name);
+        else labels=[t('home'),t('draw'),t('away')];
+
+        // For F1 show top 3 drivers; for 2-way sports show 2; for football show 3
+        const maxOdds=sk==='formula1'?3:(sk==='basketball'||sk==='volleyball'||sk==='mma')?2:3;
+        mainMarket.odds.slice(0,maxOdds).forEach((o,i)=>{
           mainOddsHtml+='<button class="odd-mini" data-oid="'+o.id+'" onclick="selectOdd('+f.id+','+o.id+',&quot;'+friendlyMarket(mainMarket.type||'')+'&quot;,&quot;'+o.name+'&quot;,'+o.value+',&quot;'+matchStr+'&quot;)"><div class="om-label">'+(labels[i]||o.name)+'</div><div class="om-val">'+o.value.toFixed(2)+'</div></button>';
         });
+        // For F1 with more drivers, auto-include remaining in extra markets
+        if(sk==='formula1'&&mainMarket.odds.length>3&&!extraMarkets.find(m=>m===mainMarket)){
+          // We'll show expand for remaining drivers
+        }
       }
 
-      // Expand button — hide if finished
+      // For F1: if main market has >3 odds, create a virtual extra market with remaining drivers
+      const hasMoreMainOdds=sk==='formula1'&&mainMarket&&mainMarket.odds&&mainMarket.odds.length>3;
+      const allExtraMarkets=[...extraMarkets];
+      if(hasMoreMainOdds){
+        allExtraMarkets.unshift({type:mainMarket.type,odds:mainMarket.odds.slice(3)});
+      }
+
+      // Expand button — hide if live or finished
       let expandBtn='';
-      if(!isFin&&extraMarkets.length){
+      if(canBet&&allExtraMarkets.length){
         expandBtn='<button class="odd-expand" onclick="toggleExpand(this,'+f.id+')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>';
       }
 
-      // Expanded odds with friendly names — hide if finished
+      // Expanded odds with friendly names — hide if live or finished
       let expandedHtml='';
-      if(!isFin&&extraMarkets.length){
+      if(canBet&&allExtraMarkets.length){
         expandedHtml='<div class="odds-expanded" id="expand-'+f.id+'">';
-        extraMarkets.forEach(m=>{
+        allExtraMarkets.forEach(m=>{
           const mName=friendlyMarket(m.type);
           expandedHtml+='<div class="odds-market"><div class="odds-market-title">'+mName+'</div><div class="odds-grid">';
           (m.odds||[]).forEach(o=>{
@@ -1095,16 +1552,50 @@ function renderFixtures(){
         expandedHtml+='</div>';
       }
 
+      // Score display for live/finished (in place of odds)
+      let scoreHtml='';
+      if(!canBet){
+        if(sk==='formula1'){
+          // F1: show status badge instead of score
+          const statusLabel=isLive?t('live'):t('finished');
+          scoreHtml='<div style="display:flex;align-items:center;justify-content:center;min-width:50px"><span style="font-size:12px;font-weight:700;color:'+(isLive?'var(--primary)':'var(--text-light)')+'">'+statusLabel+'</span></div>';
+        } else {
+          const homeScore=sh!==''?sh:'0';
+          const awayScore=sa!==''?sa:'0';
+          scoreHtml='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:50px;gap:2px">'
+            +'<span style="font-size:20px;font-weight:800;color:'+(isLive?'var(--primary)':'var(--text)')+';line-height:1.1">'+homeScore+'</span>'
+            +'<span style="font-size:10px;color:var(--text-light)">×</span>'
+            +'<span style="font-size:20px;font-weight:800;color:'+(isLive?'var(--primary)':'var(--text)')+';line-height:1.1">'+awayScore+'</span>'
+            +'</div>';
+        }
+      }
+
+      // Sport-specific match card layout
+      let teamsHtml='';
+      if(sk==='formula1'){
+        // F1: single line with race name + circuit
+        teamsHtml='<div class="match-teams-col">'
+          +'<div class="match-team-row"><span class="team-name" style="font-size:13px;font-weight:700">🏎️ '+homeTeam+'</span></div>'
+          +'<div class="match-team-row"><span class="team-name" style="font-size:11px;color:var(--text-light)">'+awayTeam+'</span></div>'
+          +'</div>';
+      } else if(sk==='mma'){
+        teamsHtml='<div class="match-teams-col">'
+          +'<div class="match-team-row"><span class="team-name">🥊 '+homeTeam+'</span></div>'
+          +'<div class="match-team-row"><span class="team-name">'+awayTeam+'</span></div>'
+          +'</div>';
+      } else {
+        const sportIcon=sk==='basketball'?'🏀':sk==='volleyball'?'🏐':'⚽';
+        teamsHtml='<div class="match-teams-col">'
+          +'<div class="match-team-row"><span class="team-name">'+homeTeam+'</span></div>'
+          +'<div class="match-team-row"><span class="team-name">'+awayTeam+'</span></div>'
+          +'</div>';
+      }
+
       html+='<div class="match-card">'+
         '<div class="match-top-row">'+topRow+'</div>'+
         '<div class="match-row">'+
-        '<div class="match-teams-col">'+
-          '<div class="match-team-row">'+(sh!==''?'<span class="team-score'+(isLive?' live':'')+'">'+sh+'</span>':'')+
-          '<span class="team-name">'+homeTeam+'</span></div>'+
-          '<div class="match-team-row">'+(sa!==''?'<span class="team-score'+(isLive?' live':'')+'">'+sa+'</span>':'')+
-          '<span class="team-name">'+awayTeam+'</span></div>'+
-        '</div>'+
-        '<div class="match-odds-col">'+mainOddsHtml+expandBtn+'</div>'+
+        teamsHtml+
+        (canBet?'<div class="match-odds-col">'+mainOddsHtml+expandBtn+'</div>':scoreHtml)+
         '</div>'+expandedHtml+'</div>';
     });
   });
@@ -1140,7 +1631,7 @@ function renderSlip(){
   slip.classList.add('active');
 
   const n=selections.length;
-  document.getElementById('bsPreviewText').textContent=n+' selecao'+(n===1?'':'es');
+  document.getElementById('bsPreviewText').textContent=n+' '+(n===1?t('selection'):t('selections'));
   document.getElementById('bsPreviewOdd').textContent='@ '+combined.toFixed(2);
 
   document.getElementById('bsCount').textContent=n===1?'· Simples':'· Multipla ('+n+')';
@@ -1154,15 +1645,53 @@ function renderSlip(){
 }
 
 function syncOddHighlights(){
-  document.querySelectorAll('.odd-chip').forEach(chip=>{
+  document.querySelectorAll('.odd-chip, .odd-mini').forEach(chip=>{
     const oid=parseInt(chip.dataset.oid);
     chip.classList.toggle('selected',selections.some(s=>s.oId===oid));
   });
 }
 
 function toggleBetSlip(){document.getElementById('betSlip').classList.toggle('expanded');}
-function closeBetSlip(){const s=document.getElementById('betSlip');s.classList.remove('active','expanded');selections=[];syncOddHighlights();}
+function closeBetSlip(){const s=document.getElementById('betSlip');s.classList.remove('active','expanded');selections=[];syncOddHighlights();document.querySelector('.bs-body').style.display='';document.getElementById('bsLeaguePicker').style.display='none';}
 function getCombinedOdd(){return selections.reduce((acc,s)=>acc*s.oVal,1);}
+
+function openLeaguePicker(){
+  if(!selections.length)return;
+  const amt=parseInt(document.getElementById('betAmount').value)||0;
+  if(amt<10){showToast(t('min_points'),'error');return;}
+  if(amt>10000){showToast(t('max_points'),'error');return;}
+  if(!curLeagueId){showToast(t('please_choose_league'),'error');return;}
+  placeBet(curLeagueId);
+}
+
+function renderLeaguePickerList(amt){
+  const container=document.getElementById('bsLeagueList');
+  container.innerHTML=allLeagues.map(l=>{
+    const name=l.isOfficial?'Liga BetBrincadeira':l.name;
+    const bal=(l.balance||0);
+    const balStr=bal.toLocaleString('pt-BR');
+    const insufficient=bal<amt;
+    const opacity=insufficient?'opacity:0.5;':'';
+    const badge=l.isOfficial?'<span style="font-size:9px;background:rgba(196,149,106,0.2);color:var(--primary);padding:2px 6px;border-radius:4px;font-weight:600;margin-left:6px">OFICIAL</span>':'';
+    return '<div onclick="'+(insufficient?'':'selectLeagueAndBet('+l.id+')')+'" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px;cursor:'+(insufficient?'not-allowed':'pointer')+';background:var(--card);border-radius:var(--radius-xs);margin-bottom:8px;border:1.5px solid var(--border);'+opacity+'transition:all 0.15s ease;">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center"><span style="color:var(--text);font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+'</span>'+badge+'</div>'
+      +'<div style="font-size:12px;color:var(--text-sec);margin-top:4px">'+t('balance')+': <span style="color:var(--primary);font-weight:700">'+balStr+'</span> pts'+(insufficient?' <span style="color:#e74c3c;font-size:10px">('+t('insufficient')+')</span>':'')+'</div>'
+      +'</div>'
+      +'<span style="color:var(--primary);font-size:20px;font-weight:300">›</span>'
+      +'</div>';
+  }).join('');
+}
+
+function closeLeaguePicker(){
+  document.querySelector('.bs-body').style.display='';
+  document.getElementById('bsLeaguePicker').style.display='none';
+}
+
+function selectLeagueAndBet(leagueId){
+  placeBet(leagueId);
+}
+
 function updateReturn(){
   if(!selections.length)return;
   const a=parseInt(document.getElementById('betAmount').value)||0;
@@ -1171,125 +1700,256 @@ function updateReturn(){
   const retornoPotencial=Math.floor(a*co);
   const sum=document.getElementById('bsSummary');
   sum.innerHTML='<div class="bs-summary-row"><span class="bsl">Valor do bilhete</span><span class="bsv">'+a.toLocaleString('pt-BR')+' pts</span></div>'
-    +(n>1?'<div class="bs-summary-row"><span class="bsl">Selecoes</span><span class="bsv">'+n+' jogos</span></div>':'')
-    +'<div class="bs-summary-row"><span class="bsl">Retorno potencial</span><span class="bsv highlight">'+retornoPotencial.toLocaleString('pt-BR')+' pts</span></div>';
-  document.getElementById('bsConfirmBtn').textContent=n===1?'Confirmar Aposta':'Confirmar Bilhete ('+n+' selecoes)';
+    +(n>1?'<div class="bs-summary-row"><span class="bsl">Seleções</span><span class="bsv">'+n+' jogos</span></div>':'')
+    +'<div class="bs-summary-row"><span class="bsl">'+t('potential_return')+'</span><span class="bsv highlight">'+retornoPotencial.toLocaleString('pt-BR')+' pts</span></div>';
+  document.getElementById('bsConfirmBtn').textContent=n===1?t('confirm_bet'):t('confirm_slip')+' ('+n+' '+t('selections')+')';
 }
 
-async function placeBet(){
+async function placeBet(leagueId){
   if(!selections.length)return;
+  if(!leagueId){showToast('Selecione uma liga','error');return;}
   const amt=parseInt(document.getElementById('betAmount').value)||0;
-  if(amt<10){showToast('Minimo: 10 pontos','error');return;}
-  if(amt>10000){showToast('Maximo: 10.000 pontos','error');return;}
   const n=selections.length;
   const co=getCombinedOdd();
   try{
     const payload={
-      leagueId:curLeagueId,
+      leagueId:leagueId,
       selections:selections.map(s=>({fixtureId:s.fId,oddId:s.oId})),
       amount:amt
     };
     await api('/bets/slip',{method:'POST',body:JSON.stringify(payload)});
     closeBetSlip();
     if(n===1) showToast('Aposta de '+amt+' pts confirmada!','success');
-    else showToast('Bilhete de '+amt+' pts ('+n+' selecoes) · Odd '+co.toFixed(2),'success');
+    else showToast('Bilhete de '+amt+' pts ('+n+' seleções) · Odd '+co.toFixed(2),'success');
     await loadBalance();
   }catch(e){showToast(e.message,'error');}
 }
 
-async function switchTab(tab,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');
-  const c=document.getElementById('mainContent'),sub=document.getElementById('headerSub'),fb=document.getElementById('filtersBar');
+function showRequireLeagueScreen(){
+  const ls=document.getElementById('leagueSelector'),gs=document.getElementById('gamesSection'),lmp=document.getElementById('leagueManagePage');
+  ls.style.display='none';gs.style.display='flex';if(lmp)lmp.style.display='none';
+  document.querySelector('.games-header').style.display='none';
+  document.getElementById('filtersBar').style.display='none';
+  const st=document.getElementById('sportTabs');if(st)st.style.display='none';
+  const sb=document.getElementById('searchBar');if(sb)sb.style.display='none';
+  document.getElementById('refreshBtn').style.display='none';
+  document.getElementById('mainContent').innerHTML=
+    '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:40px 20px;text-align:center">'
+    +'<div style="width:56px;height:56px;border-radius:50%;background:rgba(196,149,106,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:16px">'
+    +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>'
+    +'</div>'
+    +'<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px">'+t('please_choose_league')+'</div>'
+    +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:20px">'+t('require_league_msg')+'</div>'
+    +'<button onclick="switchTab(\'jogos\',document.querySelector(\'.tab\'))" style="background:var(--primary);color:#fff;border:none;border-radius:var(--radius-xs);padding:10px 24px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">'+t('go_to_leagues')+'</button>'
+    +'</div>';
+}
 
-  if(tab==='jogos'){fb.style.display='flex';sub.textContent='Jogos de hoje';renderFixtures();}
+function requireLeague(tab,el){
+  if(!curLeagueId){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    if(el)el.classList.add('active');
+    showRequireLeagueScreen();
+    return;
+  }
+  switchTab(tab,el);
+}
+
+async function switchTab(tab,el){
+  // Close bet slip and any open pages when changing tabs
+  closeBetSlip();
+  const lmp=document.getElementById('leagueManagePage');if(lmp)lmp.style.display='none';
+  closeAllModals();
+
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');
+  const c=document.getElementById('mainContent'),fb=document.getElementById('filtersBar'),rb=document.getElementById('refreshBtn');
+  const ls=document.getElementById('leagueSelector'),gs=document.getElementById('gamesSection'),st=document.getElementById('sportTabs');
+  const sb=document.getElementById('searchBar');if(sb)sb.style.display='none';
+
+  // Block tabs that need a league
+  const leagueRequiredTabs=['explorar','apostas','ranking'];
+  if(leagueRequiredTabs.includes(tab)&&!curLeagueId){
+    showRequireLeagueScreen();
+    return;
+  }
+
+  // Hide refresh button by default, only show on games screen
+  if(rb)rb.style.display='none';
+
+  if(tab==='jogos'){
+    ls.style.display='flex';gs.style.display='none';
+    updateLeagueSelector();
+  }
   else if(tab==='explorar'){
-    fb.style.display='none';sub.textContent='Explorar ligas';
-    try{const lg=await api('/odds/leagues');
-      if(!lg.length){c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div><h3>Nenhuma liga</h3></div>';return;}
-      c.innerHTML=lg.map(l=>'<div class="league-card"><div class="league-crest">'+(l.logo?'<img src="'+l.logo+'">':'<span style="font-weight:700;color:var(--text-light)">'+l.name[0]+'</span>')+'</div><div class="league-info"><div class="li-name">'+l.name+'</div><div class="li-count">'+l.fixtureCount+' jogo'+(l.fixtureCount>1?'s':'')+'</div></div><span class="league-arrow">›</span></div>').join('');
-    }catch{c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div><h3>Erro ao carregar</h3></div>';}
+    ls.style.display='none';gs.style.display='flex';
+    document.querySelector('.games-header').style.display='none';
+    fb.style.display='flex';if(st)st.style.display='flex';
+    if(sb){sb.style.display='block';document.getElementById('fixtureSearchInput').value='';fixtureSearch='';}
+    if(rb)rb.style.display='';
+    c.innerHTML='<div style="padding:20px;text-align:center"><div class="spinner"></div></div>';
+    try{
+      await loadSports();
+      fixtures=await api('/odds/fixtures?fresh=1');
+      renderFixtures();
+    }catch{c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div><h3>'+t('error_loading')+'</h3></div>';}
   }
   else if(tab==='apostas'){
-    fb.style.display='none';sub.textContent='Minhas apostas';
+    ls.style.display='none';gs.style.display='flex';fb.style.display='none';if(st)st.style.display='none';
+    document.querySelector('.games-header').style.display='none';
+
     c.innerHTML='<div style="padding:20px;text-align:center"><div class="spinner"></div></div>';
     await loadBets();
-    if(!bets.length){c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 15a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg></div><h3>Nenhuma aposta</h3><p>Faca sua primeira aposta na aba Jogos!</p></div>';return;}
+    if(!bets.length){c.innerHTML='<div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 15a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg></div><h3>'+t('no_bets')+'</h3><p>'+t('first_bet')+'</p></div>';return;}
     c.innerHTML=bets.map(b=>{
       const isSlip=!!b.legs;
       const st=b.status==='PENDING'?'pending':b.status==='WON'?'won':'lost';
-      const stLbl={PENDING:'Pendente',WON:'Ganhou',LOST:'Perdeu'}[b.status]||b.status;
+      const stLbl={PENDING:t('pending'),WON:t('won'),LOST:t('lost')}[b.status]||b.status;
       const created=b.createdAt?new Date(b.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      // League name
+      const bLeague=b.league||(b.leagueId&&allLeagues.find(l=>l.id===b.leagueId))||null;
+      const leagueName=bLeague?(bLeague.isOfficial?'Liga BetBrincadeira':(bLeague.name||'Liga')):(b.leagueId?'Liga #'+b.leagueId:'Liga BetBrincadeira');
+      const leagueTag='<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(196,149,106,0.12);color:var(--primary);font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;margin-bottom:6px">'+leagueName+'</div>';
+      const _mk=new Proxy({},{get:(_,key)=>friendlyMarket(key)||key});
 
       if(isSlip){
         const legs=b.legs||[];
         const n=legs.length;
-        const typeLabel=n===1?'Simples':'Multipla ('+n+')';
+        const typeLabel=n===1?t('simple'):t('multiple')+' ('+n+')';
         const co=b.combinedOdd?parseFloat(b.combinedOdd).toFixed(2):'';
 
-        let title=n===1?(legs[0].fixture.homeTeam+' vs '+legs[0].fixture.awayTeam):'Bilhete '+typeLabel;
-        let subtitle=n===1?((({MATCH_WINNER:'Resultado',OVER_UNDER_25:'Gols +/- 2.5',BOTH_TEAMS_SCORE:'Ambos marcam'})[legs[0].marketType]||'')+': '+legs[0].oddName+' @ '+parseFloat(legs[0].oddValue).toFixed(2)):('Odd combinada: '+co);
+        let title=n===1?(legs[0].fixture.homeTeam+' vs '+legs[0].fixture.awayTeam):t('slip_type')+' '+typeLabel;
+        const firstFixDate=n===1&&legs[0].fixture.startAt?new Date(legs[0].fixture.startAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+        let subtitle=(firstFixDate?'<span style="color:var(--text-light);font-size:10px">'+firstFixDate+'</span><br>':'')+(n===1?((_mk[legs[0].marketType]||'')+': '+legs[0].oddName+' @ '+parseFloat(legs[0].oddValue).toFixed(2)):(t('combined_odd_label')+': '+co));
 
         let legsHtml=legs.map(l=>{
           const fix=l.fixture||{};
-          const mk=({MATCH_WINNER:'Resultado',OVER_UNDER_25:'Gols +/- 2.5',BOTH_TEAMS_SCORE:'Ambos marcam'})[l.marketType]||'';
+          const mk=_mk[l.marketType]||'';
           const legSt=l.status==='WON'?'✓':l.status==='LOST'?'✗':'⏳';
           const legColor=l.status==='WON'?'var(--success)':l.status==='LOST'?'var(--error)':'var(--text-sec)';
           const hasScore=fix.scoreHome!=null;
-          return '<div class="bs-sel-item" style="margin-bottom:6px"><div class="bs-sel-info"><div class="bs-sel-match">'+fix.homeTeam+' vs '+fix.awayTeam+(hasScore?' ('+fix.scoreHome+'-'+fix.scoreAway+')':'')+'</div><div class="bs-sel-pick">'+mk+': '+l.oddName+'</div></div><span class="bs-sel-odd">'+parseFloat(l.oddValue).toFixed(2)+'</span><span style="font-size:16px;color:'+legColor+'">'+legSt+'</span></div>';
+          const fixDate=fix.startAt?new Date(fix.startAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+          return '<div class="bs-sel-item" style="margin-bottom:6px"><div class="bs-sel-info"><div class="bs-sel-match">'+fix.homeTeam+' vs '+fix.awayTeam+(hasScore?' ('+fix.scoreHome+'-'+fix.scoreAway+')':'')+'</div>'+(fixDate?'<div style="font-size:10px;color:var(--text-light);margin-top:1px">'+fixDate+'</div>':'')+'<div class="bs-sel-pick">'+mk+': '+l.oddName+'</div></div><span class="bs-sel-odd">'+parseFloat(l.oddValue).toFixed(2)+'</span><span style="font-size:16px;color:'+legColor+'">'+legSt+'</span></div>';
         }).join('');
 
-        return '<div class="bet-card" onclick="this.classList.toggle(\'expanded\')"><div class="bc-top"><div><div class="bc-match">'+title+'</div><div class="bc-market">'+subtitle+'</div></div><span class="bc-expand">▼</span></div><div class="bc-bottom"><span class="bc-amount">'+b.amount+' pts</span><span class="badge badge-'+st+'">'+stLbl+'</span></div><div class="bc-detail"><div style="margin-bottom:12px">'+legsHtml+'</div><div class="detail-row"><span class="dl">Tipo</span><span class="dv">'+typeLabel+'</span></div><div class="detail-row"><span class="dl">Odd combinada</span><span class="dv" style="color:var(--primary);font-weight:800">'+co+'</span></div><div class="detail-row"><span class="dl">Valor apostado</span><span class="dv">'+b.amount+' pts</span></div><div class="detail-row"><span class="dl">Retorno potencial</span><span class="dv green">'+(b.potentialReturn||0)+' pts</span></div>'+(created?'<div class="detail-row"><span class="dl">Feita em</span><span class="dv">'+created+'</span></div>':'')+'</div></div>';
+        const betCode='BB-'+(b.id||'0').toString().padStart(6,'0');
+        return '<div class="bet-card" onclick="this.classList.toggle(\'expanded\')">'+leagueTag+'<div class="bc-top"><div><div class="bc-match">'+title+'</div><div class="bc-market">'+subtitle+'</div></div><span class="bc-expand">▼</span></div><div class="bc-bottom"><span class="bc-amount">'+b.amount+' pts</span><span class="badge badge-'+st+'">'+stLbl+'</span></div><div class="bc-detail"><div style="margin-bottom:12px">'+legsHtml+'</div><div class="detail-row"><span class="dl">'+t('type')+'</span><span class="dv">'+typeLabel+'</span></div><div class="detail-row"><span class="dl">'+t('combined_odd_label')+'</span><span class="dv" style="color:var(--primary);font-weight:800">'+co+'</span></div><div class="detail-row"><span class="dl">'+t('bet_amount_label')+'</span><span class="dv">'+b.amount+' pts</span></div><div class="detail-row"><span class="dl">'+t('potential_return_label')+'</span><span class="dv green">'+(b.potentialReturn||0)+' pts</span></div>'+(created?'<div class="detail-row"><span class="dl">'+t('placed_at')+'</span><span class="dv">'+created+'</span></div>':'')+'<div class="detail-row"><span class="dl">'+t('code')+'</span><span class="dv" style="font-family:monospace;letter-spacing:1px;color:var(--primary)">'+betCode+'</span></div></div></div>';
       } else {
         const fix=b.fixture||{};
-        const match=fix.homeTeam?fix.homeTeam+' vs '+fix.awayTeam:'Jogo #'+b.fixtureId;
+        const match=fix.homeTeam?fix.homeTeam+' vs '+fix.awayTeam:t('game_num')+b.fixtureId;
+        const legacyFixDate=fix.startAt?new Date(fix.startAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
         const oddName=b.oddName||(b.odd?b.odd.name:'');
-        const mktLabel={MATCH_WINNER:'Resultado',OVER_UNDER_25:'Gols +/- 2.5',BOTH_TEAMS_SCORE:'Ambos marcam'}[b.marketType]||'';
+        const mktLabel=_mk[b.marketType]||'';
         const oddVal=b.oddValue?parseFloat(b.oddValue).toFixed(2):'';
-        return '<div class="bet-card" onclick="this.classList.toggle(\'expanded\')"><div class="bc-top"><div><div class="bc-match">'+match+'</div><div class="bc-market">'+(mktLabel?mktLabel+': ':'')+oddName+' @ '+oddVal+'</div></div><span class="bc-expand">▼</span></div><div class="bc-bottom"><span class="bc-amount">'+b.amount+' pts</span><span class="badge badge-'+st+'">'+stLbl+'</span></div><div class="bc-detail"><div class="bc-pick-box"><div class="bc-pick-label">'+(mktLabel||'Aposta')+'</div><div class="bc-pick-value">'+oddName+'</div><div class="bc-pick-odd">Odd '+oddVal+'</div></div><div class="detail-row"><span class="dl">Valor apostado</span><span class="dv">'+b.amount+' pts</span></div><div class="detail-row"><span class="dl">Retorno potencial</span><span class="dv green">'+(b.potentialReturn||0)+' pts</span></div>'+(created?'<div class="detail-row"><span class="dl">Feita em</span><span class="dv">'+created+'</span></div>':'')+'</div></div>';
+        const betCode2='BB-'+(b.id||'0').toString().padStart(6,'0');
+        return '<div class="bet-card" onclick="this.classList.toggle(\'expanded\')">'+leagueTag+'<div class="bc-top"><div><div class="bc-match">'+match+'</div>'+(legacyFixDate?'<div style="font-size:10px;color:var(--text-light)">'+legacyFixDate+'</div>':'')+'<div class="bc-market">'+(mktLabel?mktLabel+': ':'')+oddName+' @ '+oddVal+'</div></div><span class="bc-expand">▼</span></div><div class="bc-bottom"><span class="bc-amount">'+b.amount+' pts</span><span class="badge badge-'+st+'">'+stLbl+'</span></div><div class="bc-detail"><div class="bc-pick-box"><div class="bc-pick-label">'+(mktLabel||t('bet_label'))+'</div><div class="bc-pick-value">'+oddName+'</div><div class="bc-pick-odd">Odd '+oddVal+'</div></div><div class="detail-row"><span class="dl">'+t('bet_amount_label')+'</span><span class="dv">'+b.amount+' pts</span></div><div class="detail-row"><span class="dl">'+t('potential_return_label')+'</span><span class="dv green">'+(b.potentialReturn||0)+' pts</span></div>'+(created?'<div class="detail-row"><span class="dl">'+t('placed_at')+'</span><span class="dv">'+created+'</span></div>':'')+'<div class="detail-row"><span class="dl">'+t('code')+'</span><span class="dv" style="font-family:monospace;letter-spacing:1px;color:var(--primary)">'+betCode2+'</span></div></div></div>';
       }
     }).join('');
   }
   else if(tab==='ranking'){
-    fb.style.display='none';sub.textContent='Ranking';
+    ls.style.display='none';gs.style.display='flex';fb.style.display='none';if(st)st.style.display='none';
+    document.querySelector('.games-header').style.display='none';
+
     c.innerHTML='<div style="padding:20px;text-align:center"><div class="spinner"></div></div>';
-    try{const rk=await api('/ranking');if(!rk.length)throw 0;
-      c.innerHTML=rk.map((r,i)=>{const pc=i===0?'g':i===1?'s':i===2?'b':'n';const md=i===0?'1º':i===1?'2º':i===2?'3º':'';
-        return '<div class="rank-card"><div class="rank-num '+pc+'">'+(md||(i+1))+'</div><div class="rank-av">'+((r.name||'?')[0]).toUpperCase()+'</div><div class="rank-info"><div class="ri-name">'+r.name+'</div><div class="ri-stats">'+(r.totalBets||0)+' apostas · '+(r.winRate||0)+'%</div></div><div class="rank-pts">'+(r.points||0).toLocaleString('pt-BR')+'</div></div>';
+    try{
+      const rkUrl=curLeagueId?'/ranking/league/'+curLeagueId:'/ranking/global';
+      const rk=await api(rkUrl);if(!rk.length)throw 0;
+      const leagueLabel=curLeague?(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name):'';
+      const headerHtml=leagueLabel?'<div style="text-align:center;margin-bottom:12px;padding:6px 0"><span style="font-size:12px;font-weight:600;color:var(--primary);background:rgba(196,149,106,0.12);padding:4px 12px;border-radius:4px">'+leagueLabel+'</span></div>':'';
+      c.innerHTML=headerHtml+rk.map((r,i)=>{const pc=i===0?'g':i===1?'s':i===2?'b':'n';const md=i===0?'1º':i===1?'2º':i===2?'3º':'';
+        return '<div class="rank-card"><div class="rank-num '+pc+'">'+(md||(i+1))+'</div><div class="rank-av">'+((r.name||'?')[0]).toUpperCase()+'</div><div class="rank-info"><div class="ri-name">'+r.name+'</div><div class="ri-stats">'+(r.wonBets||r.totalBets||0)+' '+t('wins')+' · '+(r.winRate||0)+'%</div></div><div class="rank-pts">'+(r.points||0).toLocaleString('pt-BR')+'</div></div>';
       }).join('');
     }catch{
-      c.innerHTML='<div class="rank-card"><div class="rank-num g">🥇</div><div class="rank-av">'+((user?.name||'U')[0]).toUpperCase()+'</div><div class="rank-info"><div class="ri-name">'+(user?.name||'Voce')+'</div><div class="ri-stats">Unico jogador por enquanto!</div></div><div class="rank-pts">'+document.getElementById('userPoints').textContent+'</div></div><div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 6 7 6 7z"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 18 7 18 7z"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div><p>Convide amigos para competir!</p></div>';
+      c.innerHTML='<div class="rank-card"><div class="rank-num g">🥇</div><div class="rank-av">'+((user?.name||'U')[0]).toUpperCase()+'</div><div class="rank-info"><div class="ri-name">'+(user?.name||t('player'))+'</div><div class="ri-stats">'+t('only_player')+'</div></div><div class="rank-pts">'+document.getElementById('userPoints').textContent+'</div></div><div class="empty"><div class="em-icon"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 6 7 6 7z"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 18 7 18 7z"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div><p>'+t('invite_friends')+'</p></div>';
     }
   }
   else if(tab==='perfil'){
-    fb.style.display='none';sub.textContent='Perfil';
-    const pts=document.getElementById('userPoints').textContent,dia=document.getElementById('userDiamonds').textContent;
-    c.innerHTML='<div class="profile-top"><div class="profile-av">'+((user?.name||'U')[0]).toUpperCase()+'</div><div class="pt-name">'+(user?.name||'Jogador')+'</div><div class="pt-email">'+(user?.email||'')+'</div></div><div class="stats-row"><div class="stat-box"><div class="sb-val">'+pts+'</div><div class="sb-lbl">Saldo</div></div><div class="stat-box"><div class="sb-val">'+dia+'</div><div class="sb-lbl">Diamantes</div></div><div class="stat-box"><div class="sb-val">'+bets.length+'</div><div class="sb-lbl">Apostas</div></div><div class="stat-box"><div class="sb-val">1</div><div class="sb-lbl">Dias ativos</div></div></div><div class="menu-row" onclick="showDiamondStore()"><span class="mr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span class="mr-label">Loja de diamantes</span><span class="mr-arrow">›</span></div><div class="menu-row" onclick="showToast(&quot;Em breve!&quot;,&quot;success&quot;)"><span class="mr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span><span class="mr-label">Conquistas</span><span class="mr-arrow">›</span></div><div class="menu-row" onclick="handleLogout()"><span class="mr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="mr-label" style="color:var(--error)">Sair</span><span class="mr-arrow">›</span></div>';
+    ls.style.display='none';gs.style.display='flex';fb.style.display='none';if(st)st.style.display='none';
+    document.querySelector('.games-header').style.display='none';
+    loadBalance();
+    renderProfile();
   }
 }
 
 function showMyLeagues(){
-  document.getElementById('leaguesListContent').innerHTML=allLeagues.map(l=>'<div class="league-card" style="cursor:pointer" onclick="switchLeague('+l.id+')"><div class="league-crest" style="width:50px;height:50px"><span style="font-weight:700;font-size:20px;color:var(--primary)">'+l.name[0]+'</span></div><div class="league-info"><div class="li-name">'+l.name+'</div><div class="li-count">Saldo: '+((l.balance||0).toLocaleString('pt-BR'))+' · '+((l.memberCount||0))+' membros</div></div></div>').join('');
+  document.getElementById('leaguesListContent').innerHTML=allLeagues.map(l=>'<div class="league-card" style="cursor:pointer" onclick="switchLeague('+l.id+')"><div class="league-crest" style="width:50px;height:50px"><span style="font-weight:700;font-size:20px;color:var(--primary)">'+l.name[0]+'</span></div><div class="league-info"><div class="li-name">'+l.name+'</div><div class="li-count">'+t('balance')+': '+((l.balance||0).toLocaleString('pt-BR'))+' · '+((l.memberCount||0))+' '+t('members')+'</div></div></div>').join('');
   openModal('myLeaguesModal');
 }
 
 function switchLeague(id){
   curLeagueId=id;
   curLeague=allLeagues.find(l=>l.id===id);
+  betFromExplorar=false;
   closeAllModals();
   // Update games header
-  document.getElementById('gamesLeagueName').textContent=curLeague?curLeague.name:'Liga';
+  document.getElementById('gamesLeagueName').textContent=curLeague?(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name):'Liga';
   document.getElementById('gamesLeagueBal').textContent=(curLeague?(curLeague.balance||0).toLocaleString('pt-BR'):'0')+' pts';
-  // Show games, hide leagues
+  // Update header balance to selected league
+  updateHeaderBalance();
+  // Show games, hide leagues, restore game UI elements
   document.getElementById('leagueSelector').style.display='none';
   document.getElementById('gamesSection').style.display='flex';
+  document.querySelector('.games-header').style.display='flex';
+  const st=document.getElementById('sportTabs');if(st)st.style.display='flex';
+  document.getElementById('filtersBar').style.display='flex';
+  const sb2=document.getElementById('searchBar');if(sb2){sb2.style.display='block';document.getElementById('fixtureSearchInput').value='';fixtureSearch='';}
+  const rb=document.getElementById('refreshBtn');if(rb)rb.style.display='';
   loadLeagueBalance();
   loadFixtures();
 }
 
+function updateHeaderBalance(){
+  const pts=document.getElementById('userPoints');
+  if(curLeague){
+    pts.textContent=(curLeague.balance||0).toLocaleString('pt-BR');
+  } else {
+    pts.textContent='--';
+  }
+  updateActiveLeagueBadge();
+}
+
+function updateActiveLeagueBadge(){
+  const badge=document.getElementById('activeLeagueBadge');
+  const nameEl=document.getElementById('activeLeagueName');
+  if(!badge||!nameEl)return;
+  if(curLeague&&curLeagueId){
+    nameEl.textContent=curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name;
+    badge.style.display='block';
+  } else {
+    badge.style.display='none';
+  }
+}
+
 function backToLeagues(){
   document.getElementById('gamesSection').style.display='none';
-  document.getElementById('leagueSelector').style.display='block';
+  document.getElementById('leagueSelector').style.display='flex';
+  document.getElementById('refreshBtn').style.display='none';
   updateLeagueSelector();
+}
+
+async function showExplorarLeagueGames(leagueId,leagueName){
+  const c=document.getElementById('mainContent'),gs=document.getElementById('gamesSection'),st=document.getElementById('sportTabs'),fb=document.getElementById('filtersBar');
+  const gh=document.querySelector('.games-header');
+  // Show games section with back button to explorar
+  gs.style.display='flex';gh.style.display='flex';fb.style.display='flex';if(st)st.style.display='flex';
+  document.getElementById('gamesLeagueName').textContent=leagueName;
+  document.getElementById('gamesLeagueBal').textContent='';
+  // Override back button to go back to explorar
+  document.querySelector('.games-back').setAttribute('onclick','backToExplorar()');
+  c.innerHTML='<div style="padding:20px;text-align:center"><div class="spinner"></div></div>';
+  try{
+    const allFix=await api('/odds/fixtures?fresh=1');
+    const leagueFix=allFix.filter(f=>(f.leagueName||'')==leagueName||f.leagueId===leagueId);
+    fixtures=leagueFix;
+    renderFixtures();
+  }catch{c.innerHTML='<div class="empty"><h3>'+t('error_loading')+'</h3></div>';}
+}
+
+function backToExplorar(){
+  document.querySelector('.games-back').setAttribute('onclick','backToLeagues()');
+  document.querySelector('.games-header').style.display='none';
+  document.getElementById('sportTabs').style.display='none';
+  document.getElementById('filtersBar').style.display='none';
+  document.getElementById('refreshBtn').style.display='none';
+  requireLeague('explorar',document.querySelectorAll('.tab')[1]);
 }
 
 async function showCreateLeagueModal(){
@@ -1304,25 +1964,84 @@ async function showJoinLeagueModal(){
 
 async function handleCreateLeague(){
   const n=document.getElementById('createLeagueName').value;
-  if(!n){showToast('Digite o nome da liga','error');return;}
+  const diamonds=parseInt(document.getElementById('createLeagueDiamonds').value)||0;
+  if(!n){showToast(t('enter_league_name'),'error');return;}
+  if(diamonds<1){showToast('Informe a quantidade de diamantes para o caixa inicial','error');return;}
   try{
-    const l=await api('/user-leagues',{method:'POST',body:JSON.stringify({name:n})});
+    const l=await api('/user-leagues',{method:'POST',body:JSON.stringify({name:n,initialDiamonds:diamonds})});
     document.getElementById('createLeagueName').value='';
+    document.getElementById('createLeagueDiamonds').value='200';
     document.getElementById('inviteCodeDisplay').textContent=l.inviteCode||'000000';
     closeAllModals();
+    showToast('Liga criada! Caixa: '+(diamonds*5)+' fichas','success');
     setTimeout(()=>openModal('inviteCodeModal'),100);
+    loadLeagues();loadBalance();
+  }catch(e){showToast(e.message,'error');}
+}
+
+// ─── Cashbox Functions ────────────────────────────────────────────────
+let cashboxLeagueId=null;
+
+function openCashboxDeposit(leagueId){
+  cashboxLeagueId=leagueId;
+  document.getElementById('cashboxDepositAmount').value='';
+  document.getElementById('cashboxDepositPreview').textContent='';
+  openModal('cashboxDepositModal');
+}
+
+function openCashboxWithdraw(leagueId){
+  cashboxLeagueId=leagueId;
+  document.getElementById('cashboxWithdrawAmount').value='';
+  document.getElementById('cashboxWithdrawPreview').textContent='';
+  openModal('cashboxWithdrawModal');
+}
+
+// Live preview for deposit
+document.addEventListener('input',function(e){
+  if(e.target.id==='cashboxDepositAmount'){
+    const d=parseInt(e.target.value)||0;
+    document.getElementById('cashboxDepositPreview').textContent=d>0?d+' diamantes = '+(d*5).toLocaleString('pt-BR')+' fichas':'';
+  }
+  if(e.target.id==='cashboxWithdrawAmount'){
+    const f=parseInt(e.target.value)||0;
+    const d=Math.floor(f/5);
+    document.getElementById('cashboxWithdrawPreview').textContent=f>=5?f+' fichas = '+d+' diamantes':'Min: 5 fichas';
+  }
+});
+
+async function handleCashboxDeposit(){
+  const diamonds=parseInt(document.getElementById('cashboxDepositAmount').value)||0;
+  if(diamonds<1){showToast('Informe a quantidade de diamantes','error');return;}
+  try{
+    await api('/user-leagues/'+cashboxLeagueId+'/cashbox/deposit',{method:'POST',body:JSON.stringify({diamonds})});
+    showToast('Depositado! +'+(diamonds*5)+' fichas no caixa','success');
+    closeAllModals();
+    loadBalance();loadLeagues();
+    setTimeout(()=>openLeaguePanel(cashboxLeagueId),300);
+  }catch(e){showToast(e.message,'error');}
+}
+
+async function handleCashboxWithdraw(){
+  const amount=parseInt(document.getElementById('cashboxWithdrawAmount').value)||0;
+  if(amount<5){showToast('Minimo: 5 fichas','error');return;}
+  try{
+    const r=await api('/user-leagues/'+cashboxLeagueId+'/cashbox/withdraw',{method:'POST',body:JSON.stringify({amount})});
+    showToast('Sacado! +'+r.diamonds+' diamantes','success');
+    closeAllModals();
+    loadBalance();loadLeagues();
+    setTimeout(()=>openLeaguePanel(cashboxLeagueId),300);
   }catch(e){showToast(e.message,'error');}
 }
 
 async function handleJoinLeague(){
   const c=document.getElementById('joinLeagueCode').value;
-  if(!c||c.length!==6){showToast('Digite um codigo valido','error');return;}
+  if(!c||c.length!==6){showToast(t('enter_valid_code'),'error');return;}
   try{
     await api('/user-leagues/join',{method:'POST',body:JSON.stringify({inviteCode:c})});
     document.getElementById('joinLeagueCode').value='';
     closeAllModals();
     await loadLeagues();
-    showToast('Solicitacao enviada!','success');
+    showToast(t('request_sent'),'success');
   }catch(e){showToast(e.message,'error');}
 }
 
@@ -1332,17 +2051,27 @@ function copyInviteCode(){
 }
 
 function copyCode(code){
-  navigator.clipboard.writeText(code).then(()=>showToast('Codigo copiado!','success')).catch(()=>showToast('Erro ao copiar','error'));
+  navigator.clipboard.writeText(code).then(()=>showToast(t('code_copied'),'success')).catch(()=>showToast(t('copy_error'),'error'));
 }
 
 let panelLeagueId=null;
 
 async function openLeaguePanel(leagueId){
   panelLeagueId=leagueId;
+  // Auto-activate this league
+  if(curLeagueId!==leagueId) switchLeague(leagueId);
   const league=allLeagues.find(l=>l.id===leagueId);
-  document.getElementById('leaguePanelTitle').textContent='Gerenciar '+(league?league.name:'Liga');
-  document.getElementById('leaguePanelContent').innerHTML='<div style="text-align:center;padding:20px;color:var(--text-light)">Carregando...</div>';
-  openModal('leaguePanelModal');
+  // Hide other sections, show manage page
+  document.getElementById('leagueSelector').style.display='none';
+  document.getElementById('gamesSection').style.display='none';
+  const mp=document.getElementById('leagueManagePage');
+  mp.style.display='flex';
+  document.getElementById('managePageTitle').textContent=t('manage_league')+' - '+(league?league.name:'Liga');
+  const codeEl=document.getElementById('managePageCode');
+  const code=league?league.inviteCode:'';
+  if(code){codeEl.style.display='';codeEl.dataset.code=code;document.getElementById('managePageCodeText').textContent=code;}
+  else{codeEl.style.display='none';}
+  document.getElementById('managePageContent').innerHTML='<div style="text-align:center;padding:20px;color:var(--text-light)"><div class="spinner"></div></div>';
   try{
     const [details,requests]=await Promise.all([
       api('/user-leagues/'+leagueId),
@@ -1350,8 +2079,15 @@ async function openLeaguePanel(leagueId){
     ]);
     renderLeaguePanel(leagueId,details,requests,league);
   }catch(e){
-    document.getElementById('leaguePanelContent').innerHTML='<div style="text-align:center;padding:20px;color:var(--error)">Erro: '+e.message+'</div>';
+    document.getElementById('managePageContent').innerHTML='<div style="text-align:center;padding:20px;color:var(--error)">'+t('error_label')+': '+e.message+'</div>';
   }
+}
+
+function closeLeagueManagePage(){
+  document.getElementById('leagueManagePage').style.display='none';
+  document.getElementById('leagueSelector').style.display='flex';
+  document.getElementById('refreshBtn').style.display='none';
+  updateLeagueSelector();
 }
 
 function renderLeaguePanel(leagueId,details,requests,league){
@@ -1360,47 +2096,76 @@ function renderLeaguePanel(leagueId,details,requests,league){
   const code=league?league.inviteCode:'';
   let html='';
 
-  // Invite code
-  if(code){
-    html+='<div class="panel-section"><div class="panel-section-title">Codigo de Convite</div>'+
-      '<div class="panel-code-row"><div class="panel-code">'+code+'</div>'+
-      '<div class="panel-code-copy" onclick="copyCode(&quot;'+code+'&quot;)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div></div></div>';
+  // Invite code is now shown in the header bar
+
+  // Cashbox section (private leagues only)
+  if(!league?.isOfficial){
+    const cb=details.cashbox||0;
+    const cbInit=details.cashboxInitial||1;
+    const cbHealth=Math.min(100,Math.round((cb/cbInit)*100))||0;
+    const cbColor=cbHealth>50?'var(--success)':cbHealth>20?'var(--warning)':'var(--error)';
+    const isOpen=details.isOpen!==false;
+
+    html+='<div class="panel-section">';
+    html+='<div class="panel-section-title">Caixa da Liga '+(isOpen?'<span style="font-size:10px;color:var(--success);font-weight:400">Aberta</span>':'<span style="font-size:10px;color:var(--error);font-weight:400">Fechada - Reabastecer!</span>')+'</div>';
+
+    // Cashbox balance
+    html+='<div style="background:var(--card);border-radius:12px;padding:14px;margin-bottom:8px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html+='<span style="font-size:12px;color:var(--text-sec)">Saldo do Caixa</span>';
+    html+='<span style="font-size:18px;font-weight:700;color:'+cbColor+'">'+cb.toLocaleString('pt-BR')+' fichas</span>';
+    html+='</div>';
+
+    // Health bar
+    html+='<div style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">';
+    html+='<div style="width:'+cbHealth+'%;height:100%;background:'+cbColor+';border-radius:4px;transition:width 0.3s"></div>';
+    html+='</div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text-light)">';
+    html+='<span>Inicial: '+cbInit.toLocaleString('pt-BR')+'</span>';
+    html+='<span>'+cbHealth+'%</span>';
+    html+='</div></div>';
+
+    // Deposit / Withdraw buttons
+    html+='<div style="display:flex;gap:8px;margin-bottom:4px">';
+    html+='<button onclick="openCashboxDeposit('+leagueId+')" style="flex:1;background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Depositar</button>';
+    html+='<button onclick="openCashboxWithdraw('+leagueId+')" style="flex:1;background:transparent;color:var(--primary);border:1px solid var(--primary);border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Sacar</button>';
+    html+='</div></div>';
   }
 
   // Pending requests
-  html+='<div class="panel-section"><div class="panel-section-title">Solicitacoes Pendentes '+(pendingReqs.length?'<span style="background:var(--error);color:white;border-radius:10px;padding:2px 8px;font-size:11px">'+pendingReqs.length+'</span>':'<span style="font-weight:400;font-size:11px;color:var(--text-light)">nenhuma</span>')+'</div>';
+  html+='<div class="panel-section"><div class="panel-section-title">'+t('pending_requests')+' '+(pendingReqs.length?'<span style="background:var(--error);color:white;border-radius:10px;padding:2px 8px;font-size:11px">'+pendingReqs.length+'</span>':'<span style="font-weight:400;font-size:11px;color:var(--text-light)">'+t('none_lbl')+'</span>')+'</div>';
   if(pendingReqs.length){
     pendingReqs.forEach(r=>{
-      const rName=r.userName||'Jogador';
+      const rName=r.userName||t('player');
       html+='<div class="panel-member"><div class="panel-member-av">'+rName[0].toUpperCase()+'</div>'+
         '<div class="panel-member-info"><div class="panel-member-name">'+rName+'</div>'+
-        '<div class="panel-member-sub">Aguardando aprovacao</div></div>'+
+        '<div class="panel-member-sub">'+t('awaiting_approval')+'</div></div>'+
         '<div class="panel-member-actions">'+
-        '<button class="panel-btn panel-btn-approve" onclick="handleApproveReq('+leagueId+','+r.id+')">Aprovar</button>'+
-        '<button class="panel-btn panel-btn-reject" onclick="handleRejectReq('+leagueId+','+r.id+')">Rejeitar</button>'+
+        '<button class="panel-btn panel-btn-approve" onclick="handleApproveReq('+leagueId+','+r.id+')">'+t('approve')+'</button>'+
+        '<button class="panel-btn panel-btn-reject" onclick="handleRejectReq('+leagueId+','+r.id+')">'+t('reject_btn')+'</button>'+
         '</div></div>';
     });
   }
   html+='</div>';
 
   // Members
-  html+='<div class="panel-section"><div class="panel-section-title">Membros ('+members.length+')</div>';
+  html+='<div class="panel-section"><div class="panel-section-title">'+t('members')+' ('+members.length+')</div>';
   if(!members.length){
-    html+='<div style="text-align:center;padding:12px;color:var(--text-light);font-size:12px">Nenhum membro ainda. Compartilhe o codigo!</div>';
+    html+='<div style="text-align:center;padding:12px;color:var(--text-light);font-size:12px">'+t('no_members_yet')+'</div>';
   }
   members.forEach(m=>{
     const isMe=m.userId===user?.id;
-    const mName=m.name||'Jogador';
+    const mName=m.name||t('player');
     const mBal=(m.balance||0).toLocaleString('pt-BR');
-    const roleLabel=m.role==='OWNER'?'Dono':m.role==='ADMIN'?'Admin':'Membro';
+    const roleLabel=m.role==='OWNER'?t('owner'):m.role==='ADMIN'?t('admin'):t('member');
     html+='<div class="panel-member"><div class="panel-member-av">'+mName[0].toUpperCase()+'</div>'+
-      '<div class="panel-member-info"><div class="panel-member-name">'+mName+(isMe?' (voce)':'')+'</div>'+
-      '<div class="panel-member-sub">Saldo: '+mBal+' pts · '+roleLabel+'</div></div>';
+      '<div class="panel-member-info"><div class="panel-member-name">'+mName+(isMe?' ('+t('you_label')+')':'')+'</div>'+
+      '<div class="panel-member-sub">'+t('balance')+': '+mBal+' pts · '+roleLabel+'</div></div>';
     if(!isMe){
       html+='<div class="panel-member-actions" style="flex-direction:column;gap:3px">'+
-        '<button class="panel-btn panel-btn-send" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;send&quot;)">+ Enviar</button>'+
-        '<button class="panel-btn panel-btn-reject" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;withdraw&quot;)">- Retirar</button>'+
-        '<button class="panel-btn panel-btn-remove" onclick="handleRemoveMember('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">Remover</button>'+
+        '<button class="panel-btn panel-btn-send" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;send&quot;)">'+t('send_btn')+'</button>'+
+        '<button class="panel-btn panel-btn-reject" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;withdraw&quot;)">'+t('withdraw_btn')+'</button>'+
+        '<button class="panel-btn panel-btn-remove" onclick="handleRemoveMember('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">'+t('remove')+'</button>'+
         '</div>';
     }
     html+='</div>';
@@ -1408,16 +2173,15 @@ function renderLeaguePanel(leagueId,details,requests,league){
   html+='</div>';
 
   // Info box
-  html+='<div style="padding:10px 14px;background:rgba(107,142,118,0.06);border-radius:10px;font-size:11px;color:var(--text-light);line-height:1.5">'+
-    '<b>Como funciona:</b> Membros iniciam com saldo 0. Voce pode enviar saldo para eles ou eles podem comprar diamantes na loja e converter em saldo para esta liga.</div>';
+  // Removed "how it works" message
 
-  document.getElementById('leaguePanelContent').innerHTML=html;
+  document.getElementById('managePageContent').innerHTML=html;
 }
 
 async function handleApproveReq(leagueId,reqId){
   try{
     await api('/user-leagues/'+leagueId+'/requests/'+reqId+'/approve',{method:'POST'});
-    showToast('Aprovado!','success');
+    showToast(t('approved'),'success');
     openLeaguePanel(leagueId);
     loadLeagues();
   }catch(e){showToast(e.message,'error');}
@@ -1426,7 +2190,7 @@ async function handleApproveReq(leagueId,reqId){
 async function handleRejectReq(leagueId,reqId){
   try{
     await api('/user-leagues/'+leagueId+'/requests/'+reqId+'/reject',{method:'POST'});
-    showToast('Rejeitado','success');
+    showToast(t('rejected'),'success');
     openLeaguePanel(leagueId);
   }catch(e){showToast(e.message,'error');}
 }
@@ -1438,22 +2202,21 @@ function openBalanceAction(leagueId,targetUserId,targetName,actionType){
   balActionTargetId=targetUserId;
   balActionType=actionType;
   const isSend=actionType==='send';
-  document.getElementById('balActionTitle').textContent=isSend?'Enviar Saldo':'Retirar Saldo';
+  document.getElementById('balActionTitle').textContent=isSend?t('send_balance'):t('withdraw_balance');
   document.getElementById('balActionTarget').textContent=targetName;
-  document.getElementById('balActionBtn').textContent=isSend?'Enviar':'Retirar';
+  document.getElementById('balActionBtn').textContent=isSend?t('send'):t('withdraw_balance').split(' ')[0];
   document.getElementById('balActionBtn').style.background=isSend?'var(--primary)':'var(--error)';
   document.getElementById('balActionAmount').value='';
-  closeAllModals();
-  setTimeout(()=>openModal('balanceActionModal'),100);
+  openModal('balanceActionModal');
 }
 
 async function handleBalanceAction(){
   const amt=parseInt(document.getElementById('balActionAmount').value);
-  if(!amt||amt<1){showToast('Digite um valor valido','error');return;}
+  if(!amt||amt<1){showToast(t('enter_valid_value'),'error');return;}
   const endpoint=balActionType==='send'?'send-balance':'withdraw-balance';
   try{
     await api('/user-leagues/'+balActionLeagueId+'/'+endpoint,{method:'POST',body:JSON.stringify({targetUserId:balActionTargetId,amount:amt})});
-    showToast(amt+' pontos '+(balActionType==='send'?'enviados':'retirados')+'!','success');
+    showToast(amt+' '+(balActionType==='send'?t('points_sent'):t('points_withdrawn'))+'!','success');
     closeAllModals();
     loadLeagues();
     setTimeout(()=>openLeaguePanel(balActionLeagueId),300);
@@ -1461,44 +2224,151 @@ async function handleBalanceAction(){
 }
 
 async function handleRemoveMember(leagueId,targetUserId,name){
-  if(!confirm('Remover '+name+' da liga?'))return;
+  if(!confirm(t('remove_confirm')+' '+name+'?'))return;
   try{
     await api('/user-leagues/'+leagueId+'/members/'+targetUserId,{method:'DELETE'});
-    showToast(name+' removido','success');
+    showToast(name+' '+t('removed'),'success');
     openLeaguePanel(leagueId);
     loadLeagues();
   }catch(e){showToast(e.message,'error');}
 }
 
+function openDiamondConvertScreen(){ showDiamondStore(); }
+
 async function showDiamondStore(){
-  const packages=[
-    {id:1,name:'Starter',diamonds:100,price:'R$ 9,90'},
-    {id:2,name:'Popular',diamonds:500,price:'R$ 39,90'},
-    {id:3,name:'Pro',diamonds:1200,price:'R$ 79,90'},
-    {id:4,name:'VIP',diamonds:3000,price:'R$ 179,90'}
-  ];
-  document.getElementById('diamondPackagesContent').innerHTML=packages.map(p=>'<div class="diamond-package"><div class="dp-name">'+p.name+'</div><div class="dp-diamonds">'+p.diamonds+' 💎</div><div class="dp-price">'+p.price+'</div><button class="dp-btn" onclick="handleDiamondPurchase('+p.id+','+p.diamonds+')">Comprar</button></div>').join('');
-  document.getElementById('diamondConvertContent').style.display='none';
+  let packages;
+  try{
+    packages=await api('/diamonds/packages');
+  }catch{
+    packages=[
+      {id:'starter',name:'Starter',diamonds:100,priceFormatted:'R$ 4,90'},
+      {id:'popular',name:'Popular',diamonds:500,priceFormatted:'R$ 19,90'},
+      {id:'pro',name:'Pro',diamonds:1200,priceFormatted:'R$ 39,90'},
+      {id:'vip',name:'VIP',diamonds:3000,priceFormatted:'R$ 79,90'}
+    ];
+  }
+  document.getElementById('diamondPackagesContent').innerHTML=packages.map(p=>{
+    const price=p.priceFormatted||('R$ '+((p.priceBRL||0).toFixed(2).replace('.',',')));
+    return '<div class="diamond-package"><div class="dp-name">'+p.name+'</div><div class="dp-diamonds">'+p.diamonds+' 💎</div><div class="dp-price">'+price+'</div><button class="dp-btn" onclick="handleDiamondPurchase(\''+p.id+'\','+p.diamonds+')">'+t('buy')+'</button></div>';
+  }).join('');
+  const cvt=document.getElementById('diamondConvertContent');
+  if(userDiamondsCount>0&&curLeagueId){
+    pendingDiamonds=userDiamondsCount;
+    const leagueName=curLeague?(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name):'Liga';
+    cvt.style.display='block';
+    cvt.innerHTML=''
+      +'<div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:4px">💎 '+userDiamondsCount.toLocaleString('pt-BR')+' '+t('diamonds_available')+'</div>'
+      +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:14px">'+t('convert_league_balance')+' <b style="color:var(--primary)">'+leagueName+'</b></div>'
+      +'<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:14px">'
+      +'<input type="number" id="convertAmount" value="'+userDiamondsCount+'" min="1" max="'+userDiamondsCount+'" style="width:110px;height:42px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:0 12px;font-size:16px;color:var(--text);font-family:inherit;text-align:center">'
+      +'<span style="color:var(--text-sec);font-size:13px">'+t('diamonds')+'</span>'
+      +'<button onclick="document.getElementById(\'convertAmount\').value='+userDiamondsCount+'" style="padding:8px 12px;background:rgba(196,149,106,0.15);border:1px solid var(--primary);border-radius:var(--radius-xs);color:var(--primary);font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">MAX</button>'
+      +'</div>'
+      +'<button class="btn btn-primary" style="background:var(--success);width:100%;padding:14px;font-size:15px" onclick="handleConvertDiamonds()">'+t('convert_to_balance')+'</button>';
+  } else {
+    cvt.style.display='none';
+  }
   openModal('diamondStoreModal');
 }
 
 async function handleDiamondPurchase(pkgId,diamonds){
   try{
-    await api('/diamonds/purchase',{method:'POST',body:JSON.stringify({packageId:pkgId,platform:'web'})});
-    pendingDiamonds=diamonds;
+    // Simulate store receipt for development
+    const fakeReceipt='SIM-'+Date.now()+'-'+Math.random().toString(36).substring(2,10);
+    const res=await api('/diamonds/purchase',{method:'POST',body:JSON.stringify({
+      packageId:pkgId,
+      platform:'google_play',
+      storeReceipt:fakeReceipt
+    })});
+    console.log('[DIAMOND] Purchase result:',JSON.stringify(res));
+    if(res&&res.status==='VERIFIED'){
+      pendingDiamonds=diamonds;
+    } else {
+      pendingDiamonds=diamonds; // still show convert UI, diamonds may arrive later
+    }
+    await loadBalance();
     document.getElementById('diamondConvertContent').style.display='block';
+    const cvtText=document.getElementById('diamondConvertContent');
+    if(cvtText){
+      // In private leagues, only owner can convert diamonds to balance
+      const canConvert = !curLeague || curLeague.isOfficial || curLeague.role==='OWNER';
+      let buttonsHtml='<div style="display:flex;flex-direction:column;gap:12px">';
+      if(canConvert){
+        buttonsHtml+='<button class="btn btn-primary" style="background:var(--success);width:100%;padding:14px;font-size:15px" onclick="showDiamondConvertUI('+diamonds+')">💰 '+t('convert_to_balance')+'</button>';
+      }
+      buttonsHtml+='<button class="btn btn-primary" style="background:var(--primary);width:100%;padding:14px;font-size:15px" onclick="goToLeaguesForUpgrade()">⚡ '+t('use_for_upgrades')+'</button>';
+      buttonsHtml+='</div>';
+      cvtText.innerHTML='<div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:8px">'+diamonds+' '+t('diamonds_added')+'</div>'
+        +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:16px">'+t('choose_diamond_use')+'</div>'
+        +buttonsHtml;
+    }
+    showToast(diamonds+' '+t('diamonds_bought'),'success');
   }catch(e){showToast(e.message,'error');}
 }
 
 async function handleConvertDiamonds(){
-  if(!curLeagueId||!pendingDiamonds)return;
+  if(!curLeagueId){showToast(t('select_league_first'),'error');return;}
+  // Block conversion in private leagues for non-owners
+  if(curLeague && !curLeague.isOfficial && curLeague.role!=='OWNER'){
+    showToast('Em ligas privadas, apenas o dono pode converter diamantes em saldo.','error');return;
+  }
+  const convertInput=document.getElementById('convertAmount');
+  const amount=convertInput?parseInt(convertInput.value)||0:pendingDiamonds;
+  if(amount<1){showToast(t('enter_amount'),'error');return;}
+  if(amount>pendingDiamonds){showToast(t('you_only_have')+' '+pendingDiamonds+' '+t('diamonds'),'error');return;}
+  // Disable button while processing
+  const btn=document.querySelector('#diamondConvertContent button');
+  if(btn){btn.disabled=true;btn.textContent=t('converting');}
   try{
-    await api('/diamonds/convert-to-league',{method:'POST',body:JSON.stringify({leagueId:curLeagueId,diamonds:pendingDiamonds})});
-    pendingDiamonds=0;
-    closeAllModals();
+    console.log('[DIAMOND] Converting:',amount,'diamonds to league',curLeagueId);
+    const payload={leagueId:parseInt(curLeagueId),diamonds:parseInt(amount)};
+    console.log('[DIAMOND] Payload:',JSON.stringify(payload));
+    const res=await api('/diamonds/convert-to-league',{method:'POST',body:JSON.stringify(payload)});
+    console.log('[DIAMOND] Convert result:',JSON.stringify(res));
+    pendingDiamonds=pendingDiamonds-amount;
     await loadBalance();
-    showToast('Diamantes convertidos!','success');
-  }catch(e){showToast(e.message,'error');}
+    if(pendingDiamonds>0){
+      const cvt=document.getElementById('diamondConvertContent');
+      if(cvt) cvt.innerHTML='<div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:8px">'+t('converted_remaining')+' '+pendingDiamonds+' '+t('diamonds')+'</div>'
+        +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:12px">'+t('convert_more')+(curLeague?' ('+( curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name)+')':'')+'</div>'
+        +'<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px">'
+        +'<input type="number" id="convertAmount" value="'+pendingDiamonds+'" min="1" max="'+pendingDiamonds+'" style="width:100px;height:38px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:0 10px;font-size:14px;color:var(--text);font-family:inherit;text-align:center">'
+        +'<span style="color:var(--text-sec);font-size:13px">'+t('diamonds')+'</span>'
+        +'</div>'
+        +'<button class="btn btn-primary" style="background:var(--success);width:100%" onclick="handleConvertDiamonds()">'+t('convert_to_balance')+'</button>';
+    } else {
+      closeAllModals();
+    }
+    showToast(amount+' '+t('diamonds_converted'),'success');
+  }catch(e){
+    console.error('[DIAMOND] Convert error:',e);
+    showToast(t('error_convert')+': '+(e.message||t('try_again')),'error');
+    if(btn){btn.disabled=false;btn.textContent=t('convert_to_balance');}
+  }
+}
+
+function showDiamondConvertUI(diamonds){
+  // Block conversion in private leagues for non-owners
+  const canConvert = !curLeague || curLeague.isOfficial || curLeague.role==='OWNER';
+  if(!canConvert){
+    showToast('Em ligas privadas, apenas o dono pode converter diamantes em saldo.','error');
+    return;
+  }
+  const cvt=document.getElementById('diamondConvertContent');
+  if(cvt){
+    cvt.innerHTML='<div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:8px">'+diamonds+' '+t('diamonds_added')+'</div>'
+      +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:12px">'+t('now_convert')+(curLeague?' ('+(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name)+')':'')+'</div>'
+      +'<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:12px">'
+      +'<input type="number" id="convertAmount" value="'+diamonds+'" min="1" max="'+diamonds+'" style="width:100px;height:38px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:0 10px;font-size:14px;color:var(--text);font-family:inherit;text-align:center">'
+      +'<span style="color:var(--text-sec);font-size:13px">'+t('diamonds')+'</span>'
+      +'</div>'
+      +'<button class="btn btn-primary" style="background:var(--success);width:100%" onclick="handleConvertDiamonds()">'+t('convert_to_balance')+'</button>';
+  }
+}
+
+function goToLeaguesForUpgrade(){
+  closeAllModals();
+  switchTab('leagues');
 }
 
 function openModal(id){
@@ -1512,8 +2382,54 @@ function closeAllModals(){
 }
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function updateGreeting(){const h=new Date().getHours(),g=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';document.getElementById('greetingText').textContent=g+', '+(user?.name?.split(' ')[0]||'Jogador')+'!';document.getElementById('headerAvatar').textContent=((user?.name||'U')[0]).toUpperCase();}
-function handleLogout(){token=null;user=null;fixtures=[];bets=[];selections=[];curLeagueId=null;curLeague=null;allLeagues=[];showScreen('loginScreen');showToast('Ate logo!','success');}
+function updateGreeting(){document.getElementById('greetingText').textContent=t('hello')+', '+(user?.name?.split(' ')[0]||t('player'))+'!';}
+function renderProfile(){
+  const c=document.getElementById('mainContent');
+  const pts=document.getElementById('userPoints').textContent,dia=userDiamondsCount.toLocaleString('pt-BR');
+  c.innerHTML='<div class="profile-top"><div class="profile-av">'+((user?.name||'U')[0]).toUpperCase()+'</div><div class="pt-name">'+(user?.name||'Jogador')+'</div><div class="pt-email">'+(user?.email||'')+'</div></div><div class="stats-row"><div class="stat-box"><div class="sb-val">'+pts+'</div><div class="sb-lbl">'+t('balance')+'</div></div><div class="stat-box"><div class="sb-val">'+dia+'</div><div class="sb-lbl">'+t('diamonds')+'</div></div><div class="stat-box"><div class="sb-val">'+bets.length+'</div><div class="sb-lbl">'+t('tab_bets')+'</div></div><div class="stat-box"><div class="sb-val">1</div><div class="sb-lbl">'+t('active_days')+'</div></div></div>'
+    +'<div style="margin:16px 0 8px;font-size:11px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:0.5px">'+t('language')+'</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px">'
+    +'<button onclick="setAppLang(\'pt\')" class="lang-btn'+(appLang==='pt'?' active':'')+'">Português</button>'
+    +'<button onclick="setAppLang(\'en\')" class="lang-btn'+(appLang==='en'?' active':'')+'">English</button>'
+    +'<button onclick="setAppLang(\'es\')" class="lang-btn'+(appLang==='es'?' active':'')+'">Español</button>'
+    +'</div>'
+    +'<div class="menu-row" onclick="showDiamondStore()"><span class="mr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span class="mr-label">'+t('diamond_store')+'</span><span class="mr-arrow">›</span></div><div class="menu-row" onclick="showToast(t(\'soon\'),\'success\')"><span class="mr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span><span class="mr-label">'+t('achievements')+'</span><span class="mr-arrow">›</span></div><div class="menu-row" onclick="handleLogout()"><span class="mr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="mr-label" style="color:var(--error)">'+t('logout')+'</span><span class="mr-arrow">›</span></div>';
+}
+
+function setAppLang(lang){
+  console.log('[LANG] Setting language to:', lang);
+  appLang=lang;
+  try{localStorage.setItem('appLang',lang);}catch(e){console.error('[LANG] localStorage error:',e);}
+  // 1. Update all static data-i18n elements (tabs, headers, labels)
+  try{applyTranslations();}catch(e){console.error('[LANG] applyTranslations error:',e);}
+  // 2. Update greeting text
+  try{updateGreeting();}catch(e){}
+  // 3. Re-render current active tab content
+  try{
+    const activeTab=document.querySelector('.tab.active');
+    const activeTabName=activeTab?activeTab.getAttribute('onclick'):'';
+    // Determine which view is active and re-render it
+    if(activeTabName.includes('perfil')){
+      renderProfile();
+    } else if(activeTabName.includes('apostas')){
+      // Re-render bets by re-calling switchTab
+      switchTab('apostas',activeTab);
+    } else if(activeTabName.includes('ranking')){
+      switchTab('ranking',activeTab);
+    } else if(activeTabName.includes('explorar')){
+      // Re-render fixtures if on games screen
+      try{renderFixtures();}catch(e){}
+    } else {
+      // On leagues tab, re-render league selector
+      try{updateLeagueSelector();}catch(e){}
+    }
+  }catch(e){console.error('[LANG] re-render error:',e);}
+  // 4. Re-render profile since we're on it
+  try{renderProfile();}catch(e){}
+  showToast(lang==='pt'?'Idioma: Português':lang==='en'?'Language: English':'Idioma: Español','success');
+}
+
+function handleLogout(){token=null;user=null;fixtures=[];bets=[];selections=[];curLeagueId=null;curLeague=null;allLeagues=[];showScreen('loginScreen');showToast(t('see_you'),'success');}
 function showToast(m,t){const el=document.getElementById('toast');el.className='toast '+t;el.textContent=m;setTimeout(()=>{el.className='toast';},3000);}
 </script>
 </body>

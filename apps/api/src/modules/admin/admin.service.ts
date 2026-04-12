@@ -197,7 +197,23 @@ export class AdminService {
       where: { id: userId },
       include: {
         balance: true,
-        bets: { take: 20, orderBy: { createdAt: 'desc' }, include: { fixture: { select: { homeTeam: true, awayTeam: true } } } },
+        bets: {
+          take: 20,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            fixture: {
+              select: {
+                homeTeam: true,
+                awayTeam: true,
+                scoreHome: true,
+                scoreAway: true,
+                startAt: true,
+                status: true,
+                leagueName: true,
+              },
+            },
+          },
+        },
         transactions: { take: 20, orderBy: { createdAt: 'desc' } },
         purchases: { take: 10, orderBy: { createdAt: 'desc' } },
         achievements: { include: { achievement: true } },
@@ -352,11 +368,18 @@ export class AdminService {
 
   // ─── Fixture Management ────────────────────────────────────────────────
 
-  async getFixtureManagement(page = 1, limit = 25) {
+  async getFixtureManagement(page = 1, limit = 25, sportKey?: string, filter?: string) {
     const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (sportKey) where.sportKey = sportKey;
+    if (filter === 'live') where.status = { in: ['FIRST_HALF', 'SECOND_HALF', 'HALFTIME', 'EXTRA_TIME', 'PENALTIES', 'QUARTER_1', 'QUARTER_2', 'QUARTER_3', 'QUARTER_4', 'OVERTIME', 'SET_1', 'SET_2', 'SET_3', 'SET_4', 'SET_5', 'ROUND_1', 'ROUND_2', 'ROUND_3', 'ROUND_4', 'ROUND_5', 'IN_PROGRESS'] };
+    else if (filter === 'upcoming') where.status = 'NOT_STARTED';
+    else if (filter === 'finished') where.status = { in: ['FINISHED', 'CANCELLED', 'POSTPONED'] };
 
     const [fixtures, total] = await Promise.all([
       this.prisma.fixture.findMany({
+        where,
         include: {
           _count: { select: { bets: true, markets: true } },
         },
@@ -364,13 +387,14 @@ export class AdminService {
         take: limit,
         skip,
       }),
-      this.prisma.fixture.count(),
+      this.prisma.fixture.count({ where }),
     ]);
 
     return {
       data: fixtures.map((f) => ({
         id: f.id,
         apiFootballId: f.apiFootballId,
+        sportKey: f.sportKey,
         homeTeam: f.homeTeam,
         awayTeam: f.awayTeam,
         leagueName: f.leagueName,
@@ -381,6 +405,46 @@ export class AdminService {
         isSettled: f.isSettled,
         totalBets: f._count.bets,
         totalMarkets: f._count.markets,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // ─── Leagues ───────────────────────────────────────────────────────────
+
+  async getPrivateLeagues(page = 1, limit = 25) {
+    const skip = (page - 1) * limit;
+
+    const [leagues, total] = await Promise.all([
+      this.prisma.league.findMany({
+        where: { isOfficial: false },
+        include: {
+          owner: { select: { name: true, email: true } },
+          _count: { select: { members: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      this.prisma.league.count({ where: { isOfficial: false } }),
+    ]);
+
+    return {
+      data: leagues.map((l) => ({
+        id: l.id,
+        name: l.name,
+        inviteCode: l.inviteCode,
+        cashbox: l.cashbox,
+        cashboxInitial: l.cashboxInitial,
+        cashboxMinAlert: l.cashboxMinAlert,
+        isOpen: l.isOpen,
+        ownerName: l.owner?.name || '—',
+        ownerEmail: l.owner?.email || '—',
+        memberCount: l._count.members,
+        createdAt: l.createdAt,
       })),
       total,
       page,

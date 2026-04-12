@@ -8,10 +8,13 @@ interface User {
   name: string;
   email: string;
   phone: string;
-  role: string;
-  phoneVerified: boolean;
-  blocked: boolean;
+  role?: string;
+  phoneVerified?: boolean;
+  isVerified?: boolean;
+  blocked?: boolean;
   createdAt: string;
+  points?: number;
+  diamonds?: number;
   balance?: { points: number; diamonds: number };
 }
 
@@ -44,10 +47,12 @@ export default function CRMPage() {
     try {
       const params: any = { page, limit };
       if (search) params.search = search;
-      const { data } = await api.get('/admin/users', { params });
-      const res = data.data || data;
-      setUsers(res.users || res.items || []);
-      setTotal(res.total || 0);
+      const { data: axiosData } = await api.get('/admin/users', { params });
+      // API: { success, data: { data: [...], total, totalPages } }
+      const wrapped = axiosData.data || axiosData;
+      const list = wrapped.data || wrapped.users || wrapped.items || wrapped;
+      setUsers(Array.isArray(list) ? list : []);
+      setTotal(wrapped.total || 0);
     } catch {
       // silent
     } finally {
@@ -110,8 +115,8 @@ export default function CRMPage() {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-  const formatCurrency = (v: number) =>
-    v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatCurrency = (v: number | undefined | null) =>
+    (v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
     <div>
@@ -165,12 +170,12 @@ export default function CRMPage() {
                   <td className="px-4 py-3 text-gray-600">{user.email}</td>
                   <td className="px-4 py-3 text-gray-600">{user.phone}</td>
                   <td className="px-4 py-3 text-center font-medium text-brand-700">
-                    {(user.balance?.points || 0).toLocaleString('pt-BR')}
+                    {(user.points ?? user.balance?.points ?? 0).toLocaleString('pt-BR')}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {user.blocked ? (
                       <span className="inline-block px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">Bloqueado</span>
-                    ) : user.phoneVerified ? (
+                    ) : (user.isVerified ?? user.phoneVerified) ? (
                       <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Ativo</span>
                     ) : (
                       <span className="inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Pendente</span>
@@ -364,51 +369,116 @@ export default function CRMPage() {
                       {(selectedUser.bets || []).length === 0 ? (
                         <p className="text-center text-gray-400 py-8">Nenhuma aposta encontrada</p>
                       ) : (
-                        selectedUser.bets.map((bet: any, i: number) => (
-                          <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {bet.odd?.fixture?.homeTeam || 'Time A'} vs {bet.odd?.fixture?.awayTeam || 'Time B'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {bet.odd?.name || bet.marketType} | Odd: {bet.oddValue}
-                              </p>
+                        selectedUser.bets.map((bet: any, i: number) => {
+                          const fix = bet.fixture || bet.odd?.fixture;
+                          const home = fix?.homeTeam || '—';
+                          const away = fix?.awayTeam || '—';
+                          const sH = fix?.scoreHome;
+                          const sA = fix?.scoreAway;
+                          const score = sH != null && sA != null ? `${sH} x ${sA}` : null;
+                          const league = fix?.leagueName;
+                          const betDate = bet.createdAt ? new Date(bet.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                          const matchDate = fix?.startAt ? new Date(fix.startAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+
+                          return (
+                            <div key={i} className="bg-gray-50 rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {home} vs {away}
+                                  {score && <span className="ml-2 text-xs font-bold text-brand-700">({score})</span>}
+                                </p>
+                                <div className="text-right">
+                                  <p className="text-sm font-bold text-gray-900">{bet.amount} pts</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs text-gray-500">
+                                  {league && <span>{league} · </span>}
+                                  {matchDate && <span>Jogo: {matchDate} · </span>}
+                                  <span>Aposta: {betDate}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-500">Odd: {bet.oddValue}</span>
+                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                    bet.status === 'WON' ? 'bg-green-100 text-green-700' :
+                                    bet.status === 'LOST' ? 'bg-red-100 text-red-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                    {bet.status === 'WON' ? 'Ganhou' : bet.status === 'LOST' ? 'Perdeu' : bet.status === 'PENDING' ? 'Pendente' : bet.status}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm font-bold text-gray-900">{bet.amount} pts</p>
-                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                bet.status === 'WON' ? 'bg-green-100 text-green-700' :
-                                bet.status === 'LOST' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'
-                              }`}>
-                                {bet.status}
-                              </span>
-                            </div>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   )}
 
-                  {detailTab === 'transactions' && (
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {(selectedUser.transactions || []).length === 0 ? (
-                        <p className="text-center text-gray-400 py-8">Nenhuma transacao encontrada</p>
-                      ) : (
-                        selectedUser.transactions.map((tx: any, i: number) => (
-                          <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{tx.type}</p>
-                              <p className="text-xs text-gray-500">{tx.description || '-'}</p>
+                  {detailTab === 'transactions' && (() => {
+                    const txs = (selectedUser.transactions || []).map((tx: any) => ({
+                      type: tx.type,
+                      description: tx.description || '-',
+                      amount: tx.amount,
+                      currency: 'pts',
+                      date: tx.createdAt,
+                      status: null,
+                    }));
+                    const purchases = (selectedUser.purchases || []).map((p: any) => ({
+                      type: 'COMPRA_DIAMANTES',
+                      description: `Pacote ${p.packageId} — ${p.diamonds} diamantes (${p.platform || 'app'})`,
+                      amount: parseFloat(p.priceBrl) || 0,
+                      currency: 'BRL',
+                      date: p.createdAt,
+                      status: p.status,
+                    }));
+                    const all = [...txs, ...purchases].sort((a, b) =>
+                      new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+                    );
+
+                    return (
+                      <div className="space-y-2 max-h-80 overflow-y-auto">
+                        {all.length === 0 ? (
+                          <p className="text-center text-gray-400 py-8">Nenhuma transacao encontrada</p>
+                        ) : (
+                          all.map((tx, i) => (
+                            <div key={i} className="bg-gray-50 rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-sm font-medium text-gray-900">{tx.type}</p>
+                                <div className="flex items-center gap-2">
+                                  {tx.status && (
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                      tx.status === 'VERIFIED' ? 'bg-green-100 text-green-700' :
+                                      tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                      'bg-red-100 text-red-700'
+                                    }`}>
+                                      {tx.status === 'VERIFIED' ? 'Verificado' : tx.status === 'PENDING' ? 'Pendente' : tx.status}
+                                    </span>
+                                  )}
+                                  <p className={`text-sm font-bold ${
+                                    tx.currency === 'BRL' ? 'text-cyan-600' :
+                                    tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                                  }`}>
+                                    {tx.currency === 'BRL'
+                                      ? `R$ ${tx.amount.toFixed(2)}`
+                                      : `${tx.amount > 0 ? '+' : ''}${(tx.amount ?? 0).toLocaleString('pt-BR')} pts`}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-gray-500">{tx.description}</p>
+                                {tx.date && (
+                                  <p className="text-xs text-gray-400">
+                                    {new Date(tx.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                            <p className={`text-sm font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString('pt-BR')}
-                            </p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
+                          ))
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {detailTab === 'achievements' && (
                     <div className="grid grid-cols-2 gap-3">

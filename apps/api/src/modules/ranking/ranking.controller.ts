@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RankingService } from './ranking.service';
@@ -34,5 +34,15 @@ export class RankingController {
   @ApiOperation({ summary: 'Current user position and stats' })
   async getMyPosition(@CurrentUser('userId') userId: number) {
     return this.rankingService.getUserPosition(userId);
+  }
+
+  @Get('league/:leagueId')
+  @ApiOperation({ summary: 'Ranking by league' })
+  @ApiQuery({ name: 'limit', required: false, example: 50 })
+  async getLeagueRanking(
+    @Param('leagueId', ParseIntPipe) leagueId: number,
+    @Query('limit') limit?: string,
+  ) {
+    return this.rankingService.getLeagueRanking(leagueId, limit ? parseInt(limit) : 50);
   }
 }

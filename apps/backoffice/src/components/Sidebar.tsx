@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: 'Jogos / Fixtures', href: '/dashboard/fixtures', icon: '⚽' },
   { label: 'Modalidades', href: '/dashboard/sports', icon: '🎯' },
   { label: 'Ligas', href: '/dashboard/leagues', icon: '🏆' },
+  { label: 'Ligas Privadas', href: '/dashboard/private-leagues', icon: '🎲' },
   { label: 'Configuracoes', href: '/dashboard/settings', icon: '⚙' },
   { label: 'Audit Log', href: '/dashboard/audit', icon: '⎔' },
 ];

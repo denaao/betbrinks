@@ -186,6 +186,55 @@ export class RankingService {
     };
   }
 
+  // ─── League Ranking ────────────────────────────────────────────────────
+
+  async getLeagueRanking(leagueId: number, limit = 50): Promise<RankingEntry[]> {
+    const cacheKey = `ranking:league:${leagueId}`;
+    const cached = await this.redis.getJson<RankingEntry[]>(cacheKey);
+    if (cached) return cached;
+
+    const members = await this.prisma.leagueMember.findMany({
+      where: { leagueId, status: 'ACTIVE' },
+      include: {
+        user: { select: { id: true, name: true, avatarUrl: true, level: true } },
+      },
+    });
+
+    const ranking: RankingEntry[] = [];
+    for (const m of members) {
+      const balance = await this.prisma.leagueBalance.findUnique({
+        where: { leagueId_userId: { leagueId, userId: m.user.id } },
+      });
+
+      const [won, total] = await Promise.all([
+        this.prisma.bet.count({
+          where: { userId: m.user.id, status: 'WON', betSlip: { leagueId } },
+        }),
+        this.prisma.bet.count({
+          where: { userId: m.user.id, status: { in: ['WON', 'LOST'] }, betSlip: { leagueId } },
+        }),
+      ]);
+
+      ranking.push({
+        position: 0,
+        userId: m.user.id,
+        name: m.user.name,
+        avatarUrl: m.user.avatarUrl,
+        level: m.user.level,
+        points: balance?.balance ?? 0,
+        wonBets: won,
+        winRate: total > 0 ? Math.round((won / total) * 100) : 0,
+      });
+    }
+
+    ranking.sort((a, b) => b.points - a.points);
+    ranking.forEach((r, i) => r.position = i + 1);
+
+    const result = ranking.slice(0, limit);
+    await this.redis.setJson(cacheKey, result, 300);
+    return result;
+  }
+
   // ─── Cron: Invalidate Cache ────────────────────────────────────────────
 
   @Cron(CronExpression.EVERY_10_MINUTES)

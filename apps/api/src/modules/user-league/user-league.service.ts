@@ -24,10 +24,10 @@ export class UserLeagueService {
     private redis: RedisService,
   ) {}
 
-  // ─── Liga Oficial ──────────────────────────────────────────────────────
+  // ─── Liga BetBrincadeira ──────────────────────────────────────────────────────
 
   /**
-   * Find or create the Liga Oficial (singleton)
+   * Find or create the Liga BetBrincadeira (singleton)
    */
   async getOrCreateLigaOficial() {
     const cacheKey = 'liga_oficial:id';
@@ -45,13 +45,18 @@ export class UserLeagueService {
     if (!ligaOficial) {
       ligaOficial = await this.prisma.league.create({
         data: {
-          name: 'Liga Oficial',
+          name: 'Liga BetBrincadeira',
           inviteCode: 'OFICIAL',
           isOfficial: true,
           ownerId: null,
         },
       });
-      this.logger.log(`Created Liga Oficial with ID ${ligaOficial.id}`);
+      this.logger.log(`Created Liga BetBrincadeira with ID ${ligaOficial.id}`);
+    } else if (ligaOficial.name !== 'Liga BetBrincadeira') {
+      ligaOficial = await this.prisma.league.update({
+        where: { id: ligaOficial.id },
+        data: { name: 'Liga BetBrincadeira' },
+      });
     }
 
     // Cache for 24 hours
@@ -63,10 +68,10 @@ export class UserLeagueService {
   // ─── User's Leagues ────────────────────────────────────────────────────
 
   /**
-   * Get all leagues user belongs to (Liga Oficial first, then private by name)
+   * Get all leagues user belongs to (Liga BetBrincadeira first, then private by name)
    */
   async getUserLeagues(userId: number) {
-    // Get Liga Oficial first
+    // Get Liga BetBrincadeira first
     const ligaOficial = await this.getOrCreateLigaOficial();
 
     // Get user's memberships
@@ -101,25 +106,45 @@ export class UserLeagueService {
       ),
     );
 
-    // Check if user is in Liga Oficial
-    const isInLigaOficial = ligaOficial ? memberships.some((m) => m.leagueId === ligaOficial.id) : false;
+    // Check if user is in Liga BetBrincadeira — auto-enroll if not
+    let isInLigaOficial = ligaOficial ? memberships.some((m) => m.leagueId === ligaOficial.id) : false;
+
+    if (!isInLigaOficial && ligaOficial) {
+      // Auto-enroll user in Liga BetBrincadeira (covers users created before this logic)
+      await this.prisma.leagueMember.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId,
+          role: 'MEMBER',
+          status: 'ACTIVE',
+        },
+      });
+      await this.prisma.leagueBalance.upsert({
+        where: { leagueId_userId: { leagueId: ligaOficial.id, userId } },
+        create: { leagueId: ligaOficial.id, userId, balance: 1000 },
+        update: {},
+      });
+      isInLigaOficial = true;
+      this.logger.log(`Auto-enrolled user ${userId} in Liga BetBrincadeira`);
+    }
 
     const result: any[] = [];
 
-    // Add Liga Oficial if user exists in it
+    // Add Liga BetBrincadeira first
     if (isInLigaOficial && ligaOficial) {
       const memberIndex = memberships.findIndex((m) => m.leagueId === ligaOficial.id);
-      if (memberIndex >= 0) {
-        result.push({
-          id: ligaOficial.id,
-          name: ligaOficial.name,
-          inviteCode: ligaOficial.inviteCode,
-          isOfficial: true,
-          role: memberships[memberIndex].role,
-          balance: balanceMap.get(ligaOficial.id) || 0,
-          memberCount: memberCounts[memberIndex],
-        });
-      }
+      const oficialMemberCount = await this.prisma.leagueMember.count({
+        where: { leagueId: ligaOficial.id, status: 'ACTIVE' },
+      });
+      result.push({
+        id: ligaOficial.id,
+        name: ligaOficial.name,
+        inviteCode: ligaOficial.inviteCode,
+        isOfficial: true,
+        role: memberIndex >= 0 ? memberships[memberIndex].role : 'MEMBER',
+        balance: balanceMap.get(ligaOficial.id) || 1000,
+        memberCount: oficialMemberCount,
+      });
     }
 
     // Add private leagues
@@ -133,6 +158,8 @@ export class UserLeagueService {
           role: m.role,
           balance: balanceMap.get(m.leagueId) || 0,
           memberCount: memberCounts[index],
+          cashbox: m.league.cashbox,
+          isOpen: m.league.isOpen,
         });
       }
     });
@@ -173,6 +200,13 @@ export class UserLeagueService {
       role: membership.role,
       memberCount,
       balance: balance?.balance || 0,
+      cashbox: league.cashbox,
+      cashboxInitial: league.cashboxInitial,
+      cashboxMinAlert: league.cashboxMinAlert,
+      isOpen: league.isOpen,
+      cashboxHealth: league.cashboxInitial > 0
+        ? Math.round((league.cashbox / league.cashboxInitial) * 100)
+        : 0,
       createdAt: league.createdAt,
     };
 
@@ -230,6 +264,18 @@ export class UserLeagueService {
    * Create a private league
    */
   async createLeague(userId: number, dto: CreateLeagueDto) {
+    const initialDiamonds = dto.initialDiamonds;
+    const initialPoints = initialDiamonds * DIAMOND_CONVERSION_RATE;
+    const minAlert = dto.cashboxMinAlert ?? 100;
+
+    // Check user has enough diamonds for initial cashbox
+    const userBalance = await this.prisma.pointBalance.findUnique({ where: { userId } });
+    if (!userBalance || userBalance.diamonds < initialDiamonds) {
+      throw new BadRequestException(
+        `Diamantes insuficientes. Você tem ${userBalance?.diamonds || 0}, precisa de ${initialDiamonds} para abrir a liga.`,
+      );
+    }
+
     // Generate unique invite code
     let inviteCode: string;
     let isUnique = false;
@@ -250,7 +296,7 @@ export class UserLeagueService {
       throw new BadRequestException('Não foi possível gerar código de convite único');
     }
 
-    // Create league, member, and balance atomically
+    // Create league, member, balance, deduct diamonds, and fund cashbox atomically
     const result = await this.prisma.$transaction(async (tx) => {
       const league = await tx.league.create({
         data: {
@@ -258,6 +304,10 @@ export class UserLeagueService {
           inviteCode,
           isOfficial: false,
           ownerId: userId,
+          cashbox: initialPoints,
+          cashboxInitial: initialPoints,
+          cashboxMinAlert: minAlert,
+          isOpen: true,
         },
       });
 
@@ -278,10 +328,31 @@ export class UserLeagueService {
         },
       });
 
+      // Deduct diamonds from owner
+      await tx.pointBalance.update({
+        where: { userId },
+        data: { diamonds: { decrement: initialDiamonds } },
+      });
+
+      // Log cashbox deposit
+      await tx.cashboxLog.create({
+        data: {
+          leagueId: league.id,
+          type: 'DEPOSIT',
+          amount: initialPoints,
+          balanceAfter: initialPoints,
+          description: `Depósito inicial: ${initialDiamonds} diamantes → ${initialPoints} fichas`,
+        },
+      });
+
       return league;
     });
 
-    return result;
+    return {
+      ...result,
+      cashbox: initialPoints,
+      cashboxInitial: initialPoints,
+    };
   }
 
   /**

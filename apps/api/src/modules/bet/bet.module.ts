@@ -6,10 +6,11 @@ import { PrismaModule } from '../../prisma/prisma.module';
 import { RedisModule } from '../../common/redis/redis.module';
 import { PointsModule } from '../points/points.module';
 import { OddsModule } from '../odds/odds.module';
+import { CashboxService } from '../user-league/cashbox.service';
 
 @Module({
   imports: [PrismaModule, RedisModule, PointsModule, OddsModule],
-  providers: [BetService, BetSettlementService],
+  providers: [BetService, BetSettlementService, CashboxService],
   controllers: [BetController],
   exports: [BetService],
 })

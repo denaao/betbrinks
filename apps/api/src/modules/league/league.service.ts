@@ -87,38 +87,72 @@ export class LeagueService {
   // ─── Get all API leagues enriched with enabled status ────────────────
 
   async getAllApiLeaguesWithStatus(sportId?: number) {
-    const [apiLeagues, dbLeagues] = await Promise.all([
-      this.fetchAllApiLeagues(),
-      this.prisma.activeLeague.findMany({
-        include: { sport: { select: { id: true, name: true } } },
-      }),
-    ]);
+    // Determine if we're filtering by a specific sport
+    let sport: { id: number; key: string } | null = null;
+    if (sportId) {
+      sport = await this.prisma.sport.findUnique({
+        where: { id: sportId },
+        select: { id: true, key: true },
+      });
+    }
 
-    // Build a map of DB leagues by apiFootballId
-    const dbMap = new Map(dbLeagues.map((l) => [l.apiFootballId, l]));
+    // For non-football sports (or if no API key), return leagues from DB only
+    const isFootball = !sport || sport.key === 'football';
 
-    return apiLeagues.map((api) => {
-      const db = dbMap.get(api.apiFootballId);
-      return {
-        ...api,
-        dbId: db?.id || null,
-        isEnabled: db?.isActive || false,
-        sportId: db?.sportId || null,
-        sportName: db?.sport?.name || null,
-      };
+    if (isFootball) {
+      // Football: merge API-Football remote list with DB status
+      const [apiLeagues, dbLeagues] = await Promise.all([
+        this.fetchAllApiLeagues(),
+        this.prisma.activeLeague.findMany({
+          include: { sport: { select: { id: true, name: true } } },
+        }),
+      ]);
+
+      const dbMap = new Map(dbLeagues.map((l) => [l.apiFootballId, l]));
+
+      return apiLeagues.map((api) => {
+        const db = dbMap.get(api.apiFootballId);
+        return {
+          ...api,
+          dbId: db?.id || null,
+          isEnabled: db?.isActive || false,
+          sportId: db?.sportId || null,
+          sportName: db?.sport?.name || null,
+        };
+      });
+    }
+
+    // Non-football: return leagues from our database for this sport
+    const dbLeagues = await this.prisma.activeLeague.findMany({
+      where: { sportId: sport!.id },
+      include: { sport: { select: { id: true, name: true } } },
+      orderBy: [{ isActive: 'desc' }, { country: 'asc' }, { name: 'asc' }],
     });
+
+    return dbLeagues.map((l) => ({
+      apiFootballId: l.apiFootballId,
+      name: l.name,
+      country: l.country,
+      countryFlag: null,
+      logo: l.logo,
+      type: 'League',
+      dbId: l.id,
+      isEnabled: l.isActive,
+      sportId: l.sportId,
+      sportName: l.sport?.name || null,
+    }));
   }
 
   // ─── Enable a league (create or activate) ──────────────────────────
 
   async enableLeague(apiFootballId: number, name: string, country: string, logo?: string, sportId?: number) {
-    const existing = await this.prisma.activeLeague.findUnique({
-      where: { apiFootballId },
+    const existing = await this.prisma.activeLeague.findFirst({
+      where: { apiFootballId, sportId: sportId || null },
     });
 
     if (existing) {
       return this.prisma.activeLeague.update({
-        where: { apiFootballId },
+        where: { id: existing.id },
         data: { isActive: true, name, country, logo, ...(sportId !== undefined ? { sportId: sportId || null } : {}) },
       });
     }
@@ -130,15 +164,15 @@ export class LeagueService {
 
   // ─── Disable a league ───────────────────────────────────────────────
 
-  async disableLeague(apiFootballId: number) {
-    const existing = await this.prisma.activeLeague.findUnique({
-      where: { apiFootballId },
+  async disableLeague(apiFootballId: number, sportId?: number) {
+    const existing = await this.prisma.activeLeague.findFirst({
+      where: { apiFootballId, ...(sportId ? { sportId } : {}) },
     });
 
     if (!existing) return { message: 'Liga não encontrada' };
 
     return this.prisma.activeLeague.update({
-      where: { apiFootballId },
+      where: { id: existing.id },
       data: { isActive: false },
     });
   }
@@ -158,14 +192,14 @@ export class LeagueService {
   // ─── Update league sport ────────────────────────────────────────────
 
   async updateLeagueSport(apiFootballId: number, sportId: number | null) {
-    const existing = await this.prisma.activeLeague.findUnique({
+    const existing = await this.prisma.activeLeague.findFirst({
       where: { apiFootballId },
     });
 
     if (!existing) throw new BadRequestException('Liga não encontrada no banco');
 
     return this.prisma.activeLeague.update({
-      where: { apiFootballId },
+      where: { id: existing.id },
       data: { sportId },
     });
   }

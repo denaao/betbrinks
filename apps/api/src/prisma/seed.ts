@@ -60,19 +60,19 @@ async function main() {
   }
   console.log(`  ✅ ${achievements.length} achievements created`);
 
-  // ─── Liga Oficial (singleton) ─────────────────────────────────────
+  // ─── Liga BetBrincadeira (singleton) ─────────────────────────────────────
   let ligaOficial = await prisma.league.findFirst({ where: { isOfficial: true } });
   if (!ligaOficial) {
     ligaOficial = await prisma.league.create({
       data: {
-        name: 'Liga Oficial',
+        name: 'Liga BetBrincadeira',
         inviteCode: 'OFICIAL',
         isOfficial: true,
         ownerId: null,
       },
     });
   }
-  console.log(`  ✅ Liga Oficial created (ID: ${ligaOficial.id})`);
+  console.log(`  ✅ Liga BetBrincadeira created (ID: ${ligaOficial.id})`);
 
   // ─── Test user (dev only) ─────────────────────────────────────────
   const userHash = await bcryptjs.hash('teste123', 12);
@@ -117,7 +117,7 @@ async function main() {
     },
   });
 
-  // Enroll in Liga Oficial
+  // Enroll in Liga BetBrincadeira
   await prisma.leagueMember.upsert({
     where: { leagueId_userId: { leagueId: ligaOficial.id, userId: user.id } },
     update: {},
@@ -140,6 +140,35 @@ async function main() {
   });
 
   console.log(`  ✅ Test user created (CPF: ${testCpf} / senha: teste123)`);
+
+  // ─── Auto-enroll ALL existing users in Liga BetBrincadeira ─────────
+  const allUsers = await prisma.user.findMany({ select: { id: true } });
+  let enrolled = 0;
+  for (const u of allUsers) {
+    const existing = await prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId: ligaOficial.id, userId: u.id } },
+    });
+    if (!existing) {
+      await prisma.leagueMember.create({
+        data: {
+          leagueId: ligaOficial.id,
+          userId: u.id,
+          role: 'MEMBER',
+          status: 'ACTIVE',
+        },
+      });
+      await prisma.leagueBalance.upsert({
+        where: { leagueId_userId: { leagueId: ligaOficial.id, userId: u.id } },
+        create: { leagueId: ligaOficial.id, userId: u.id, balance: 1000 },
+        update: {},
+      });
+      enrolled++;
+    }
+  }
+  if (enrolled > 0) {
+    console.log(`  ✅ Auto-enrolled ${enrolled} existing users in Liga BetBrincadeira`);
+  }
+
   console.log('🌱 Seed complete!');
 }
 

@@ -42,6 +42,13 @@ export class OddsController {
   async getLeagues() {
     return this.oddsService.getLeagues();
   }
+
+  @Get('sports')
+  @Public()
+  @ApiOperation({ summary: 'Get active sports (football, basketball, volleyball, mma, formula1)' })
+  async getSports() {
+    return this.oddsService.getSports();
+  }
 }
 
 // ─── Admin Sync Controller ───────────────────────────────────────────

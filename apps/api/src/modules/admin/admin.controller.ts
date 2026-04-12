@@ -141,11 +141,34 @@ export class AdminController {
   @ApiOperation({ summary: 'List fixtures with bet counts' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'sportKey', required: false })
+  @ApiQuery({ name: 'filter', required: false })
   async getFixtures(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('sportKey') sportKey?: string,
+    @Query('filter') filter?: string,
   ) {
     return this.adminService.getFixtureManagement(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 25,
+      sportKey,
+      filter,
+    );
+  }
+
+  // ─── Leagues ───────────────────────────────────────────────────────────
+
+  @Get('private-leagues')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List private leagues with member counts' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async getPrivateLeagues(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.adminService.getPrivateLeagues(
       page ? parseInt(page) : 1,
       limit ? parseInt(limit) : 25,
     );

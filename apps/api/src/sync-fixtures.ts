@@ -58,8 +58,8 @@ async function syncFixtures() {
     };
 
     try {
-      const existing = await prisma.fixture.findUnique({
-        where: { apiFootballId: f.id },
+      const existing = await prisma.fixture.findFirst({
+        where: { apiFootballId: f.id, sportKey: 'football' },
       });
 
       if (existing) {
@@ -102,8 +102,8 @@ async function syncOdds() {
   for (const item of oddsData) {
     const fixtureApiId = item.fixture.id;
 
-    const fixture = await prisma.fixture.findUnique({
-      where: { apiFootballId: fixtureApiId },
+    const fixture = await prisma.fixture.findFirst({
+      where: { apiFootballId: fixtureApiId, sportKey: 'football' },
     });
     if (!fixture) continue;
 
@@ -182,7 +182,7 @@ async function syncLive() {
     const status = STATUS_MAP[item.fixture.status.short] || 'FIRST_HALF';
     try {
       const result = await prisma.fixture.updateMany({
-        where: { apiFootballId: item.fixture.id },
+        where: { apiFootballId: item.fixture.id, sportKey: 'football' },
         data: {
           status: status as any,
           scoreHome: item.goals.home,

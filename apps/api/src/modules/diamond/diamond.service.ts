@@ -45,13 +45,15 @@ export class DiamondService {
     leagueId: number,
     diamonds: number,
   ): Promise<{ pointsAdded: number; newBalance: number }> {
-    // Validate user has enough diamonds
-    const balance = await this.prisma.pointBalance.findUnique({
+    // Validate user has enough diamonds (create record if missing)
+    let balance = await this.prisma.pointBalance.findUnique({
       where: { userId },
     });
 
     if (!balance) {
-      throw new NotFoundException('Saldo nao encontrado.');
+      balance = await this.prisma.pointBalance.create({
+        data: { userId, points: 0, diamonds: 0 },
+      });
     }
 
     if (balance.diamonds < diamonds) {
@@ -61,6 +63,14 @@ export class DiamondService {
     }
 
     // Validate league exists and user is a member
+    const league = await this.prisma.league.findUnique({
+      where: { id: leagueId },
+    });
+
+    if (!league) {
+      throw new BadRequestException('Liga nao encontrada.');
+    }
+
     const member = await this.prisma.leagueMember.findUnique({
       where: {
         leagueId_userId: { leagueId, userId },
@@ -69,6 +79,13 @@ export class DiamondService {
 
     if (!member) {
       throw new BadRequestException('Usuario nao e membro da liga.');
+    }
+
+    // In private leagues, only the owner can convert diamonds to balance
+    if (!league.isOfficial && league.ownerId !== userId) {
+      throw new BadRequestException(
+        'Em ligas privadas, apenas o dono pode converter diamantes em saldo. Seus diamantes podem ser usados para upgrades no clube.',
+      );
     }
 
     // Get conversion rate from SystemConfig
@@ -276,10 +293,15 @@ export class DiamondService {
         data: { status: 'VERIFIED' },
       });
 
-      // Credit both diamonds and bonus points
-      await tx.pointBalance.update({
+      // Credit both diamonds and bonus points (upsert to handle missing record)
+      await tx.pointBalance.upsert({
         where: { userId },
-        data: {
+        create: {
+          userId,
+          diamonds,
+          points: pkg.bonusPoints,
+        },
+        update: {
           diamonds: { increment: diamonds },
           points: { increment: pkg.bonusPoints },
         },

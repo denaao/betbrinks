@@ -125,7 +125,8 @@ enum DiamondPurchaseStatus {
 
 model Fixture {
   id             Int           @id @default(autoincrement())
-  apiFootballId  Int           @unique @map("api_football_id")
+  apiFootballId  Int           @map("api_football_id")
+  sportKey       String        @default("football") @map("sport_key") @db.VarChar(30) // football, basketball, volleyball, mma, formula1
   leagueId       Int           @map("league_id")
   leagueName     String        @map("league_name") @db.VarChar(100)
   leagueLogo     String?       @map("league_logo") @db.VarChar(500)
@@ -143,8 +144,10 @@ model Fixture {
   markets Market[]
   bets    Bet[]
 
+  @@unique([apiFootballId, sportKey])
   @@index([startAt, status])
   @@index([leagueId])
+  @@index([sportKey, startAt])
   @@map("fixtures")
 }
 
@@ -158,6 +161,27 @@ enum FixtureStatus {
   FINISHED
   POSTPONED
   CANCELLED
+  // Basketball / Volleyball
+  QUARTER_1
+  QUARTER_2
+  QUARTER_3
+  QUARTER_4
+  OVERTIME
+  BREAK
+  SET_1
+  SET_2
+  SET_3
+  SET_4
+  SET_5
+  // MMA
+  ROUND_1
+  ROUND_2
+  ROUND_3
+  ROUND_4
+  ROUND_5
+  // F1
+  IN_PROGRESS
+  SUSPENDED
 }
 
 // ─── Market ────────────────────────────────────────────────────────────────
@@ -177,9 +201,26 @@ model Market {
 }
 
 enum MarketType {
+  // Football
   MATCH_WINNER
   OVER_UNDER_25
   BOTH_TEAMS_SCORE
+  // Basketball
+  BASKETBALL_WINNER
+  BASKETBALL_SPREAD
+  BASKETBALL_TOTAL
+  // Volleyball
+  VOLLEYBALL_WINNER
+  VOLLEYBALL_TOTAL_SETS
+  VOLLEYBALL_HANDICAP
+  // MMA
+  MMA_FIGHT_WINNER
+  MMA_METHOD_OF_VICTORY
+  MMA_TOTAL_ROUNDS
+  // Formula 1
+  F1_RACE_WINNER
+  F1_PODIUM_FINISH
+  F1_FASTEST_LAP
 }
 
 // ─── Odd ───────────────────────────────────────────────────────────────────
@@ -308,12 +349,16 @@ enum FriendshipStatus {
 // ─── League (Private) ──────────────────────────────────────────────────────
 
 model League {
-  id          Int      @id @default(autoincrement())
-  ownerId     Int?     @map("owner_id")
-  name        String   @db.VarChar(50)
-  inviteCode  String   @unique @map("invite_code") @db.VarChar(10)
-  isOfficial  Boolean  @default(false) @map("is_official")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id              Int           @id @default(autoincrement())
+  ownerId         Int?          @map("owner_id")
+  name            String        @db.VarChar(50)
+  inviteCode      String        @unique @map("invite_code") @db.VarChar(10)
+  isOfficial      Boolean       @default(false) @map("is_official")
+  cashbox         Int           @default(0)  // saldo atual do caixa da liga (em pontos/fichas)
+  cashboxInitial  Int           @default(0)  @map("cashbox_initial") // valor inicial depositado pelo owner
+  cashboxMinAlert Int           @default(100) @map("cashbox_min_alert") // limite mínimo para alerta ao owner
+  isOpen          Boolean       @default(true) @map("is_open") // liga aceita apostas? (false = caixa baixo)
+  createdAt       DateTime      @default(now()) @map("created_at")
 
   owner        User?             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   members      LeagueMember[]
@@ -321,8 +366,33 @@ model League {
   joinRequests LeagueJoinRequest[]
   transactions LeagueTransaction[]
   betSlips     BetSlip[]
+  cashboxLogs  CashboxLog[]
 
   @@map("leagues")
+}
+
+model CashboxLog {
+  id          Int      @id @default(autoincrement())
+  leagueId    Int      @map("league_id")
+  type        CashboxLogType
+  amount      Int      // valor movimentado (positivo = entrada, negativo = saída)
+  balanceAfter Int     @map("balance_after") // saldo do caixa após a operação
+  betSlipId   Int?     @map("bet_slip_id") // referência à aposta, se aplicável
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  league  League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@index([leagueId, createdAt])
+  @@map("cashbox_logs")
+}
+
+enum CashboxLogType {
+  DEPOSIT        // owner deposita diamantes → fichas no caixa
+  BET_LOST       // jogador perdeu aposta → caixa recebe (valor - 10% taxa)
+  BET_WON        // jogador ganhou aposta → caixa paga o prêmio
+  PLATFORM_FEE   // 10% taxa da plataforma
+  WITHDRAWAL     // owner retira do caixa
 }
 
 model LeagueMember {
@@ -451,7 +521,9 @@ model AuditLog {
 model Sport {
   id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(80)
-  icon      String?  @db.VarChar(500)   // URL or emoji/SVG identifier
+  key       String   @unique @db.VarChar(30) // football, basketball, volleyball, mma, formula1
+  apiHost   String   @default("") @map("api_host") @db.VarChar(200) // e.g. v3.football.api-sports.io
+  icon      String?  @db.VarChar(500)
   sortOrder Int      @default(0) @map("sort_order")
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
@@ -465,7 +537,7 @@ model Sport {
 
 model ActiveLeague {
   id             Int      @id @default(autoincrement())
-  apiFootballId  Int      @unique @map("api_football_id")
+  apiFootballId  Int      @map("api_football_id")
   name           String   @db.VarChar(150)
   country        String   @db.VarChar(100)
   logo           String?  @db.VarChar(500)
@@ -475,6 +547,7 @@ model ActiveLeague {
 
   sport Sport? @relation(fields: [sportId], references: [id])
 
+  @@unique([apiFootballId, sportId])
   @@map("active_leagues")
 }
 

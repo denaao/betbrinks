@@ -26,16 +26,19 @@ export class SportService {
 
   // ─── Admin: Create sport ─────────────────────────────────────────────
 
-  async createSport(name: string, icon?: string) {
+  async createSport(name: string, icon?: string, key?: string) {
     const existing = await this.prisma.sport.findUnique({ where: { name } });
     if (existing) throw new BadRequestException('Modalidade já existe');
+
+    // Auto-generate key from name if not provided
+    const sportKey = key || name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
 
     // Auto-increment sort order
     const last = await this.prisma.sport.findFirst({ orderBy: { sortOrder: 'desc' } });
     const sortOrder = (last?.sortOrder || 0) + 1;
 
     return this.prisma.sport.create({
-      data: { name, icon, sortOrder },
+      data: { name, key: sportKey, icon, sortOrder },
     });
   }
 

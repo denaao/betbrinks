@@ -59,8 +59,8 @@ export default function FinancialPage() {
     }
   };
 
-  const formatCurrency = (v: number) =>
-    v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatCurrency = (v: number | undefined | null) =>
+    (v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('pt-BR', {
