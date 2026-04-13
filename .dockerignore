@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.github
+.vscode
+*.md
+*.log
+.env
+.env.*
+!.env.example
+apps/mobile
+apps/backoffice
+docker
+scripts
+*.ps1
+*.sh
