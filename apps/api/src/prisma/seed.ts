@@ -60,6 +60,69 @@ async function main() {
   }
   console.log(`  ✅ ${achievements.length} achievements created`);
 
+  // ─── Sports & Active Leagues ──────────────────────────────────────────
+  const sportsData = [
+    { name: 'Futebol', key: 'football', apiHost: 'v3.football.api-sports.io', icon: '⚽', sortOrder: 1 },
+    { name: 'Basquete', key: 'basketball', apiHost: 'v1.basketball.api-sports.io', icon: '🏀', sortOrder: 2 },
+    { name: 'Vôlei', key: 'volleyball', apiHost: 'v1.volleyball.api-sports.io', icon: '🏐', sortOrder: 3 },
+    { name: 'MMA', key: 'mma', apiHost: '', icon: '🥊', sortOrder: 4 },
+    { name: 'Fórmula 1', key: 'formula1', apiHost: 'v1.formula-1.api-sports.io', icon: '🏎️', sortOrder: 5 },
+  ];
+
+  for (const s of sportsData) {
+    await prisma.sport.upsert({
+      where: { key: s.key },
+      update: { name: s.name, apiHost: s.apiHost, icon: s.icon, sortOrder: s.sortOrder },
+      create: s,
+    });
+  }
+  console.log(`  ✅ ${sportsData.length} sports created`);
+
+  // Football leagues (API-Football IDs)
+  const footballSport = await prisma.sport.findUnique({ where: { key: 'football' } });
+  if (footballSport) {
+    const footballLeagues = [
+      { apiFootballId: 71, name: 'Brasileirão Série A', country: 'Brazil' },
+      { apiFootballId: 72, name: 'Brasileirão Série B', country: 'Brazil' },
+      { apiFootballId: 73, name: 'Copa do Brasil', country: 'Brazil' },
+      { apiFootballId: 13, name: 'Copa Libertadores', country: 'South America' },
+      { apiFootballId: 11, name: 'Copa Sul-Americana', country: 'South America' },
+      { apiFootballId: 39, name: 'Premier League', country: 'England' },
+      { apiFootballId: 140, name: 'La Liga', country: 'Spain' },
+      { apiFootballId: 135, name: 'Serie A', country: 'Italy' },
+      { apiFootballId: 78, name: 'Bundesliga', country: 'Germany' },
+      { apiFootballId: 61, name: 'Ligue 1', country: 'France' },
+      { apiFootballId: 2, name: 'Champions League', country: 'Europe' },
+      { apiFootballId: 3, name: 'Europa League', country: 'Europe' },
+      { apiFootballId: 1, name: 'Copa do Mundo', country: 'World' },
+    ];
+    for (const l of footballLeagues) {
+      await prisma.activeLeague.upsert({
+        where: { apiFootballId_sportId: { apiFootballId: l.apiFootballId, sportId: footballSport.id } },
+        update: { name: l.name, country: l.country },
+        create: { ...l, sportId: footballSport.id },
+      });
+    }
+    console.log(`  ✅ ${footballLeagues.length} football leagues created`);
+  }
+
+  // Basketball leagues
+  const basketSport = await prisma.sport.findUnique({ where: { key: 'basketball' } });
+  if (basketSport) {
+    const basketLeagues = [
+      { apiFootballId: 12, name: 'NBB', country: 'Brazil' },
+      { apiFootballId: 12, name: 'NBA', country: 'USA' },
+    ];
+    for (const l of basketLeagues) {
+      await prisma.activeLeague.upsert({
+        where: { apiFootballId_sportId: { apiFootballId: l.apiFootballId, sportId: basketSport.id } },
+        update: { name: l.name, country: l.country },
+        create: { ...l, sportId: basketSport.id },
+      });
+    }
+    console.log(`  ✅ Basketball leagues created`);
+  }
+
   // ─── Liga BetBrincadeira (singleton) ─────────────────────────────────────
   let ligaOficial = await prisma.league.findFirst({ where: { isOfficial: true } });
   if (!ligaOficial) {

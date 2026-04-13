@@ -1,7 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 
-const API_KEY = '1447abd3d56c0fc2bdd5c4b908dad19b';
-const BASE_URL = 'https://v3.football.api-sports.io';
+const API_KEY = process.env.API_FOOTBALL_KEY || '';
+const BASE_URL = process.env.API_FOOTBALL_BASE_URL || 'https://v3.football.api-sports.io';
+
+if (!API_KEY) {
+  console.error('❌ API_FOOTBALL_KEY not set. Run: export API_FOOTBALL_KEY=your_key');
+  process.exit(1);
+}
 
 const prisma = new PrismaClient();
 

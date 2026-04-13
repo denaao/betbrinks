@@ -4,6 +4,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
+import { RolesGuard } from './common/guards/roles.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
 import { HealthModule } from './modules/health/health.module';
@@ -20,6 +21,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { LeagueModule } from './modules/league/league.module';
 import { UserLeagueModule } from './modules/user-league/user-league.module';
 import { SportModule } from './modules/sport/sport.module';
+import { AffiliateModule } from './modules/affiliate/affiliate.module';
 
 @Module({
   imports: [
@@ -70,9 +72,11 @@ import { SportModule } from './modules/sport/sport.module';
     LeagueModule,
     UserLeagueModule,
     SportModule,
+    AffiliateModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

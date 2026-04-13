@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
+import { maskCpf } from '../../common/utils/mask-cpf';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
 
@@ -45,6 +46,96 @@ export class AdminService {
     return {
       token,
       admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role },
+    };
+  }
+
+  // ─── Backoffice Unified Login (CPF) ─────────────────────────────────────
+
+  // VULN-006 fix: Admin CPFs removed from source code.
+  // Admin access is now determined solely by user.role === 'ADMIN' in the database.
+  // To promote a user to admin, update their role directly in the database:
+  //   UPDATE "User" SET role = 'ADMIN' WHERE cpf = '...'
+  // Or use: prisma db push after adding the role via a secure admin endpoint.
+
+  async backofficeLogin(cpf: string, password: string) {
+    // Normalise CPF – remove non-digits
+    const cpfClean = cpf.replace(/\D/g, '');
+
+    // Search by CPF: try both formatted (000.000.000-00) and raw digits
+    const cpfFormatted = cpfClean.length === 11
+      ? `${cpfClean.slice(0,3)}.${cpfClean.slice(3,6)}.${cpfClean.slice(6,9)}-${cpfClean.slice(9)}`
+      : cpfClean;
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { cpf: cpfClean },
+          { cpf: cpfFormatted },
+        ],
+      },
+      include: {
+        affiliateProfiles: {
+          where: { isActive: true },
+          include: { league: { select: { id: true, name: true } } },
+        },
+      },
+    });
+
+    if (!user) throw new UnauthorizedException('CPF ou senha inválidos.');
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) throw new UnauthorizedException('CPF ou senha inválidos.');
+
+    // Admin: check role in DB only (VULN-006 fix: no more hardcoded CPF whitelist)
+    const isAdmin = user.role === 'ADMIN';
+    const isAffiliate = user.affiliateProfiles.length > 0;
+
+    // Check if user is a league owner
+    const ownedLeagues = await this.prisma.leagueMember.findMany({
+      where: { userId: user.id, role: 'OWNER' },
+      select: { leagueId: true },
+    });
+    const isOwner = ownedLeagues.length > 0;
+
+    if (!isAdmin && !isAffiliate && !isOwner) {
+      throw new UnauthorizedException('Acesso não autorizado ao backoffice.');
+    }
+
+    // Build affiliate summaries
+    const affiliates = user.affiliateProfiles.map((a) => ({
+      affiliateId: a.id,
+      leagueId: a.leagueId,
+      leagueName: a.league.name,
+      affiliateCode: a.affiliateCode,
+      revenueSharePct: a.revenueSharePct,
+    }));
+
+    // Determine role for JWT: ADMIN > OWNER > USER
+    const jwtRole = isAdmin ? 'ADMIN' : isOwner ? 'OWNER' : 'USER';
+
+    const token = await this.jwtService.signAsync(
+      {
+        userId: user.id,
+        cpf: user.cpf,
+        role: jwtRole,
+        type: isAffiliate ? 'affiliate' : 'admin',
+        affiliateIds: user.affiliateProfiles.map((a) => a.id),
+      },
+      { secret: this.config.get('JWT_SECRET'), expiresIn: '24h' },
+    );
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        cpf: maskCpf(user.cpf),
+        role: user.role,
+      },
+      isAdmin,
+      isAffiliate,
+      isOwner,
+      affiliates,
     };
   }
 
@@ -441,6 +532,7 @@ export class AdminService {
         cashboxInitial: l.cashboxInitial,
         cashboxMinAlert: l.cashboxMinAlert,
         isOpen: l.isOpen,
+        status: l.isOpen ? 'OPEN' : 'CLOSED',
         ownerName: l.owner?.name || '—',
         ownerEmail: l.owner?.email || '—',
         memberCount: l._count.members,
@@ -465,5 +557,561 @@ export class AdminService {
     await this.prisma.auditLog.create({
       data: { adminUserId, action, targetType, targetId, details },
     });
+  }
+
+  // ─── Owner Dashboard ──────────────────────────────────────────────────
+
+  async getOwnerLeagues(userId: number) {
+    const memberships = await this.prisma.leagueMember.findMany({
+      where: { userId, role: 'OWNER' },
+      include: {
+        league: {
+          include: {
+            _count: { select: { members: true } },
+          },
+        },
+      },
+    });
+
+    return memberships.map((m) => ({
+      id: m.league.id,
+      name: m.league.name,
+      inviteCode: m.league.inviteCode,
+      cashbox: m.league.cashbox,
+      stars: m.league.stars,
+      memberCount: m.league._count.members,
+      createdAt: m.league.createdAt,
+    }));
+  }
+
+  // ─── Owner CRM: Members with search & pagination ──────────────────
+  async getOwnerMembers(userId: number, leagueId: number, page = 1, limit = 25, search?: string) {
+    // Verify user is owner
+    const membership = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId } },
+    });
+    if (!membership || membership.role !== 'OWNER') {
+      throw new UnauthorizedException('Acesso restrito ao dono da liga.');
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Build member query with search
+    const whereClause: any = { leagueId, status: 'ACTIVE' };
+
+    const members = await this.prisma.leagueMember.findMany({
+      where: whereClause,
+      include: {
+        user: {
+          select: { id: true, name: true, cpf: true, email: true, phone: true, createdAt: true, lastLoginAt: true },
+        },
+      },
+      orderBy: { joinedAt: 'desc' },
+    });
+
+    // Filter by search in-memory (name, cpf, email)
+    let filtered = members;
+    if (search) {
+      const s = search.toLowerCase();
+      filtered = members.filter((m) =>
+        m.user.name?.toLowerCase().includes(s) ||
+        m.user.cpf?.includes(s) ||
+        m.user.email?.toLowerCase().includes(s) ||
+        m.user.phone?.includes(s)
+      );
+    }
+
+    const total = filtered.length;
+    const paged = filtered.slice(skip, skip + limit);
+
+    // Get balances
+    const balances = await this.prisma.leagueBalance.findMany({ where: { leagueId } });
+    const balMap = new Map(balances.map((b) => [b.userId, b.balance]));
+
+    // Get affiliate referral links (AffiliateReferral has no leagueId, so query through affiliates of this league)
+    const leagueAffiliates = await this.prisma.leagueAffiliate.findMany({
+      where: { leagueId },
+      select: { id: true, affiliateCode: true, user: { select: { name: true } } },
+    });
+    const affIds = leagueAffiliates.map((a) => a.id);
+    const affMap = new Map(leagueAffiliates.map((a) => [a.id, { code: a.affiliateCode, name: a.user.name }]));
+
+    const referrals = affIds.length > 0
+      ? await this.prisma.affiliateReferral.findMany({
+          where: { affiliateId: { in: affIds } },
+        })
+      : [];
+    const refMap = new Map(referrals.map((r) => {
+      const aff = affMap.get(r.affiliateId);
+      return [r.userId, { affiliateId: r.affiliateId, code: aff?.code || '', name: aff?.name || '' }];
+    }));
+
+    // Get bet counts per user
+    const userIds = paged.map((m) => m.userId);
+    const betCounts = await this.prisma.bet.groupBy({
+      by: ['userId'],
+      where: { userId: { in: userIds } },
+      _count: { id: true },
+    });
+    const betMap = new Map(betCounts.map((b) => [b.userId, b._count.id]));
+
+    return {
+      data: paged.map((m) => ({
+        userId: m.userId,
+        name: m.user.name,
+        cpf: maskCpf(m.user.cpf),
+        email: m.user.email,
+        phone: m.user.phone,
+        role: m.role,
+        balance: balMap.get(m.userId) || 0,
+        totalBets: betMap.get(m.userId) || 0,
+        linkedAffiliate: refMap.get(m.userId) || null,
+        joinedAt: m.joinedAt,
+        lastLoginAt: m.user.lastLoginAt,
+        createdAt: m.user.createdAt,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // ─── Owner Financial: cashbox + transactions with pagination ──────
+  async getOwnerFinancial(userId: number, leagueId: number, page = 1, limit = 50) {
+    // Verify user is owner
+    const membership = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId } },
+    });
+    if (!membership || membership.role !== 'OWNER') {
+      throw new UnauthorizedException('Acesso restrito ao dono da liga.');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+
+    // Get all balances for summary
+    const balances = await this.prisma.leagueBalance.findMany({ where: { leagueId } });
+    const totalDistributed = balances.reduce((s, b) => s + b.balance, 0);
+
+    // Transaction totals by type
+    const [transactions, totalTx] = await Promise.all([
+      this.prisma.leagueTransaction.findMany({
+        where: { leagueId },
+        include: {
+          fromUser: { select: { name: true } },
+          toUser: { select: { name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      this.prisma.leagueTransaction.count({ where: { leagueId } }),
+    ]);
+
+    // Aggregate transaction types
+    const txAggregates = await this.prisma.leagueTransaction.groupBy({
+      by: ['type'],
+      where: { leagueId },
+      _sum: { amount: true },
+      _count: { id: true },
+    });
+    const txSummary = txAggregates.map((t) => ({
+      type: t.type,
+      totalAmount: t._sum.amount || 0,
+      count: t._count.id,
+    }));
+
+    // Affiliate commissions summary
+    const affiliates = await this.prisma.leagueAffiliate.findMany({
+      where: { leagueId },
+      include: {
+        user: { select: { name: true } },
+        commissions: { select: { commissionAmt: true, leagueProfit: true } },
+      },
+    });
+    const totalCommissions = affiliates.reduce((s, a) => s + a.commissions.reduce((cs, c) => cs + c.commissionAmt, 0), 0);
+    const totalLeagueProfit = affiliates.reduce((s, a) => s + a.commissions.reduce((cs, c) => cs + c.leagueProfit, 0), 0);
+
+    return {
+      league: {
+        id: league!.id,
+        name: league!.name,
+        cashbox: league!.cashbox,
+        cashboxInitial: league!.cashboxInitial,
+        cashboxMinAlert: league!.cashboxMinAlert,
+      },
+      summary: {
+        cashbox: league!.cashbox,
+        totalDistributed,
+        totalCommissions,
+        totalLeagueProfit,
+        transactionsByType: txSummary,
+      },
+      transactions: {
+        data: transactions.map((t) => ({
+          id: t.id,
+          type: t.type,
+          amount: t.amount,
+          senderName: t.fromUser?.name || 'Sistema',
+          receiverName: t.toUser?.name || 'Sistema',
+          description: t.description,
+          createdAt: t.createdAt,
+        })),
+        total: totalTx,
+        page,
+        limit,
+        totalPages: Math.ceil(totalTx / limit),
+      },
+    };
+  }
+
+  // ─── Bets: Admin (all bets) ─────────────────────────────────────────
+  async getAdminBets(page = 1, limit = 25, search?: string, status?: string, sportKey?: string, dateFrom?: string, dateTo?: string) {
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (status && status !== 'ALL') where.status = status;
+    if (sportKey) where.fixture = { sportKey };
+
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) where.createdAt.gte = new Date(dateFrom);
+      if (dateTo) {
+        const end = new Date(dateTo);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
+
+    if (search) {
+      where.user = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { cpf: { contains: search } },
+        ],
+      };
+    }
+
+    const [bets, total] = await Promise.all([
+      this.prisma.bet.findMany({
+        where,
+        include: {
+          user: { select: { id: true, name: true, cpf: true } },
+          fixture: {
+            select: {
+              id: true, homeTeam: true, awayTeam: true, homeLogo: true, awayLogo: true,
+              scoreHome: true, scoreAway: true, startAt: true, status: true,
+              leagueName: true, sportKey: true,
+            },
+          },
+          odd: {
+            select: { name: true, value: true, market: { select: { type: true } } },
+          },
+          betSlip: {
+            select: { id: true, leagueId: true, league: { select: { name: true } } },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      this.prisma.bet.count({ where }),
+    ]);
+
+    // Get affiliate info for each bettor
+    const userIds = [...new Set(bets.map((b) => b.userId))];
+    const referrals = await this.prisma.affiliateReferral.findMany({
+      where: { userId: { in: userIds } },
+      include: {
+        affiliate: { select: { affiliateCode: true, user: { select: { name: true } } } },
+      },
+    });
+    const affMap = new Map(referrals.map((r) => [r.userId, {
+      code: r.affiliate.affiliateCode,
+      name: r.affiliate.user.name,
+    }]));
+
+    // Stats
+    const [totalBets, totalWon, totalLost, totalPending] = await Promise.all([
+      this.prisma.bet.count(),
+      this.prisma.bet.count({ where: { status: 'WON' } }),
+      this.prisma.bet.count({ where: { status: 'LOST' } }),
+      this.prisma.bet.count({ where: { status: 'PENDING' } }),
+    ]);
+
+    return {
+      stats: { totalBets, totalWon, totalLost, totalPending },
+      data: bets.map((b) => ({
+        id: b.id,
+        user: { id: b.user.id, name: b.user.name, cpf: maskCpf(b.user.cpf) },
+        fixture: b.fixture,
+        odd: { name: b.odd.name, value: parseFloat(b.odd.value.toString()), marketType: b.odd.market.type },
+        league: b.betSlip?.league ? { id: b.betSlip.leagueId, name: b.betSlip.league.name } : null,
+        amount: b.amount,
+        oddValue: parseFloat(b.oddValue.toString()),
+        potentialReturn: b.potentialReturn,
+        status: b.status,
+        affiliate: affMap.get(b.userId) || null,
+        createdAt: b.createdAt,
+        settledAt: b.settledAt,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // ─── Bets: Owner (league-scoped) ──────────────────────────────────────
+  async getOwnerBets(userId: number, leagueId: number, page = 1, limit = 25, search?: string, status?: string, dateFrom?: string, dateTo?: string) {
+    // Verify user is owner
+    const membership = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId } },
+    });
+    if (!membership || membership.role !== 'OWNER') {
+      throw new UnauthorizedException('Acesso restrito ao dono da liga.');
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Get member IDs of this league
+    const members = await this.prisma.leagueMember.findMany({
+      where: { leagueId, status: 'ACTIVE' },
+      select: { userId: true },
+    });
+    const memberIds = members.map((m) => m.userId);
+
+    const where: any = {
+      betSlip: { leagueId },
+    };
+    if (status && status !== 'ALL') where.status = status;
+
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) where.createdAt.gte = new Date(dateFrom);
+      if (dateTo) {
+        const end = new Date(dateTo);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
+
+    if (search) {
+      where.user = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { cpf: { contains: search } },
+        ],
+      };
+    }
+
+    const [bets, total] = await Promise.all([
+      this.prisma.bet.findMany({
+        where,
+        include: {
+          user: { select: { id: true, name: true, cpf: true } },
+          fixture: {
+            select: {
+              id: true, homeTeam: true, awayTeam: true, homeLogo: true, awayLogo: true,
+              scoreHome: true, scoreAway: true, startAt: true, status: true,
+              leagueName: true, sportKey: true,
+            },
+          },
+          odd: {
+            select: { name: true, value: true, market: { select: { type: true } } },
+          },
+          betSlip: {
+            select: { id: true, leagueId: true, league: { select: { name: true } } },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      this.prisma.bet.count({ where }),
+    ]);
+
+    // Get affiliate info
+    const userIds = [...new Set(bets.map((b) => b.userId))];
+    const leagueAffiliates = await this.prisma.leagueAffiliate.findMany({
+      where: { leagueId },
+      select: { id: true, affiliateCode: true, user: { select: { name: true } } },
+    });
+    const affIds = leagueAffiliates.map((a) => a.id);
+    const affInfoMap = new Map(leagueAffiliates.map((a) => [a.id, { code: a.affiliateCode, name: a.user.name }]));
+
+    const referrals = affIds.length > 0
+      ? await this.prisma.affiliateReferral.findMany({
+          where: { affiliateId: { in: affIds }, userId: { in: userIds } },
+        })
+      : [];
+    const affMap = new Map(referrals.map((r) => {
+      const aff = affInfoMap.get(r.affiliateId);
+      return [r.userId, { code: aff?.code || '', name: aff?.name || '' }];
+    }));
+
+    // Stats for this league
+    const baseWhere = { betSlip: { leagueId } };
+    const [totalBets, totalWon, totalLost, totalPending] = await Promise.all([
+      this.prisma.bet.count({ where: baseWhere }),
+      this.prisma.bet.count({ where: { ...baseWhere, status: 'WON' } }),
+      this.prisma.bet.count({ where: { ...baseWhere, status: 'LOST' } }),
+      this.prisma.bet.count({ where: { ...baseWhere, status: 'PENDING' } }),
+    ]);
+
+    return {
+      stats: { totalBets, totalWon, totalLost, totalPending },
+      data: bets.map((b) => ({
+        id: b.id,
+        user: { id: b.user.id, name: b.user.name, cpf: maskCpf(b.user.cpf) },
+        fixture: b.fixture,
+        odd: { name: b.odd.name, value: parseFloat(b.odd.value.toString()), marketType: b.odd.market.type },
+        league: b.betSlip?.league ? { id: b.betSlip.leagueId, name: b.betSlip.league.name } : null,
+        amount: b.amount,
+        oddValue: parseFloat(b.oddValue.toString()),
+        potentialReturn: b.potentialReturn,
+        status: b.status,
+        affiliate: affMap.get(b.userId) || null,
+        createdAt: b.createdAt,
+        settledAt: b.settledAt,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getOwnerDashboard(userId: number, leagueId: number) {
+    // Verify user is owner
+    const membership = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId } },
+    });
+
+    if (!membership || membership.role !== 'OWNER') {
+      throw new UnauthorizedException('Acesso restrito ao dono da liga.');
+    }
+
+    const league = await this.prisma.league.findUnique({
+      where: { id: leagueId },
+    });
+
+    // ─── Members with balances ─────────────────────────────────────────
+    const members = await this.prisma.leagueMember.findMany({
+      where: { leagueId, status: 'ACTIVE' },
+      include: { user: { select: { id: true, name: true, cpf: true } } },
+    });
+
+    const balances = await this.prisma.leagueBalance.findMany({
+      where: { leagueId },
+    });
+    const balMap = new Map(balances.map((b) => [b.userId, b.balance]));
+
+    const memberList = members.map((m) => ({
+      userId: m.userId,
+      name: m.user.name,
+      cpf: maskCpf(m.user.cpf),
+      role: m.role,
+      balance: balMap.get(m.userId) || 0,
+    }));
+
+    // ─── Affiliates with full details ──────────────────────────────────
+    const affiliates = await this.prisma.leagueAffiliate.findMany({
+      where: { leagueId },
+      include: {
+        user: { select: { id: true, name: true } },
+        referrals: {
+          include: { user: { select: { id: true, name: true } } },
+        },
+        commissions: {
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+        },
+        _count: { select: { referrals: true, commissions: true } },
+      },
+    });
+
+    const affiliateList = affiliates.map((a) => {
+      const totalCommission = a.commissions.reduce((s, c) => s + c.commissionAmt, 0);
+      const totalProfit = a.commissions.reduce((s, c) => s + c.leagueProfit, 0);
+      return {
+        id: a.id,
+        userId: a.userId,
+        name: a.user.name,
+        code: a.affiliateCode,
+        revenueSharePct: a.revenueSharePct,
+        creditLimit: a.creditLimit,
+        creditUsed: a.creditUsed,
+        isActive: a.isActive,
+        referralCount: a._count.referrals,
+        commissionCount: a._count.commissions,
+        totalCommission,
+        totalProfit,
+        referrals: a.referrals.map((r) => ({
+          userId: r.userId,
+          name: r.user.name,
+          joinedAt: r.joinedAt,
+        })),
+        recentCommissions: a.commissions.slice(0, 10).map((c) => ({
+          id: c.id,
+          betAmount: c.betAmount,
+          leagueProfit: c.leagueProfit,
+          commissionPct: c.commissionPct,
+          commissionAmt: c.commissionAmt,
+          level: c.level,
+          createdAt: c.createdAt,
+        })),
+      };
+    });
+
+    // ─── Recent transactions ───────────────────────────────────────────
+    const transactions = await this.prisma.leagueTransaction.findMany({
+      where: { leagueId },
+      include: {
+        fromUser: { select: { name: true } },
+        toUser: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+
+    const transactionList = transactions.map((t) => ({
+      id: t.id,
+      type: t.type,
+      amount: t.amount,
+      senderName: t.fromUser?.name || 'Sistema',
+      receiverName: t.toUser?.name || 'Sistema',
+      description: t.description,
+      createdAt: t.createdAt,
+    }));
+
+    // ─── Summary stats ─────────────────────────────────────────────────
+    const totalBalance = Array.from(balMap.values()).reduce((s, v) => s + v, 0);
+    const totalMembers = members.length;
+    const totalAffiliates = affiliates.length;
+    const totalReferrals = affiliates.reduce((s, a) => s + a._count.referrals, 0);
+    const totalCommissions = affiliateList.reduce((s, a) => s + a.totalCommission, 0);
+
+    return {
+      league: {
+        id: league!.id,
+        name: league!.name,
+        inviteCode: league!.inviteCode,
+        cashbox: league!.cashbox,
+        stars: league!.stars,
+      },
+      stats: {
+        totalMembers,
+        totalBalance,
+        totalAffiliates,
+        totalReferrals,
+        totalCommissions,
+      },
+      members: memberList,
+      affiliates: affiliateList,
+      transactions: transactionList,
+    };
   }
 }

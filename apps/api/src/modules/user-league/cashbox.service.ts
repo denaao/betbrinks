@@ -199,10 +199,22 @@ export class CashboxService {
       return { ok: false, reason: 'A liga está fechada para novas apostas. O caixa precisa ser reabastecido pelo dono.' };
     }
 
-    if (league.cashbox < potentialPayout) {
+    // Calculate reserved amount: sum of potentialReturn for all PENDING bets in this league
+    const pendingBets = await this.prisma.bet.aggregate({
+      where: { betSlip: { leagueId }, status: 'PENDING' },
+      _sum: { potentialReturn: true },
+    });
+    const pendingSlips = await this.prisma.betSlip.aggregate({
+      where: { leagueId, status: 'PENDING' },
+      _sum: { potentialReturn: true },
+    });
+    const reserved = (pendingBets._sum.potentialReturn || 0) + (pendingSlips._sum.potentialReturn || 0);
+    const available = league.cashbox - reserved;
+
+    if (available < potentialPayout) {
       return {
         ok: false,
-        reason: `Caixa da liga insuficiente. Caixa: ${league.cashbox} fichas, retorno potencial: ${potentialPayout} fichas. Peça ao dono da liga para reabastecer.`,
+        reason: `Caixa da liga insuficiente. Caixa: ${league.cashbox} fichas, reservado para apostas pendentes: ${reserved}, disponivel: ${available}, retorno potencial: ${potentialPayout}. Peca ao dono da liga para reabastecer.`,
       };
     }
 

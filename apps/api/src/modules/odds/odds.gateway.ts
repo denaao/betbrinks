@@ -10,6 +10,8 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { Cron } from '@nestjs/schedule';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { OddsService } from './odds.service';
 
 @WebSocketGateway({
@@ -22,10 +24,42 @@ export class OddsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private readonly logger = new Logger(OddsGateway.name);
 
-  constructor(private oddsService: OddsService) {}
+  constructor(
+    private oddsService: OddsService,
+    private jwtService: JwtService,
+    private config: ConfigService,
+  ) {}
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+  /**
+   * VULN-012 fix: Authenticate WebSocket connections via JWT.
+   * The client must provide the token as a query param (?token=xxx)
+   * or in the auth handshake (socket.io `auth: { token }` option).
+   */
+  async handleConnection(client: Socket) {
+    try {
+      const token =
+        (client.handshake.auth as any)?.token ||
+        client.handshake.query?.token as string;
+
+      if (!token) {
+        this.logger.warn(`Client ${client.id} rejected: no token provided`);
+        client.emit('error', { message: 'Autenticação necessária.' });
+        client.disconnect(true);
+        return;
+      }
+
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.config.get<string>('JWT_SECRET'),
+      });
+
+      // Attach user info to socket for downstream use
+      (client as any).user = payload;
+      this.logger.log(`Client connected: ${client.id} (user: ${payload.userId || payload.adminId})`);
+    } catch (err) {
+      this.logger.warn(`Client ${client.id} rejected: invalid token`);
+      client.emit('error', { message: 'Token inválido ou expirado.' });
+      client.disconnect(true);
+    }
   }
 
   handleDisconnect(client: Socket) {

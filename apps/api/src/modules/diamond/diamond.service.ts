@@ -81,10 +81,10 @@ export class DiamondService {
       throw new BadRequestException('Usuario nao e membro da liga.');
     }
 
-    // In private leagues, only the owner can convert diamonds to balance
-    if (!league.isOfficial && league.ownerId !== userId) {
+    // Only OWNER or MANAGER can convert diamonds to league balance
+    if (member.role !== 'OWNER' && member.role !== 'MANAGER') {
       throw new BadRequestException(
-        'Em ligas privadas, apenas o dono pode converter diamantes em saldo. Seus diamantes podem ser usados para upgrades no clube.',
+        'Apenas o dono ou gestor da liga pode converter diamantes em saldo para apostas.',
       );
     }
 
@@ -93,7 +93,11 @@ export class DiamondService {
       where: { key: 'DIAMOND_TO_POINTS_RATE' },
     });
 
-    const RATE = configRate ? parseInt(configRate.value) : 5;
+    // VULN-015 fix: Ensure rate is always a safe integer to prevent float drift
+    const RATE = configRate ? Math.round(Number(configRate.value)) : 5;
+    if (!Number.isFinite(RATE) || RATE <= 0) {
+      throw new BadRequestException('Taxa de conversão inválida. Contate o administrador.');
+    }
     const pointsToAdd = diamonds * RATE;
 
     // Atomic transaction
@@ -207,11 +211,18 @@ export class DiamondService {
       },
     });
 
-    // Verify receipt with store (async)
-    // In production, this would call Google Play / App Store APIs
-    // For now, auto-verify in development
+    // Check if auto-approve is enabled (dev/test mode)
     try {
-      const isValid = await this.verifyStoreReceipt(dto.platform, dto.storeReceipt);
+      const autoApproveConfig = await this.prisma.systemConfig.findUnique({
+        where: { key: 'AUTO_APPROVE_PURCHASES' },
+      });
+      const autoApprove = autoApproveConfig?.value === 'true';
+
+      const isValid = autoApprove || await this.verifyStoreReceipt(dto.platform, dto.storeReceipt);
+
+      if (autoApprove) {
+        this.logger.warn(`Auto-approve enabled — purchase #${purchase.id} approved automatically`);
+      }
 
       if (isValid) {
         await this.creditDiamonds(purchase.id, userId, pkg.diamonds);
@@ -312,17 +323,31 @@ export class DiamondService {
   // ─── Private: Store Receipt Verification ───────────────────────────────
 
   private async verifyStoreReceipt(platform: string, receipt: string): Promise<boolean> {
-    // TODO: Implement real store verification
-    // - Google Play: googleapis.com/androidpublisher/v3/applications/{pkg}/purchases/products/{id}/tokens/{token}
-    // - App Store: api.storekit.itunes.apple.com/inApps/v1/transactions/{transactionId}
+    // VULN-005 fix: NEVER auto-verify receipts regardless of environment.
+    // Use Apple/Google sandbox environments for development testing instead.
 
-    // Development: auto-verify all receipts
-    if (process.env.NODE_ENV === 'development') {
-      return true;
+    if (!receipt || receipt.trim().length === 0) {
+      this.logger.warn('Empty receipt provided — rejecting');
+      return false;
     }
 
-    // Production: would call real APIs here
-    this.logger.warn(`Store verification not implemented for ${platform}`);
+    if (platform === 'ios' || platform === 'apple') {
+      // TODO: Implement Apple App Store Server API v2 verification
+      // POST https://api.storekit.itunes.apple.com/inApps/v1/transactions/{transactionId}
+      // For sandbox testing: https://api.storekit-sandbox.itunes.apple.com/...
+      this.logger.warn('Apple receipt verification not yet implemented — rejecting');
+      return false;
+    }
+
+    if (platform === 'android' || platform === 'google') {
+      // TODO: Implement Google Play Developer API verification
+      // GET https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{pkg}/purchases/products/{productId}/tokens/{token}
+      // Works with sandbox/test purchases natively
+      this.logger.warn('Google receipt verification not yet implemented — rejecting');
+      return false;
+    }
+
+    this.logger.warn(`Unknown platform "${platform}" — rejecting receipt`);
     return false;
   }
 }

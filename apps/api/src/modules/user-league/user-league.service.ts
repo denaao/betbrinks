@@ -5,15 +5,57 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { CreateLeagueDto } from './dto/create-league.dto';
 import { JoinLeagueDto } from './dto/join-league.dto';
 import { TransferBalanceDto } from './dto/transfer-balance.dto';
 import { ConvertDiamondsLeagueDto } from './dto/convert-diamonds.dto';
+import * as bcrypt from 'bcryptjs';
 
 const DIAMOND_CONVERSION_RATE = 5; // 1 diamond = 5 points
 const MAX_INVITE_CODE_RETRIES = 10;
+
+// Valid league transaction types (application-level enum, DB field remains VarChar for safety)
+export const LEAGUE_TX_TYPES = [
+  'BET_PLACED',
+  'BET_WON',
+  'ADMIN_CREDIT',
+  'ADMIN_DEBIT',
+  'DEPOSIT',
+  'WITHDRAWAL',
+  'DIAMOND_CONVERSION',
+  'STAR_UPGRADE',
+  'TRANSFER',
+] as const;
+export type LeagueTransactionType = (typeof LEAGUE_TX_TYPES)[number];
+
+// Star tier configuration
+const STAR_TIERS: Record<number, { maxMembers: number; maxManagers: number }> = {
+  0: { maxMembers: 15, maxManagers: 0 },
+  1: { maxMembers: 100, maxManagers: 1 },
+  2: { maxMembers: 250, maxManagers: 2 },
+  3: { maxMembers: 600, maxManagers: 3 },
+  4: { maxMembers: 1000, maxManagers: 4 },
+  5: { maxMembers: 1500, maxManagers: 5 },
+};
+
+const STAR_COSTS: Record<number, number> = {
+  0: 0,
+  1: 50,
+  2: 125,
+  3: 300,
+  4: 500,
+  5: 750,
+};
+
+function getStarUpgradeCost(targetStars: number): number {
+  return STAR_COSTS[targetStars] ?? 0;
+}
+
+const STAR_DURATION_DAYS = 30;
+const STAR_EXPIRY_WARNING_DAYS = 3;
 
 @Injectable()
 export class UserLeagueService {
@@ -150,6 +192,16 @@ export class UserLeagueService {
     // Add private leagues
     memberships.forEach((m, index) => {
       if (!m.league.isOfficial) {
+        // Check star expiry: if expired, effective stars = 1
+        const now = new Date();
+        let effectiveStars = m.league.stars;
+        const expired = m.league.starsExpiresAt && m.league.starsExpiresAt < now;
+        if (expired && effectiveStars > 0) effectiveStars = 0;
+
+        const tier = STAR_TIERS[effectiveStars] || STAR_TIERS[0];
+        const expiresAt = m.league.starsExpiresAt;
+        const daysUntilExpiry = expiresAt ? Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null;
+
         result.push({
           id: m.league.id,
           name: m.league.name,
@@ -159,7 +211,16 @@ export class UserLeagueService {
           balance: balanceMap.get(m.leagueId) || 0,
           memberCount: memberCounts[index],
           cashbox: m.league.cashbox,
+          autoApprove: m.league.autoApprove,
           isOpen: m.league.isOpen,
+          stars: effectiveStars,
+          starsExpiresAt: expiresAt,
+          starsExpired: !!expired,
+          starsExpiringSoon: daysUntilExpiry !== null && daysUntilExpiry <= STAR_EXPIRY_WARNING_DAYS && daysUntilExpiry > 0,
+          daysUntilExpiry,
+          maxMembers: tier.maxMembers,
+          maxManagers: tier.maxManagers,
+          overLimit: memberCounts[index] > tier.maxMembers,
         });
       }
     });
@@ -192,6 +253,16 @@ export class UserLeagueService {
       where: { leagueId_userId: { leagueId, userId } },
     });
 
+    // Check star expiry
+    const now = new Date();
+    let effectiveStars = league.stars;
+    const expired = league.starsExpiresAt && league.starsExpiresAt < now;
+    if (expired && effectiveStars > 0) effectiveStars = 0;
+    const tier = STAR_TIERS[effectiveStars] || STAR_TIERS[0];
+    const daysUntilExpiry = league.starsExpiresAt
+      ? Math.ceil((league.starsExpiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      : null;
+
     const result: any = {
       id: league.id,
       name: league.name,
@@ -208,10 +279,18 @@ export class UserLeagueService {
         ? Math.round((league.cashbox / league.cashboxInitial) * 100)
         : 0,
       createdAt: league.createdAt,
+      stars: effectiveStars,
+      starsExpiresAt: league.starsExpiresAt,
+      starsExpired: !!expired,
+      starsExpiringSoon: daysUntilExpiry !== null && daysUntilExpiry <= STAR_EXPIRY_WARNING_DAYS && daysUntilExpiry > 0,
+      daysUntilExpiry,
+      maxMembers: tier.maxMembers,
+      maxManagers: tier.maxManagers,
+      overLimit: memberCount > tier.maxMembers,
     };
 
-    // Include members if user is owner or admin
-    if (membership.role === 'OWNER' || membership.role === 'ADMIN') {
+    // Include members if user is owner, admin, or manager
+    if (membership.role === 'OWNER' || membership.role === 'ADMIN' || membership.role === 'MANAGER') {
       const members = await this.prisma.leagueMember.findMany({
         where: { leagueId, status: 'ACTIVE' },
         include: {
@@ -226,15 +305,42 @@ export class UserLeagueService {
       });
       const balMap = new Map(memberBalances.map((b) => [b.userId, b.balance]));
 
-      result.members = members.map((m: any) => ({
-        userId: m.userId,
-        name: m.user.name,
-        cpf: m.user.cpf,
-        avatarUrl: m.user.avatarUrl,
-        role: m.role,
-        balance: balMap.get(m.userId) || 0,
-        joinedAt: m.joinedAt,
-      }));
+      // Get affiliates for this league
+      const affiliates = await this.prisma.leagueAffiliate.findMany({
+        where: { leagueId },
+        include: { user: { select: { name: true } } },
+      });
+      const affMap = new Map(affiliates.map((a) => [a.userId, a]));
+      const affIdMap = new Map(affiliates.map((a) => [a.id, a]));
+
+      // Get referrals for this league (who is linked to which affiliate)
+      const referrals = await this.prisma.affiliateReferral.findMany({
+        where: { affiliate: { leagueId } },
+      });
+      const refMap = new Map(referrals.map((r) => [r.userId, r.affiliateId]));
+
+      result.members = members.map((m: any) => {
+        const aff = affMap.get(m.userId);
+        const linkedAffId = refMap.get(m.userId);
+        const linkedAff = linkedAffId ? affIdMap.get(linkedAffId) : null;
+        return {
+          userId: m.userId,
+          name: m.user.name,
+          cpf: m.user.cpf,
+          avatarUrl: m.user.avatarUrl,
+          role: m.role,
+          balance: balMap.get(m.userId) || 0,
+          joinedAt: m.joinedAt,
+          isAffiliate: !!aff,
+          affiliateCode: aff?.affiliateCode || null,
+          revenueSharePct: aff?.revenueSharePct || null,
+          creditLimit: aff?.creditLimit || 0,
+          creditUsed: aff?.creditUsed || 0,
+          linkedToAffiliateId: linkedAffId || null,
+          linkedToAffiliateName: linkedAff ? (linkedAff as any).user?.name || null : null,
+          linkedToAffiliateCode: linkedAff?.affiliateCode || null,
+        };
+      });
     }
 
     return result;
@@ -391,6 +497,23 @@ export class UserLeagueService {
       }
     }
 
+    // If auto-approve is enabled, add member directly
+    if (league.autoApprove) {
+      await this.checkLeagueCapacity(league.id);
+
+      const member = await this.prisma.$transaction(async (tx) => {
+        const m = await tx.leagueMember.create({
+          data: { leagueId: league.id, userId, role: 'MEMBER' },
+        });
+        await tx.leagueBalance.create({
+          data: { leagueId: league.id, userId, balance: 0 },
+        });
+        return m;
+      });
+
+      return { ...member, autoApproved: true };
+    }
+
     const request = await this.prisma.leagueJoinRequest.create({
       data: {
         leagueId: league.id,
@@ -444,6 +567,23 @@ export class UserLeagueService {
 
     // Verify user is admin of the league
     await this.verifyLeagueAdmin(userId, request.leagueId);
+
+    // Check member limit before approving
+    const league = await this.prisma.league.findUnique({ where: { id: request.leagueId } });
+    if (league && !league.isOfficial) {
+      const now = new Date();
+      let effectiveStars = league.stars;
+      if (league.starsExpiresAt && league.starsExpiresAt < now && effectiveStars > 0) effectiveStars = 0;
+      const tier = STAR_TIERS[effectiveStars] || STAR_TIERS[0];
+      const currentMembers = await this.prisma.leagueMember.count({
+        where: { leagueId: league.id, status: 'ACTIVE' },
+      });
+      if (currentMembers >= tier.maxMembers) {
+        throw new BadRequestException(
+          `Liga atingiu o limite de ${tier.maxMembers} membros para nível ${effectiveStars}⭐. O dono precisa evoluir a liga.`,
+        );
+      }
+    }
 
     // Approve atomically
     await this.prisma.$transaction(async (tx) => {
@@ -500,7 +640,7 @@ export class UserLeagueService {
    * Remove member from league
    */
   async removeMember(adminId: number, leagueId: number, targetUserId: number) {
-    await this.verifyLeagueAdmin(adminId, leagueId);
+    const adminMembership = await this.verifyLeagueAdmin(adminId, leagueId);
 
     if (adminId === targetUserId) {
       throw new BadRequestException('Você não pode se remover da liga');
@@ -512,6 +652,13 @@ export class UserLeagueService {
 
     if (!membership) {
       throw new NotFoundException('Membro não encontrado');
+    }
+
+    // Managers cannot remove other managers or owners
+    if (adminMembership.role === 'MANAGER') {
+      if (membership.role === 'MANAGER' || membership.role === 'OWNER' || membership.role === 'ADMIN') {
+        throw new ForbiddenException('Gestores não podem remover outros gestores ou o dono.');
+      }
     }
 
     await this.prisma.leagueMember.update({
@@ -534,6 +681,25 @@ export class UserLeagueService {
     }
 
     await this.verifyLeagueAdmin(adminId, leagueId);
+    await this.checkLeagueCapacity(leagueId);
+
+    // Check affiliate credit limit (non-owners only)
+    const adminMember = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId: adminId } },
+    });
+    if (adminMember && adminMember.role !== 'OWNER') {
+      const affiliate = await this.prisma.leagueAffiliate.findUnique({
+        where: { leagueId_userId: { leagueId, userId: adminId } },
+      });
+      if (affiliate && affiliate.creditLimit > 0) {
+        const remaining = affiliate.creditLimit - affiliate.creditUsed;
+        if (amount > remaining) {
+          throw new BadRequestException(
+            `Limite de crédito excedido. Disponível: ${remaining} fichas (limite: ${affiliate.creditLimit}, usado: ${affiliate.creditUsed}).`,
+          );
+        }
+      }
+    }
 
     // Verify target is a member
     const targetMember = await this.prisma.leagueMember.findUnique({
@@ -544,8 +710,22 @@ export class UserLeagueService {
       throw new NotFoundException('Membro não encontrado');
     }
 
-    // Credit balance atomically
+    // Verify league has enough cashbox
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league) throw new NotFoundException('Liga não encontrada.');
+    if (league.cashbox < amount) {
+      throw new BadRequestException(
+        `Caixa da liga insuficiente. Caixa: ${league.cashbox}, necessário: ${amount}.`,
+      );
+    }
+
+    // Deduct from cashbox, credit member balance atomically
     await this.prisma.$transaction(async (tx) => {
+      await tx.league.update({
+        where: { id: leagueId },
+        data: { cashbox: { decrement: amount } },
+      });
+
       await tx.leagueBalance.update({
         where: { leagueId_userId: { leagueId, userId: targetUserId } },
         data: { balance: { increment: amount } },
@@ -558,9 +738,27 @@ export class UserLeagueService {
           toUserId: targetUserId,
           amount,
           type: 'ADMIN_CREDIT',
-          description: `Crédito do administrador: +${amount} pontos`,
+          description: `Crédito do administrador: +${amount} pontos (caixa → membro)`,
         },
       });
+
+      await tx.cashboxLog.create({
+        data: {
+          leagueId,
+          type: 'WITHDRAWAL',
+          amount: -amount,
+          balanceAfter: league.cashbox - amount,
+          description: `Envio de ${amount} fichas para membro`,
+        },
+      });
+
+      // Update affiliate credit usage if applicable
+      if (adminMember && adminMember.role !== 'OWNER') {
+        await tx.leagueAffiliate.updateMany({
+          where: { leagueId, userId: adminId },
+          data: { creditUsed: { increment: amount } },
+        });
+      }
     });
   }
 
@@ -578,6 +776,7 @@ export class UserLeagueService {
     }
 
     await this.verifyLeagueAdmin(adminId, leagueId);
+    await this.checkLeagueCapacity(leagueId);
 
     // Verify target is a member
     const targetMember = await this.prisma.leagueMember.findUnique({
@@ -599,11 +798,19 @@ export class UserLeagueService {
       );
     }
 
-    // Debit balance atomically
+    // Debit member balance, return to cashbox atomically
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league) throw new NotFoundException('Liga não encontrada.');
+
     await this.prisma.$transaction(async (tx) => {
       await tx.leagueBalance.update({
         where: { leagueId_userId: { leagueId, userId: targetUserId } },
         data: { balance: { decrement: amount } },
+      });
+
+      await tx.league.update({
+        where: { id: leagueId },
+        data: { cashbox: { increment: amount } },
       });
 
       await tx.leagueTransaction.create({
@@ -613,7 +820,17 @@ export class UserLeagueService {
           toUserId: targetUserId,
           amount: -amount,
           type: 'ADMIN_DEBIT',
-          description: `Débito do administrador: -${amount} pontos`,
+          description: `Débito do administrador: -${amount} pontos (membro → caixa)`,
+        },
+      });
+
+      await tx.cashboxLog.create({
+        data: {
+          leagueId,
+          type: 'DEPOSIT',
+          amount,
+          balanceAfter: league.cashbox + amount,
+          description: `Retirada de ${amount} fichas de membro`,
         },
       });
     });
@@ -635,6 +852,13 @@ export class UserLeagueService {
     });
 
     if (!membership) throw new ForbiddenException('Você não é membro desta liga');
+
+    // Only OWNER or MANAGER can convert diamonds to league balance
+    if (membership.role !== 'OWNER' && membership.role !== 'MANAGER') {
+      throw new ForbiddenException(
+        'Apenas o dono ou gestor da liga pode converter diamantes em saldo para apostas.',
+      );
+    }
 
     // Check user has enough diamonds
     const pointBalance = await this.prisma.pointBalance.findUnique({
@@ -795,6 +1019,168 @@ export class UserLeagueService {
     };
   }
 
+  // ─── Star Upgrade ──────────────────────────────────────────────────────
+
+  /**
+   * Get star tiers info (for frontend display)
+   */
+  getStarTiers() {
+    return Object.entries(STAR_TIERS).map(([stars, tier]) => ({
+      stars: parseInt(stars),
+      maxMembers: tier.maxMembers,
+      maxManagers: tier.maxManagers,
+      cost: getStarUpgradeCost(parseInt(stars)),
+    }));
+  }
+
+  /**
+   * Upgrade league stars (owner only, costs diamonds)
+   */
+  async upgradeLeagueStars(userId: number, leagueId: number, targetStars: number) {
+    if (targetStars < 1 || targetStars > 5) {
+      throw new BadRequestException('Nível de estrelas deve ser entre 1 e 5.');
+    }
+
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league) throw new NotFoundException('Liga não encontrada.');
+    if (league.isOfficial) throw new BadRequestException('Liga oficial não pode ser evoluída.');
+    if (league.ownerId !== userId) throw new ForbiddenException('Apenas o dono pode evoluir a liga.');
+
+    // Calculate cost based on target level
+    const cost = getStarUpgradeCost(targetStars);
+
+    // Check user has enough diamonds
+    const userBalance = await this.prisma.pointBalance.findUnique({ where: { userId } });
+    if (!userBalance || userBalance.diamonds < cost) {
+      throw new BadRequestException(
+        `Diamantes insuficientes. Você tem ${userBalance?.diamonds || 0}, precisa de ${cost}.`,
+      );
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + STAR_DURATION_DAYS);
+
+    // Upgrade atomically
+    await this.prisma.$transaction(async (tx) => {
+      await tx.league.update({
+        where: { id: leagueId },
+        data: {
+          stars: targetStars,
+          starsExpiresAt: expiresAt,
+        },
+      });
+
+      await tx.pointBalance.update({
+        where: { userId },
+        data: { diamonds: { decrement: cost } },
+      });
+
+      await tx.leagueTransaction.create({
+        data: {
+          leagueId,
+          toUserId: userId,
+          amount: 0,
+          type: 'STAR_UPGRADE',
+          description: `Upgrade para ${targetStars}⭐ (${cost} diamantes, válido por 30 dias)`,
+        },
+      });
+    });
+
+    return {
+      stars: targetStars,
+      expiresAt,
+      cost,
+      tier: STAR_TIERS[targetStars],
+    };
+  }
+
+  async toggleAutoApprove(userId: number, leagueId: number) {
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league) throw new NotFoundException('Liga não encontrada.');
+    if (league.isOfficial) throw new BadRequestException('Liga oficial não pode alterar essa configuração.');
+    if (league.ownerId !== userId) throw new ForbiddenException('Apenas o dono pode alterar essa configuração.');
+
+    const updated = await this.prisma.league.update({
+      where: { id: leagueId },
+      data: { autoApprove: !league.autoApprove },
+    });
+
+    return { autoApprove: updated.autoApprove };
+  }
+
+  // ─── Manager Role ─────────────────────────────────────────────────────
+
+  /**
+   * Promote member to manager (owner only)
+   */
+  async promoteToManager(ownerId: number, leagueId: number, targetUserId: number, password: string) {
+    // Validate owner password
+    const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
+    if (!owner) throw new NotFoundException('Usuário não encontrado.');
+    const valid = await bcrypt.compare(password, owner.passwordHash);
+    if (!valid) throw new ForbiddenException('Senha incorreta.');
+
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league) throw new NotFoundException('Liga não encontrada.');
+    if (league.ownerId !== ownerId) throw new ForbiddenException('Apenas o dono pode promover gestores.');
+
+    // Check star expiry for effective stars
+    const now = new Date();
+    let effectiveStars = league.stars;
+    if (league.starsExpiresAt && league.starsExpiresAt < now && effectiveStars > 0) effectiveStars = 0;
+    const tier = STAR_TIERS[effectiveStars] || STAR_TIERS[0];
+
+    // Count current managers
+    const managerCount = await this.prisma.leagueMember.count({
+      where: { leagueId, role: 'MANAGER', status: 'ACTIVE' },
+    });
+
+    if (managerCount >= tier.maxManagers) {
+      throw new BadRequestException(
+        `Limite de gestores atingido (${tier.maxManagers}) para nível ${effectiveStars}⭐. Evolua a liga para adicionar mais gestores.`,
+      );
+    }
+
+    const membership = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId: targetUserId } },
+    });
+
+    if (!membership) throw new NotFoundException('Membro não encontrado.');
+    if (membership.role !== 'MEMBER') throw new BadRequestException('Apenas membros podem ser promovidos a gestor.');
+
+    await this.prisma.leagueMember.update({
+      where: { id: membership.id },
+      data: { role: 'MANAGER' },
+    });
+  }
+
+  /**
+   * Demote manager back to member (owner only)
+   */
+  async demoteManager(ownerId: number, leagueId: number, targetUserId: number, password: string) {
+    // Validate owner password
+    const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
+    if (!owner) throw new NotFoundException('Usuário não encontrado.');
+    const valid = await bcrypt.compare(password, owner.passwordHash);
+    if (!valid) throw new ForbiddenException('Senha incorreta.');
+
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league) throw new NotFoundException('Liga não encontrada.');
+    if (league.ownerId !== ownerId) throw new ForbiddenException('Apenas o dono pode rebaixar gestores.');
+
+    const membership = await this.prisma.leagueMember.findUnique({
+      where: { leagueId_userId: { leagueId, userId: targetUserId } },
+    });
+
+    if (!membership) throw new NotFoundException('Membro não encontrado.');
+    if (membership.role !== 'MANAGER') throw new BadRequestException('Usuário não é gestor.');
+
+    await this.prisma.leagueMember.update({
+      where: { id: membership.id },
+      data: { role: 'MEMBER' },
+    });
+  }
+
   // ─── Helpers ───────────────────────────────────────────────────────────
 
   /**
@@ -810,15 +1196,69 @@ export class UserLeagueService {
   }
 
   /**
-   * Verify user is owner or admin of the league
+   * Verify user is owner, admin, or manager of the league
    */
   private async verifyLeagueAdmin(userId: number, leagueId: number) {
     const membership = await this.prisma.leagueMember.findUnique({
       where: { leagueId_userId: { leagueId, userId } },
     });
 
-    if (!membership || (membership.role !== 'OWNER' && membership.role !== 'ADMIN')) {
+    if (!membership || (membership.role !== 'OWNER' && membership.role !== 'ADMIN' && membership.role !== 'MANAGER')) {
       throw new ForbiddenException('Você não tem permissão para realizar esta ação');
+    }
+
+    return membership;
+  }
+
+  /**
+   * Check if league is over member limit (blocks transactions)
+   */
+  private async checkLeagueCapacity(leagueId: number) {
+    const league = await this.prisma.league.findUnique({ where: { id: leagueId } });
+    if (!league || league.isOfficial) return; // official league has no limit
+
+    const now = new Date();
+    let effectiveStars = league.stars;
+    if (league.starsExpiresAt && league.starsExpiresAt < now && effectiveStars > 0) effectiveStars = 0;
+    const tier = STAR_TIERS[effectiveStars] || STAR_TIERS[0];
+
+    const memberCount = await this.prisma.leagueMember.count({
+      where: { leagueId, status: 'ACTIVE' },
+    });
+
+    if (memberCount > tier.maxMembers) {
+      throw new BadRequestException(
+        `Liga acima do limite de membros (${memberCount}/${tier.maxMembers}). O dono precisa renovar/evoluir o nível de estrelas para transacionar crédito.`,
+      );
+    }
+  }
+
+  // ─── Cron: Expire Stars ──────────────────────────────────────────────
+
+  @Cron('0 * * * *') // Every hour
+  async checkExpiredStars() {
+    try {
+      const expired = await this.prisma.league.findMany({
+        where: {
+          stars: { gt: 0 },
+          starsExpiresAt: { lt: new Date() },
+          isOfficial: false,
+        },
+      });
+
+      if (expired.length === 0) return;
+
+      for (const league of expired) {
+        await this.prisma.league.update({
+          where: { id: league.id },
+          data: { stars: 0, starsExpiresAt: null },
+        });
+        this.logger.warn(`League #${league.id} "${league.name}" stars expired → reset to 0`);
+      }
+
+      this.logger.log(`Expired stars reset for ${expired.length} league(s)`);
+    } catch (err) {
+      this.logger.error('Failed to check expired stars', err);
     }
   }
 }

@@ -7,9 +7,11 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { PointsService } from '../points/points.service';
 import { CashboxService } from '../user-league/cashbox.service';
+import { AffiliateService } from '../affiliate/affiliate.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { CreateBetDto } from './dto/create-bet.dto';
 import { CreateBetSlipDto } from './dto/create-bet-slip.dto';
+import { safeMultiply, safeCombinedOdd } from '../../common/utils/safe-math';
 const MAX_DAILY_BETS = 50;
 const OFFICIAL_LEAGUE_ID = 1; // Default league
 
@@ -21,6 +23,7 @@ export class BetService {
     private prisma: PrismaService,
     private pointsService: PointsService,
     private cashboxService: CashboxService,
+    private affiliateService: AffiliateService,
     private redis: RedisService,
   ) {}
 
@@ -83,50 +86,86 @@ export class BetService {
       throw new BadRequestException('Voce ja tem uma aposta pendente nesta odd.');
     }
 
-    // 7. Calculate potential return
+    // 7. Calculate potential return (VULN-015 fix: safe integer math)
     const oddValue = parseFloat(odd.value.toString());
-    const potentialReturn = Math.floor(dto.amount * oddValue);
+    const potentialReturn = safeMultiply(dto.amount, oddValue);
 
-    // 8. Check league balance
-    const leagueBalance = await this.getLeagueBalance(userId, leagueId);
-    if (leagueBalance < dto.amount) {
-      throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
-    }
-
-    // 8b. Check league cashbox can cover potential payout (private leagues only)
+    // 8. Atomic balance check + debit + bet creation (VULN-004 fix: prevents double-spend)
     const cashboxCheck = await this.cashboxService.canAcceptBet(leagueId, potentialReturn);
     if (!cashboxCheck.ok) {
       throw new BadRequestException(cashboxCheck.reason);
     }
 
-    // 9. Debit from league balance
-    await this.debitLeagueBalance(
-      userId,
-      leagueId,
-      dto.amount,
-      `Aposta: ${fixture.homeTeam} vs ${fixture.awayTeam} - ${odd.name} @${oddValue}`,
-    );
+    const betDescription = `Aposta: ${fixture.homeTeam} vs ${fixture.awayTeam} - ${odd.name} @${oddValue}`;
 
-    // 10. Create bet record
-    const bet = await this.prisma.bet.create({
-      data: {
-        userId,
-        fixtureId: dto.fixtureId,
-        oddId: dto.oddId,
-        amount: dto.amount,
-        oddValue,
-        potentialReturn,
-        status: 'PENDING',
-      },
-      include: {
-        fixture: {
-          select: { homeTeam: true, awayTeam: true, leagueName: true, startAt: true, status: true },
-        },
-        odd: {
-          include: { market: { select: { type: true } } },
-        },
-      },
+    // Pre-check balance before entering transaction (fast fail with friendly message)
+    const preBalance = await this.prisma.leagueBalance.findUnique({
+      where: { leagueId_userId: { leagueId, userId } },
     });
+    if (!preBalance || preBalance.balance < dto.amount) {
+      throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+    }
+
+    let bet;
+    try {
+      bet = await this.prisma.$transaction(async (tx) => {
+        // Lock the user's league balance row with SELECT FOR UPDATE
+        const lockedBalance = await tx.$queryRaw<Array<{ balance: number }>>`
+          SELECT balance FROM "league_balances"
+          WHERE "league_id" = ${leagueId} AND "user_id" = ${userId}
+          FOR UPDATE
+        `;
+
+        const currentBalance = lockedBalance.length > 0 ? Number(lockedBalance[0].balance) : 0;
+
+        if (currentBalance < dto.amount) {
+          throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+        }
+
+        // Debit balance (row is locked, no concurrent debit can happen)
+        await tx.leagueBalance.update({
+          where: { leagueId_userId: { leagueId, userId } },
+          data: { balance: { decrement: dto.amount } },
+        });
+
+        // Create transaction record
+        await tx.leagueTransaction.create({
+          data: {
+            leagueId,
+            fromUserId: null,
+            toUserId: userId,
+            amount: -dto.amount,
+            type: 'BET_PLACED',
+            description: betDescription,
+          },
+        });
+
+        // Create bet record (inside same transaction)
+        return tx.bet.create({
+          data: {
+            userId,
+            fixtureId: dto.fixtureId,
+            oddId: dto.oddId,
+            amount: dto.amount,
+            oddValue,
+            potentialReturn,
+            status: 'PENDING',
+          },
+          include: {
+            fixture: {
+              select: { homeTeam: true, awayTeam: true, leagueName: true, startAt: true, status: true },
+            },
+            odd: {
+              include: { market: { select: { type: true } } },
+            },
+          },
+        });
+      }, { isolationLevel: 'Serializable' });
+    } catch (e: any) {
+      if (e instanceof BadRequestException || e instanceof NotFoundException) throw e;
+      this.logger.error(`Bet transaction failed: ${e.message}`, e.stack);
+      throw new BadRequestException('Erro ao processar aposta. Tente novamente.');
+    }
 
     // 11. Increment daily counter
     await this.incrementDailyCount(userId);
@@ -155,6 +194,13 @@ export class BetService {
 
     if (!leagueMember) {
       throw new BadRequestException('Voce nao esta em uma liga ativa para fazer apostas.');
+    }
+
+    // Validate no duplicate fixtures in the same slip
+    const fixtureIds = dto.selections.map((s) => s.fixtureId);
+    const uniqueFixtureIds = new Set(fixtureIds);
+    if (uniqueFixtureIds.size !== fixtureIds.length) {
+      throw new BadRequestException('Bilhete nao pode conter duas apostas no mesmo jogo.');
     }
 
     // Validate all selections
@@ -200,25 +246,58 @@ export class BetService {
       });
     }
 
-    // Calculate combined odd and potential return
-    const combinedOdd = validatedSelections.reduce((acc, s) => acc * s.oddValue, 1);
-    const potentialReturn = Math.floor(dto.amount * combinedOdd);
+    // Calculate combined odd and potential return (VULN-015 fix: safe integer math)
+    const combinedOdd = safeCombinedOdd(validatedSelections.map((s) => s.oddValue));
+    const potentialReturn = safeMultiply(dto.amount, combinedOdd);
 
-    // Check league balance
-    const leagueBalance = await this.getLeagueBalance(userId, leagueId);
-    if (leagueBalance < dto.amount) {
-      throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
-    }
-
-    // Debit from league balance ONCE for the entire slip
-    const desc = validatedSelections.length === 1
+    // Atomic balance check + debit + slip creation (VULN-004 fix: prevents double-spend)
+    const slipDesc = validatedSelections.length === 1
       ? `Aposta: ${validatedSelections[0].homeTeam} vs ${validatedSelections[0].awayTeam}`
       : `Bilhete multiplo (${validatedSelections.length} selecoes)`;
 
-    await this.debitLeagueBalance(userId, leagueId, dto.amount, desc);
+    // Pre-check balance before entering transaction (fast fail with friendly message)
+    const preBalance = await this.prisma.leagueBalance.findUnique({
+      where: { leagueId_userId: { leagueId, userId } },
+    });
+    if (!preBalance || preBalance.balance < dto.amount) {
+      throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+    }
 
-    // Create slip + legs in a transaction
-    const slip = await this.prisma.$transaction(async (tx) => {
+    let slip;
+    try {
+      slip = await this.prisma.$transaction(async (tx) => {
+      // Lock the user's league balance row with SELECT FOR UPDATE
+      const lockedBalance = await tx.$queryRaw<Array<{ balance: number }>>`
+        SELECT balance FROM "league_balances"
+        WHERE "league_id" = ${leagueId} AND "user_id" = ${userId}
+        FOR UPDATE
+      `;
+
+      const currentBalance = lockedBalance.length > 0 ? Number(lockedBalance[0].balance) : 0;
+
+      if (currentBalance < dto.amount) {
+        throw new BadRequestException('Saldo insuficiente na liga para esta aposta.');
+      }
+
+      // Debit balance (row is locked)
+      await tx.leagueBalance.update({
+        where: { leagueId_userId: { leagueId, userId } },
+        data: { balance: { decrement: dto.amount } },
+      });
+
+      // Create transaction record
+      await tx.leagueTransaction.create({
+        data: {
+          leagueId,
+          fromUserId: null,
+          toUserId: userId,
+          amount: -dto.amount,
+          type: 'BET_PLACED',
+          description: slipDesc,
+        },
+      });
+
+      // Create bet slip
       const betSlip = await tx.betSlip.create({
         data: {
           userId,
@@ -230,6 +309,7 @@ export class BetService {
         },
       });
 
+      // Create legs
       for (const sel of validatedSelections) {
         await tx.bet.create({
           data: {
@@ -239,7 +319,7 @@ export class BetService {
             oddId: sel.oddId,
             amount: dto.amount,
             oddValue: sel.oddValue,
-            potentialReturn: Math.floor(dto.amount * sel.oddValue),
+            potentialReturn: safeMultiply(dto.amount, sel.oddValue),
             status: 'PENDING',
           },
         });
@@ -258,7 +338,13 @@ export class BetService {
           },
         },
       });
-    });
+    }, { isolationLevel: 'Serializable' });
+    } catch (e: any) {
+      // Re-throw NestJS exceptions as-is; wrap unknown errors with details
+      if (e instanceof BadRequestException || e instanceof NotFoundException) throw e;
+      this.logger.error(`BetSlip transaction failed: ${e.message}`, e.stack);
+      throw new BadRequestException('Erro ao processar aposta. Tente novamente.');
+    }
 
     await this.incrementDailyCount(userId);
 
@@ -269,7 +355,8 @@ export class BetService {
 
   // ─── Get Active Slips ─────────────────────────────────────────────────
 
-  async getActiveSlips(userId: number, leagueId?: number) {
+  async getActiveSlips(userId: number, leagueId?: number, page = 1, limit = 50) {
+    const skip = (page - 1) * limit;
     const slips = await this.prisma.betSlip.findMany({
       where: { userId, status: 'PENDING', ...(leagueId ? { leagueId } : {}) },
       include: {
@@ -284,6 +371,8 @@ export class BetService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip,
     });
     return slips.map(s => this.mapSlipResponse(s));
   }
@@ -375,7 +464,8 @@ export class BetService {
 
   // ─── Get Active Bets ───────────────────────────────────────────────────
 
-  async getActiveBets(userId: number, leagueId?: number) {
+  async getActiveBets(userId: number, leagueId?: number, page = 1, limit = 50) {
+    const skip = (page - 1) * limit;
     const bets = await this.prisma.bet.findMany({
       where: {
         userId,
@@ -394,6 +484,8 @@ export class BetService {
         },
       },
       orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip,
     });
 
     return bets.map((b) => this.mapBetResponse(b, b.betSlip?.leagueId));
@@ -554,6 +646,15 @@ export class BetService {
           await this.cashboxService.onBetLost(leagueId, bet.amount, bet.betSlipId || undefined);
         } catch (e: any) {
           this.logger.error(`Cashbox credit failed for league ${leagueId}: ${e.message}`);
+        }
+
+        // Process affiliate commissions (revenue = bet amount lost by player)
+        try {
+          await this.affiliateService.processCommission(
+            leagueId, bet.userId, bet.betSlipId || null, bet.amount, bet.amount,
+          );
+        } catch (e: any) {
+          this.logger.error(`Affiliate commission failed for bet ${bet.id}: ${e.message}`);
         }
 
         await this.prisma.bet.update({

@@ -36,6 +36,12 @@ export class UserLeagueController {
     return this.userLeagueService.getUserLeagues(userId);
   }
 
+  @Get('star-tiers')
+  @ApiOperation({ summary: 'Obter informações dos níveis de estrelas' })
+  getStarTiers() {
+    return this.userLeagueService.getStarTiers();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obter detalhes de uma liga' })
   async getLeagueDetails(
@@ -217,6 +223,57 @@ export class UserLeagueController {
     @Body() body: { amount: number },
   ) {
     return this.cashboxService.withdrawFromCashbox(userId, id, body.amount);
+  }
+
+  // ─── Star Upgrade ──────────────────────────────────────────────────────
+
+  @Post(':id/upgrade-stars')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Evoluir nível de estrelas da liga (owner only, custa diamantes)' })
+  async upgradeStars(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { targetStars: number },
+  ) {
+    return this.userLeagueService.upgradeLeagueStars(userId, id, body.targetStars);
+  }
+
+  // ─── Manager Role ─────────────────────────────────────────────────────
+
+  @Post(':id/members/:memberId/promote')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Promover membro a gestor (owner only)' })
+  async promoteToManager(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('memberId', ParseIntPipe) memberId: number,
+    @Body() body: { password: string },
+  ) {
+    await this.userLeagueService.promoteToManager(userId, id, memberId, body.password);
+    return { message: 'Membro promovido a gestor com sucesso' };
+  }
+
+  @Post(':id/members/:memberId/demote')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Rebaixar gestor a membro (owner only)' })
+  async demoteManager(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('memberId', ParseIntPipe) memberId: number,
+    @Body() body: { password: string },
+  ) {
+    await this.userLeagueService.demoteManager(userId, id, memberId, body.password);
+    return { message: 'Gestor rebaixado a membro com sucesso' };
+  }
+
+  @Post(':id/toggle-auto-approve')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Habilitar/desabilitar auto-aprovação de membros (owner only)' })
+  async toggleAutoApprove(
+    @CurrentUser('userId') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.userLeagueService.toggleAutoApprove(userId, id);
   }
 
   // ─── Remove Member ─────────────────────────────────────────────────────

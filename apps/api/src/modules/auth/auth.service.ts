@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   ConflictException,
   UnauthorizedException,
@@ -24,7 +24,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // ─── Register ──────────────────────────────────────────────────────────
+  // â”€â”€â”€ Register â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async register(dto: RegisterDto) {
     // Validate CPF format and algorithm
@@ -35,14 +35,24 @@ export class AuthService {
     const formattedCpf = this.formatCPF(dto.cpf);
 
     const existing = await this.prisma.user.findFirst({
-      where: { OR: [{ cpf: formattedCpf }, { phone: dto.phone }] },
+      where: {
+        OR: [
+          { cpf: formattedCpf },
+          { phone: dto.phone },
+          // email duplicate check disabled
+        ],
+      },
     });
 
     if (existing) {
       if (existing.cpf === formattedCpf) {
         throw new ConflictException('CPF ja cadastrado');
       }
-      throw new ConflictException('Telefone ja cadastrado');
+      if (existing.phone === dto.phone) {
+        throw new ConflictException('Telefone ja cadastrado');
+      }
+      // email check will be added when email field is enabled
+      throw new ConflictException('Dados ja cadastrados');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
@@ -116,7 +126,7 @@ export class AuthService {
     };
   }
 
-  // ─── Verify Phone ──────────────────────────────────────────────────────
+  // â”€â”€â”€ Verify Phone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async verifyPhone(dto: VerifyPhoneDto) {
     const storedOtp = await this.redis.get(`otp:${dto.phone}`);
@@ -200,7 +210,7 @@ export class AuthService {
     };
   }
 
-  // ─── Login ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async login(dto: LoginDto) {
     const formattedCpf = this.formatCPF(dto.cpf);
@@ -270,7 +280,7 @@ export class AuthService {
     };
   }
 
-  // ─── Refresh Token ─────────────────────────────────────────────────────
+  // â”€â”€â”€ Refresh Token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async refreshToken(dto: RefreshTokenDto) {
     try {
@@ -292,62 +302,10 @@ export class AuthService {
     }
   }
 
-  // ─── Helpers ───────────────────────────────────────────────────────────
+  // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private validateCPF(cpf: string): boolean {
     // Strip formatting
     const cleaned = cpf.replace(/\D/g, '');
     if (cleaned.length !== 11) return false;
-    if (/^(\d)\1+$/.test(cleaned)) return false; // all same digits
-
-    // Validate check digits (mod 11 algorithm)
-    let sum = 0;
-    for (let i = 0; i < 9; i++) sum += parseInt(cleaned[i]) * (10 - i);
-    let check = 11 - (sum % 11);
-    if (check >= 10) check = 0;
-    if (parseInt(cleaned[9]) !== check) return false;
-
-    sum = 0;
-    for (let i = 0; i < 10; i++) sum += parseInt(cleaned[i]) * (11 - i);
-    check = 11 - (sum % 11);
-    if (check >= 10) check = 0;
-    if (parseInt(cleaned[10]) !== check) return false;
-
-    return true;
-  }
-
-  private formatCPF(cpf: string): string {
-    const cleaned = cpf.replace(/\D/g, '');
-    return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
-  }
-
-  private generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  }
-
-  private async generateTokens(userId: number, identifier: string) {
-    const payload = { userId, cpf: identifier };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.config.get<string>('JWT_SECRET'),
-        expiresIn: this.config.get<string>('JWT_EXPIRATION', '15m'),
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRATION', '7d'),
-      }),
-    ]);
-    return { accessToken, refreshToken };
-  }
-
-  private sanitizeUser(user: { id: number; name: string; cpf: string | null; phone: string; avatarUrl: string | null; isVerified: boolean }) {
-    return {
-      id: user.id,
-      name: user.name,
-      cpf: user.cpf,
-      phone: user.phone,
-      avatarUrl: user.avatarUrl,
-      isVerified: user.isVerified,
-    };
-  }
-}
+    if (/^(\d)\1

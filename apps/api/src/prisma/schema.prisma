@@ -41,6 +41,8 @@ model User {
   joinRequests      LeagueJoinRequest[]
   sentTransfers     LeagueTransaction[] @relation("SentTransfers")
   receivedTransfers LeagueTransaction[] @relation("ReceivedTransfers")
+  affiliateProfiles LeagueAffiliate[]
+  affiliateReferrals AffiliateReferral[] @relation("ReferredUser")
 
   @@map("users")
 }
@@ -354,10 +356,13 @@ model League {
   name            String        @db.VarChar(50)
   inviteCode      String        @unique @map("invite_code") @db.VarChar(10)
   isOfficial      Boolean       @default(false) @map("is_official")
+  stars           Int           @default(0)  // 0-5 estrelas, define limites de membros e gestores
+  starsExpiresAt  DateTime?     @map("stars_expires_at") // quando o nível expira (30 dias após upgrade)
   cashbox         Int           @default(0)  // saldo atual do caixa da liga (em pontos/fichas)
   cashboxInitial  Int           @default(0)  @map("cashbox_initial") // valor inicial depositado pelo owner
   cashboxMinAlert Int           @default(100) @map("cashbox_min_alert") // limite mínimo para alerta ao owner
   isOpen          Boolean       @default(true) @map("is_open") // liga aceita apostas? (false = caixa baixo)
+  autoApprove     Boolean       @default(false) @map("auto_approve") // auto-aprovar entrada de membros
   createdAt       DateTime      @default(now()) @map("created_at")
 
   owner        User?             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -367,6 +372,8 @@ model League {
   transactions LeagueTransaction[]
   betSlips     BetSlip[]
   cashboxLogs  CashboxLog[]
+  affiliates   LeagueAffiliate[]
+  affiliateCommissions AffiliateCommission[]
 
   @@map("leagues")
 }
@@ -413,6 +420,7 @@ model LeagueMember {
 enum LeagueMemberRole {
   OWNER
   ADMIN
+  MANAGER
   MEMBER
 }
 
@@ -474,6 +482,67 @@ model LeagueTransaction {
   @@index([leagueId, createdAt])
   @@index([toUserId, leagueId])
   @@map("league_transactions")
+}
+
+// ─── Affiliate System ──────────────────────────────────────────────────────
+
+model LeagueAffiliate {
+  id              Int       @id @default(autoincrement())
+  leagueId        Int       @map("league_id")
+  userId          Int       @map("user_id")
+  parentId        Int?      @map("parent_id") // null = top-level affiliate, set = sub-affiliate
+  affiliateCode   String    @unique @map("affiliate_code") @db.VarChar(12)
+  revenueSharePct Int       @default(0) @map("revenue_share_pct") // 0-100%
+  creditLimit     Int       @default(0) @map("credit_limit") // max fichas que pode enviar do caixa (0 = sem limite)
+  creditUsed      Int       @default(0) @map("credit_used") // fichas já enviadas (reseta manual ou por período)
+  passwordHash    String    @map("password_hash") // login for affiliate backoffice
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  league    League           @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    LeagueAffiliate? @relation("AffiliateTree", fields: [parentId], references: [id])
+  children  LeagueAffiliate[] @relation("AffiliateTree")
+  referrals AffiliateReferral[]
+  commissions AffiliateCommission[]
+
+  @@unique([leagueId, userId])
+  @@index([affiliateCode])
+  @@map("league_affiliates")
+}
+
+model AffiliateReferral {
+  id            Int      @id @default(autoincrement())
+  affiliateId   Int      @map("affiliate_id")
+  userId        Int      @map("user_id") // the referred player
+  joinedAt      DateTime @default(now()) @map("joined_at")
+
+  affiliate LeagueAffiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  user      User            @relation("ReferredUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([affiliateId, userId])
+  @@map("affiliate_referrals")
+}
+
+model AffiliateCommission {
+  id            Int      @id @default(autoincrement())
+  affiliateId   Int      @map("affiliate_id")
+  leagueId      Int      @map("league_id")
+  betSlipId     Int?     @map("bet_slip_id")
+  referralUserId Int     @map("referral_user_id") // the player who lost the bet
+  betAmount     Int      @map("bet_amount") // amount the player bet
+  leagueProfit  Int      @map("league_profit") // how much the league earned (bet lost)
+  commissionPct Int      @map("commission_pct") // % applied at the time
+  commissionAmt Int      @map("commission_amt") // actual amount earned by this affiliate
+  level         Int      @default(1) // 1 = direct affiliate, 2 = parent of sub-affiliate
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  affiliate LeagueAffiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  league    League          @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId, createdAt])
+  @@index([leagueId, createdAt])
+  @@map("affiliate_commissions")
 }
 
 // ─── Admin / Audit ─────────────────────────────────────────────────────────

@@ -145,7 +145,7 @@ export class OddsService implements OnModuleInit {
   // CRON: SYNC ALL SPORTS
   // ═══════════════════════════════════════════════════════════════════════
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async syncAllSports() {
     if (!this.apiKey) {
       this.logger.warn('API_FOOTBALL_KEY not set — skipping sync');
