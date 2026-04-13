@@ -1,5 +1,5 @@
-FROM node:20-alpine
-RUN apk add --no-cache openssl1.1-compat
+FROM node:20-slim
+RUN apt-get update -y && apt-get install -y openssl wget && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
@@ -11,6 +11,6 @@ COPY apps/api/ apps/api/
 RUN cd apps/api && npx prisma generate --schema=src/prisma/schema.prisma
 RUN pnpm --filter @betbrinks/api build
 ENV NODE_ENV=production
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 EXPOSE 3000
 CMD ["node", "apps/api/dist/main.js"]
