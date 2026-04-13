@@ -9,7 +9,6 @@ dist
 .env.*
 !.env.example
 apps/mobile
-apps/backoffice
 docker
 scripts
 *.ps1
