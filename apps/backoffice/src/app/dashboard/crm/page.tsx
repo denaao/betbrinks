@@ -120,72 +120,101 @@ export default function CRMPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">CRM / Usuarios</h1>
+      <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#F0EAE0', marginBottom: '1.5rem' }}>CRM / Usuarios</h1>
 
       {/* Search Bar */}
-      <div className="flex gap-3 mb-6">
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
         <input
           type="text"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           placeholder="Buscar por nome, email ou telefone..."
-          className="flex-1 h-11 border border-gray-200 rounded-lg px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+          style={{
+            flex: 1,
+            height: '2.75rem',
+            border: '1px solid #2A2A45',
+            borderRadius: '0.5rem',
+            paddingLeft: '1rem',
+            paddingRight: '1rem',
+            fontSize: '0.875rem',
+            color: '#F0EAE0',
+            background: '#1E1E38',
+            outline: 'none',
+          }}
+          onFocus={(e) => (e.currentTarget.style.border = '1px solid #C4956A')}
+          onBlur={(e) => (e.currentTarget.style.border = '1px solid #2A2A45')}
         />
         <button
           onClick={handleSearch}
-          className="px-6 h-11 bg-brand-700 text-white text-sm font-semibold rounded-lg hover:bg-brand-800 transition-colors"
+          style={{
+            paddingLeft: '1.5rem',
+            paddingRight: '1.5rem',
+            height: '2.75rem',
+            background: '#C4956A',
+            color: 'white',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            borderRadius: '0.5rem',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.background = '#d9a86a')}
+          onMouseOut={(e) => (e.currentTarget.style.background = '#C4956A')}
         >
           Buscar
         </button>
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
+      <div style={{ background: '#1E1E38', borderRadius: '0.75rem', border: '1px solid #2A2A45', overflow: 'hidden' }}>
+        <table style={{ width: '100%', fontSize: '0.875rem' }}>
+          <thead style={{ background: '#14142B', borderBottom: '1px solid #2A2A45' }}>
             <tr>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Nome</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Email</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Telefone</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Pontos</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Status</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Cadastro</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Acoes</th>
+              <th style={{ textAlign: 'left', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Nome</th>
+              <th style={{ textAlign: 'left', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Email</th>
+              <th style={{ textAlign: 'left', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Telefone</th>
+              <th style={{ textAlign: 'center', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Pontos</th>
+              <th style={{ textAlign: 'center', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Status</th>
+              <th style={{ textAlign: 'center', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Cadastro</th>
+              <th style={{ textAlign: 'center', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '600', color: '#9A94A8' }}>Acoes</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-gray-400">Carregando...</td>
+                <td colSpan={7} style={{ textAlign: 'center', paddingTop: '2rem', paddingBottom: '2rem', color: '#9A94A8' }}>Carregando...</td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-gray-400">Nenhum usuario encontrado</td>
+                <td colSpan={7} style={{ textAlign: 'center', paddingTop: '2rem', paddingBottom: '2rem', color: '#9A94A8' }}>Nenhum usuario encontrado</td>
               </tr>
             ) : (
               users.map((user) => (
-                <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900">{user.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{user.email}</td>
-                  <td className="px-4 py-3 text-gray-600">{user.phone}</td>
-                  <td className="px-4 py-3 text-center font-medium text-brand-700">
+                <tr key={user.id} style={{ borderBottom: '1px solid #2A2A45' }} onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')} onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}>
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', fontWeight: '500', color: '#F0EAE0' }}>{user.name}</td>
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', color: '#9A94A8' }}>{user.email}</td>
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', color: '#9A94A8' }}>{user.phone}</td>
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', textAlign: 'center', fontWeight: '500', color: '#C4956A' }}>
                     {(user.points ?? user.balance?.points ?? 0).toLocaleString('pt-BR')}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', textAlign: 'center' }}>
                     {user.blocked ? (
-                      <span className="inline-block px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">Bloqueado</span>
+                      <span style={{ display: 'inline-block', paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.125rem', paddingBottom: '0.125rem', background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.75rem', fontWeight: '600', borderRadius: '9999px' }}>Bloqueado</span>
                     ) : (user.isVerified ?? user.phoneVerified) ? (
-                      <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Ativo</span>
+                      <span style={{ display: 'inline-block', paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.125rem', paddingBottom: '0.125rem', background: 'rgba(74,222,128,0.15)', color: '#4ade80', fontSize: '0.75rem', fontWeight: '600', borderRadius: '9999px' }}>Ativo</span>
                     ) : (
-                      <span className="inline-block px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Pendente</span>
+                      <span style={{ display: 'inline-block', paddingLeft: '0.5rem', paddingRight: '0.5rem', paddingTop: '0.125rem', paddingBottom: '0.125rem', background: 'rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '0.75rem', fontWeight: '600', borderRadius: '9999px' }}>Pendente</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-center text-gray-500">{formatDate(user.createdAt)}</td>
-                  <td className="px-4 py-3 text-center">
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', textAlign: 'center', color: '#9A94A8' }}>{formatDate(user.createdAt)}</td>
+                  <td style={{ paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', textAlign: 'center' }}>
                     <button
                       onClick={() => openDetail(user.id)}
-                      className="text-brand-700 hover:text-brand-900 font-semibold text-xs"
+                      style={{ color: '#C4956A', fontWeight: '600', fontSize: '0.75rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                      onMouseOver={(e) => (e.currentTarget.style.color = '#d9a86a')}
+                      onMouseOut={(e) => (e.currentTarget.style.color = '#C4956A')}
                     >
                       Detalhes
                     </button>
@@ -199,23 +228,51 @@ export default function CRMPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-gray-500">{total} usuarios encontrados</p>
-          <div className="flex gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+          <p style={{ fontSize: '0.875rem', color: '#9A94A8' }}>{total} usuarios encontrados</p>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               disabled={page <= 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              style={{
+                paddingLeft: '0.75rem',
+                paddingRight: '0.75rem',
+                paddingTop: '0.375rem',
+                paddingBottom: '0.375rem',
+                fontSize: '0.875rem',
+                border: '1px solid #2A2A45',
+                borderRadius: '0.5rem',
+                opacity: page <= 1 ? 0.4 : 1,
+                background: 'transparent',
+                color: '#F0EAE0',
+                cursor: page <= 1 ? 'default' : 'pointer',
+              }}
+              onMouseOver={(e) => page > 1 && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+              onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               Anterior
             </button>
-            <span className="px-3 py-1.5 text-sm text-gray-600">
+            <span style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem', paddingTop: '0.375rem', paddingBottom: '0.375rem', fontSize: '0.875rem', color: '#9A94A8' }}>
               {page} / {totalPages}
             </span>
             <button
               disabled={page >= totalPages}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              style={{
+                paddingLeft: '0.75rem',
+                paddingRight: '0.75rem',
+                paddingTop: '0.375rem',
+                paddingBottom: '0.375rem',
+                fontSize: '0.875rem',
+                border: '1px solid #2A2A45',
+                borderRadius: '0.5rem',
+                opacity: page >= totalPages ? 0.4 : 1,
+                background: 'transparent',
+                color: '#F0EAE0',
+                cursor: page >= totalPages ? 'default' : 'pointer',
+              }}
+              onMouseOver={(e) => page < totalPages && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+              onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               Proximo
             </button>
@@ -225,32 +282,50 @@ export default function CRMPage() {
 
       {/* User Detail Modal */}
       {(selectedUser || detailLoading) && (
-        <div className="fixed inset-0 bg-black/40 flex items-start justify-center pt-12 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-4 mb-12">
+        <div style={{ position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '3rem', zIndex: 50, overflowY: 'auto' }}>
+          <div style={{ background: '#1E1E38', borderRadius: '1rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)', width: '100%', maxWidth: '48rem', marginLeft: '1rem', marginRight: '1rem', marginBottom: '3rem' }}>
             {detailLoading ? (
-              <div className="p-12 text-center text-gray-400">Carregando detalhes...</div>
+              <div style={{ paddingTop: '3rem', paddingBottom: '3rem', textAlign: 'center', color: '#9A94A8' }}>Carregando detalhes...</div>
             ) : selectedUser ? (
               <>
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingTop: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #2A2A45' }}>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">{selectedUser.name}</h2>
-                    <p className="text-sm text-gray-500">{selectedUser.email} | {selectedUser.phone}</p>
+                    <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#F0EAE0' }}>{selectedUser.name}</h2>
+                    <p style={{ fontSize: '0.875rem', color: '#9A94A8' }}>{selectedUser.email} | {selectedUser.phone}</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <button
                       onClick={() => handleBlock(selectedUser.id, !selectedUser.blocked)}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
-                        selectedUser.blocked
-                          ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                          : 'bg-red-100 text-red-700 hover:bg-red-200'
-                      }`}
+                      style={{
+                        paddingLeft: '0.75rem',
+                        paddingRight: '0.75rem',
+                        paddingTop: '0.375rem',
+                        paddingBottom: '0.375rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s',
+                        background: selectedUser.blocked ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)',
+                        color: selectedUser.blocked ? '#4ade80' : '#ef4444',
+                      }}
                     >
                       {selectedUser.blocked ? 'Desbloquear' : 'Bloquear'}
                     </button>
                     <button
                       onClick={() => setSelectedUser(null)}
-                      className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                      style={{
+                        color: '#9A94A8',
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '1.25rem',
+                        lineHeight: '1rem',
+                        cursor: 'pointer',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.color = '#F0EAE0')}
+                      onMouseOut={(e) => (e.currentTarget.style.color = '#9A94A8')}
                     >
                       ✕
                     </button>
@@ -258,16 +333,24 @@ export default function CRMPage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-100">
+                <div style={{ display: 'flex', borderBottom: '1px solid #2A2A45' }}>
                   {(['info', 'bets', 'transactions', 'achievements'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setDetailTab(tab)}
-                      className={`flex-1 py-3 text-sm font-semibold transition-colors ${
-                        detailTab === tab
-                          ? 'text-brand-700 border-b-2 border-brand-700'
-                          : 'text-gray-400 hover:text-gray-600'
-                      }`}
+                      style={{
+                        flex: 1,
+                        paddingTop: '0.75rem',
+                        paddingBottom: '0.75rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        transition: 'all 0.2s',
+                        color: detailTab === tab ? '#C4956A' : '#9A94A8',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: detailTab === tab ? '2px solid #C4956A' : 'none',
+                        cursor: 'pointer',
+                      }}
                     >
                       {tab === 'info' && 'Informacoes'}
                       {tab === 'bets' && 'Apostas'}
@@ -278,76 +361,116 @@ export default function CRMPage() {
                 </div>
 
                 {/* Tab Content */}
-                <div className="p-6">
+                <div style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem', paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>
                   {detailTab === 'info' && (
-                    <div className="space-y-6">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                       {/* Stats Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-gray-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Pontos</p>
-                          <p className="text-lg font-bold text-brand-700">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                        <div style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Pontos</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#C4956A' }}>
                             {(selectedUser.balance?.points || 0).toLocaleString('pt-BR')}
                           </p>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Diamantes</p>
-                          <p className="text-lg font-bold text-cyan-600">
+                        <div style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Diamantes</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#60a5fa' }}>
                             {(selectedUser.balance?.diamonds || 0).toLocaleString('pt-BR')}
                           </p>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Level</p>
-                          <p className="text-lg font-bold text-amber-600">{selectedUser.level}</p>
+                        <div style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Level</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#fb923c' }}>{selectedUser.level}</p>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">XP</p>
-                          <p className="text-lg font-bold text-gray-700">{selectedUser.xp?.toLocaleString('pt-BR')}</p>
+                        <div style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>XP</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#F0EAE0' }}>{selectedUser.xp?.toLocaleString('pt-BR')}</p>
                         </div>
                       </div>
 
                       {/* Bet Stats */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-blue-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Total Apostas</p>
-                          <p className="text-lg font-bold text-blue-700">{selectedUser.stats?.totalBets || 0}</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                        <div style={{ background: 'rgba(59,130,246,0.15)', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Total Apostas</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#60a5fa' }}>{selectedUser.stats?.totalBets || 0}</p>
                         </div>
-                        <div className="bg-green-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Ganhas</p>
-                          <p className="text-lg font-bold text-green-700">{selectedUser.stats?.wonBets || 0}</p>
+                        <div style={{ background: 'rgba(74,222,128,0.15)', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Ganhas</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#4ade80' }}>{selectedUser.stats?.wonBets || 0}</p>
                         </div>
-                        <div className="bg-red-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Perdidas</p>
-                          <p className="text-lg font-bold text-red-700">{selectedUser.stats?.lostBets || 0}</p>
+                        <div style={{ background: 'rgba(239,68,68,0.15)', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Perdidas</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#ef4444' }}>{selectedUser.stats?.lostBets || 0}</p>
                         </div>
-                        <div className="bg-purple-50 rounded-lg p-3 text-center">
-                          <p className="text-xs text-gray-500">Win Rate</p>
-                          <p className="text-lg font-bold text-purple-700">
+                        <div style={{ background: 'rgba(196,149,106,0.15)', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Win Rate</p>
+                          <p style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#C4956A' }}>
                             {((selectedUser.stats?.winRate || 0) * 100).toFixed(1)}%
                           </p>
                         </div>
                       </div>
 
                       {/* Adjust Points */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Ajustar Pontos</h4>
-                        <div className="flex gap-3">
+                      <div style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
+                        <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#F0EAE0', marginBottom: '0.75rem' }}>Ajustar Pontos</h4>
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
                           <input
                             type="number"
                             value={adjustAmount}
                             onChange={(e) => setAdjustAmount(e.target.value)}
                             placeholder="Quantidade (negativo para debitar)"
-                            className="flex-1 h-10 border border-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            style={{
+                              flex: 1,
+                              height: '2.5rem',
+                              border: '1px solid #2A2A45',
+                              borderRadius: '0.5rem',
+                              paddingLeft: '0.75rem',
+                              paddingRight: '0.75rem',
+                              fontSize: '0.875rem',
+                              background: '#1E1E38',
+                              color: '#F0EAE0',
+                              outline: 'none',
+                            }}
+                            onFocus={(e) => (e.currentTarget.style.borderColor = '#C4956A')}
+                            onBlur={(e) => (e.currentTarget.style.borderColor = '#2A2A45')}
                           />
                           <input
                             type="text"
                             value={adjustReason}
                             onChange={(e) => setAdjustReason(e.target.value)}
                             placeholder="Motivo"
-                            className="flex-1 h-10 border border-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            style={{
+                              flex: 1,
+                              height: '2.5rem',
+                              border: '1px solid #2A2A45',
+                              borderRadius: '0.5rem',
+                              paddingLeft: '0.75rem',
+                              paddingRight: '0.75rem',
+                              fontSize: '0.875rem',
+                              background: '#1E1E38',
+                              color: '#F0EAE0',
+                              outline: 'none',
+                            }}
+                            onFocus={(e) => (e.currentTarget.style.borderColor = '#C4956A')}
+                            onBlur={(e) => (e.currentTarget.style.borderColor = '#2A2A45')}
                           />
                           <button
                             onClick={handleAdjustPoints}
-                            className="px-4 h-10 bg-brand-700 text-white text-sm font-semibold rounded-lg hover:bg-brand-800"
+                            style={{
+                              paddingLeft: '1rem',
+                              paddingRight: '1rem',
+                              height: '2.5rem',
+                              background: '#C4956A',
+                              color: 'white',
+                              fontSize: '0.875rem',
+                              fontWeight: '600',
+                              borderRadius: '0.5rem',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'background 0.2s',
+                            }}
+                            onMouseOver={(e) => (e.currentTarget.style.background = '#d9a86a')}
+                            onMouseOut={(e) => (e.currentTarget.style.background = '#C4956A')}
                           >
                             Ajustar
                           </button>
@@ -355,8 +478,8 @@ export default function CRMPage() {
                       </div>
 
                       {/* User Meta */}
-                      <div className="text-sm text-gray-500 space-y-1">
-                        <p>ID: <span className="font-mono text-gray-700">{selectedUser.id}</span></p>
+                      <div style={{ fontSize: '0.875rem', color: '#9A94A8', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <p>ID: <span style={{ fontFamily: 'monospace', color: '#F0EAE0' }}>{selectedUser.id}</span></p>
                         <p>Cadastro: {formatDate(selectedUser.createdAt)}</p>
                         <p>Telefone verificado: {selectedUser.phoneVerified ? 'Sim' : 'Nao'}</p>
                         <p>Status: {selectedUser.blocked ? 'Bloqueado' : 'Ativo'}</p>
@@ -365,9 +488,9 @@ export default function CRMPage() {
                   )}
 
                   {detailTab === 'bets' && (
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '20rem', overflowY: 'auto' }}>
                       {(selectedUser.bets || []).length === 0 ? (
-                        <p className="text-center text-gray-400 py-8">Nenhuma aposta encontrada</p>
+                        <p style={{ textAlign: 'center', color: '#9A94A8', paddingTop: '2rem', paddingBottom: '2rem' }}>Nenhuma aposta encontrada</p>
                       ) : (
                         selectedUser.bets.map((bet: any, i: number) => {
                           const fix = bet.fixture || bet.odd?.fixture;
@@ -381,29 +504,35 @@ export default function CRMPage() {
                           const matchDate = fix?.startAt ? new Date(fix.startAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
 
                           return (
-                            <div key={i} className="bg-gray-50 rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-1">
-                                <p className="text-sm font-semibold text-gray-900">
+                            <div key={i} style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#F0EAE0' }}>
                                   {home} vs {away}
-                                  {score && <span className="ml-2 text-xs font-bold text-brand-700">({score})</span>}
+                                  {score && <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', color: '#C4956A' }}>({score})</span>}
                                 </p>
-                                <div className="text-right">
-                                  <p className="text-sm font-bold text-gray-900">{bet.amount} pts</p>
+                                <div style={{ textAlign: 'right' }}>
+                                  <p style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#F0EAE0' }}>{bet.amount} pts</p>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <div className="text-xs text-gray-500">
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#9A94A8' }}>
                                   {league && <span>{league} · </span>}
                                   {matchDate && <span>Jogo: {matchDate} · </span>}
                                   <span>Aposta: {betDate}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs text-gray-500">Odd: {bet.oddValue}</span>
-                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                    bet.status === 'WON' ? 'bg-green-100 text-green-700' :
-                                    bet.status === 'LOST' ? 'bg-red-100 text-red-700' :
-                                    'bg-yellow-100 text-yellow-700'
-                                  }`}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <span style={{ fontSize: '0.75rem', color: '#9A94A8' }}>Odd: {bet.oddValue}</span>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: '600',
+                                    paddingLeft: '0.5rem',
+                                    paddingRight: '0.5rem',
+                                    paddingTop: '0.125rem',
+                                    paddingBottom: '0.125rem',
+                                    borderRadius: '9999px',
+                                    background: bet.status === 'WON' ? 'rgba(74,222,128,0.15)' : bet.status === 'LOST' ? 'rgba(239,68,68,0.15)' : 'rgba(251,191,36,0.15)',
+                                    color: bet.status === 'WON' ? '#4ade80' : bet.status === 'LOST' ? '#ef4444' : '#fbbf24',
+                                  }}>
                                     {bet.status === 'WON' ? 'Ganhou' : bet.status === 'LOST' ? 'Perdeu' : bet.status === 'PENDING' ? 'Pendente' : bet.status}
                                   </span>
                                 </div>
@@ -437,38 +566,45 @@ export default function CRMPage() {
                     );
 
                     return (
-                      <div className="space-y-2 max-h-80 overflow-y-auto">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '20rem', overflowY: 'auto' }}>
                         {all.length === 0 ? (
-                          <p className="text-center text-gray-400 py-8">Nenhuma transacao encontrada</p>
+                          <p style={{ textAlign: 'center', color: '#9A94A8', paddingTop: '2rem', paddingBottom: '2rem' }}>Nenhuma transacao encontrada</p>
                         ) : (
                           all.map((tx, i) => (
-                            <div key={i} className="bg-gray-50 rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-1">
-                                <p className="text-sm font-medium text-gray-900">{tx.type}</p>
-                                <div className="flex items-center gap-2">
+                            <div key={i} style={{ background: '#14142B', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                                <p style={{ fontSize: '0.875rem', fontWeight: '500', color: '#F0EAE0' }}>{tx.type}</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                   {tx.status && (
-                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                      tx.status === 'VERIFIED' ? 'bg-green-100 text-green-700' :
-                                      tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                                      'bg-red-100 text-red-700'
-                                    }`}>
+                                    <span style={{
+                                      fontSize: '0.75rem',
+                                      fontWeight: '600',
+                                      paddingLeft: '0.5rem',
+                                      paddingRight: '0.5rem',
+                                      paddingTop: '0.125rem',
+                                      paddingBottom: '0.125rem',
+                                      borderRadius: '9999px',
+                                      background: tx.status === 'VERIFIED' ? 'rgba(74,222,128,0.15)' : tx.status === 'PENDING' ? 'rgba(251,191,36,0.15)' : 'rgba(239,68,68,0.15)',
+                                      color: tx.status === 'VERIFIED' ? '#4ade80' : tx.status === 'PENDING' ? '#fbbf24' : '#ef4444',
+                                    }}>
                                       {tx.status === 'VERIFIED' ? 'Verificado' : tx.status === 'PENDING' ? 'Pendente' : tx.status}
                                     </span>
                                   )}
-                                  <p className={`text-sm font-bold ${
-                                    tx.currency === 'BRL' ? 'text-cyan-600' :
-                                    tx.amount > 0 ? 'text-green-600' : 'text-red-600'
-                                  }`}>
+                                  <p style={{
+                                    fontSize: '0.875rem',
+                                    fontWeight: 'bold',
+                                    color: tx.currency === 'BRL' ? '#60a5fa' : tx.amount > 0 ? '#4ade80' : '#ef4444',
+                                  }}>
                                     {tx.currency === 'BRL'
                                       ? `R$ ${tx.amount.toFixed(2)}`
                                       : `${tx.amount > 0 ? '+' : ''}${(tx.amount ?? 0).toLocaleString('pt-BR')} pts`}
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <p className="text-xs text-gray-500">{tx.description}</p>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>{tx.description}</p>
                                 {tx.date && (
-                                  <p className="text-xs text-gray-400">
+                                  <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>
                                     {new Date(tx.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                   </p>
                                 )}
@@ -481,15 +617,15 @@ export default function CRMPage() {
                   })()}
 
                   {detailTab === 'achievements' && (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
                       {(selectedUser.achievements || []).length === 0 ? (
-                        <p className="col-span-2 text-center text-gray-400 py-8">Nenhuma conquista</p>
+                        <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#9A94A8', paddingTop: '2rem', paddingBottom: '2rem' }}>Nenhuma conquista</p>
                       ) : (
                         selectedUser.achievements.map((ach: any, i: number) => (
-                          <div key={i} className="bg-amber-50 rounded-lg p-3 text-center">
-                            <p className="text-2xl mb-1">{ach.achievement?.icon || '🏆'}</p>
-                            <p className="text-sm font-semibold text-gray-900">{ach.achievement?.name || ach.achievementId}</p>
-                            <p className="text-xs text-gray-500">{formatDate(ach.unlockedAt)}</p>
+                          <div key={i} style={{ background: 'rgba(196,149,106,0.15)', borderRadius: '0.5rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '0.75rem', paddingRight: '0.75rem', textAlign: 'center' }}>
+                            <p style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{ach.achievement?.icon || '🏆'}</p>
+                            <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#F0EAE0' }}>{ach.achievement?.name || ach.achievementId}</p>
+                            <p style={{ fontSize: '0.75rem', color: '#9A94A8' }}>{formatDate(ach.unlockedAt)}</p>
                           </div>
                         ))
                       )}

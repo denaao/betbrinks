@@ -157,7 +157,7 @@ export default function FixturesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Jogos / Fixtures</h1>
+      <h1 className="text-2xl font-bold mb-6" style={{ color: '#F0EAE0' }}>Jogos / Fixtures</h1>
 
       {/* Sport Tabs */}
       <div className="flex gap-2 mb-4 overflow-x-auto">
@@ -165,11 +165,12 @@ export default function FixturesPage() {
           <button
             key={sport.id}
             onClick={() => { setSelectedSportKey(sport.key); setPage(1); }}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap ${
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg transition-colors whitespace-nowrap border"
+            style={
               selectedSportKey === sport.key
-                ? 'bg-brand-700 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-            }`}
+                ? { background: '#C4956A', color: '#F0EAE0', borderColor: '#C4956A' }
+                : { background: '#1E1E38', color: '#9A94A8', borderColor: '#2A2A45' }
+            }
           >
             <span>{SPORT_ICONS[sport.key] || '🏆'}</span>
             {sport.name}
@@ -183,11 +184,12 @@ export default function FixturesPage() {
           <button
             key={f}
             onClick={() => { setFilter(f); setPage(1); }}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
+            className="px-4 py-2 text-sm font-semibold rounded-lg transition-colors border"
+            style={
               filter === f
-                ? 'bg-brand-700 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-            }`}
+                ? { background: '#C4956A', color: '#F0EAE0', borderColor: '#C4956A' }
+                : { background: '#1E1E38', color: '#9A94A8', borderColor: '#2A2A45' }
+            }
           >
             {f === 'all' && 'Todos'}
             {f === 'live' && '🔴 Ao Vivo'}
@@ -198,31 +200,31 @@ export default function FixturesPage() {
       </div>
 
       {/* Fixtures Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="rounded-xl border overflow-hidden" style={{ background: '#1E1E38', borderColor: '#2A2A45' }}>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
+          <thead className="border-b" style={{ background: '#14142B', borderColor: '#2A2A45' }}>
             <tr>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>
                 {isTeamSport ? 'Jogo' : selectedSportKey === 'mma' ? 'Luta' : 'Evento'}
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Liga</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Liga</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>
                 {isTeamSport || selectedSportKey === 'mma' ? 'Placar' : 'Info'}
               </th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Status</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Data</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Apostas</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Mercados</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Status</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Data</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Apostas</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Mercados</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-gray-400">Carregando...</td>
+                <td colSpan={7} className="text-center py-8" style={{ color: '#9A94A8' }}>Carregando...</td>
               </tr>
             ) : fixtures.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-gray-400">Nenhum jogo encontrado</td>
+                <td colSpan={7} className="text-center py-8" style={{ color: '#9A94A8' }}>Nenhum jogo encontrado</td>
               </tr>
             ) : (
               fixtures.map((fixture) => {
@@ -237,39 +239,49 @@ export default function FixturesPage() {
                 return (
                   <tr
                     key={fixture.id}
-                    className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${
-                      isLive(fixture.status) ? 'bg-green-50/30' : ''
-                    }`}
+                    className="border-b hover:bg-white/5 transition-colors"
+                    style={{
+                      borderColor: '#2A2A45',
+                      background: isLive(fixture.status) ? 'rgba(34, 197, 94, 0.1)' : undefined,
+                    }}
                   >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">
-                        {home} <span className="text-gray-400">{isTeamSport || selectedSportKey === 'mma' ? 'vs' : '—'}</span> {away}
+                      <p className="font-medium" style={{ color: '#F0EAE0' }}>
+                        {home} <span style={{ color: '#9A94A8' }}>{isTeamSport || selectedSportKey === 'mma' ? 'vs' : '—'}</span> {away}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{fixture.leagueName}</td>
+                    <td className="px-4 py-3" style={{ color: '#9A94A8' }}>{fixture.leagueName}</td>
                     <td className="px-4 py-3 text-center">
                       {sHome !== null && sHome !== undefined && sAway !== null && sAway !== undefined ? (
-                        <span className="font-bold text-gray-900">
+                        <span className="font-bold" style={{ color: '#F0EAE0' }}>
                           {sHome} - {sAway}
                         </span>
                       ) : (
-                        <span className="text-gray-300">- x -</span>
+                        <span style={{ color: '#5A5A75' }}>- x -</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${
-                        STATUS_COLORS[fixture.status] || 'bg-gray-100 text-gray-600'
-                      }`}>
+                      <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full" style={
+                        fixture.status.includes('FIRST_HALF') || fixture.status.includes('SECOND_HALF') || fixture.status.includes('QUARTER') || fixture.status.includes('SET') || fixture.status.includes('ROUND') || fixture.status === 'IN_PROGRESS' || fixture.status.includes('HALFTIME') || fixture.status.includes('BREAK') || fixture.status.includes('OVERTIME') || fixture.status.includes('EXTRA_TIME') || fixture.status.includes('PENALTIES')
+                          ? { background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80' }
+                          : fixture.status === 'FINISHED'
+                          ? { background: 'rgba(96, 165, 250, 0.2)', color: '#60a5fa' }
+                          : fixture.status === 'CANCELLED'
+                          ? { background: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }
+                          : fixture.status === 'POSTPONED' || fixture.status === 'SUSPENDED'
+                          ? { background: 'rgba(251, 146, 60, 0.2)', color: '#fb923c' }
+                          : { background: '#14142B', color: '#9A94A8' }
+                      }>
                         {STATUS_LABELS[fixture.status] || fixture.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center text-gray-500 text-xs whitespace-nowrap">
+                    <td className="px-4 py-3 text-center text-xs whitespace-nowrap" style={{ color: '#9A94A8' }}>
                       {dateStr ? formatDate(dateStr) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-center font-semibold text-blue-600">
+                    <td className="px-4 py-3 text-center font-semibold text-blue-400">
                       {bets}
                     </td>
-                    <td className="px-4 py-3 text-center font-semibold text-purple-600">
+                    <td className="px-4 py-3 text-center font-semibold text-purple-400">
                       {mkts}
                     </td>
                   </tr>
@@ -282,21 +294,23 @@ export default function FixturesPage() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between mt-4">
-        <span className="text-sm text-gray-500">
+        <span className="text-sm" style={{ color: '#9A94A8' }}>
           Página {page} de {totalPages}
         </span>
         <div className="flex gap-2">
           <button
             disabled={page <= 1}
             onClick={() => setPage(page - 1)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-40 hover:bg-white/5 transition-colors"
+            style={{ borderColor: '#2A2A45', color: '#9A94A8' }}
           >
             Anterior
           </button>
           <button
             disabled={page >= totalPages}
             onClick={() => setPage(page + 1)}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+            className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-40 hover:bg-white/5 transition-colors"
+            style={{ borderColor: '#2A2A45', color: '#9A94A8' }}
           >
             Próximo
           </button>

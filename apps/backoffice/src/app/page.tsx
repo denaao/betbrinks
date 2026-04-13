@@ -8,11 +8,28 @@ export default function RootPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
-    if (token) {
-      router.replace('/dashboard');
-    } else {
+    if (!token) {
       router.replace('/login');
+      return;
     }
+
+    // Check role to decide destination
+    try {
+      const roleStr = localStorage.getItem('admin_role');
+      if (roleStr) {
+        const role = JSON.parse(roleStr);
+        if (role.isAffiliate && !role.isAdmin && !role.isOwner) {
+          router.replace('/affiliate');
+          return;
+        }
+        if (role.isOwner && !role.isAdmin) {
+          router.replace('/dashboard/owner');
+          return;
+        }
+      }
+    } catch {}
+
+    router.replace('/dashboard');
   }, [router]);
 
   return (

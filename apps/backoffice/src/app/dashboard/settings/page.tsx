@@ -83,7 +83,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Carregando configuracoes...</p>
+        <p style={{ color: '#9A94A8' }}>Carregando configuracoes...</p>
       </div>
     );
   }
@@ -91,10 +91,13 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Configuracoes do Sistema</h1>
+        <h1 className="text-2xl font-bold" style={{ color: '#F0EAE0' }}>Configuracoes do Sistema</h1>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2 bg-brand-700 text-white text-sm font-semibold rounded-lg hover:bg-brand-800 transition-colors"
+          className="px-4 py-2 text-white text-sm font-semibold rounded-lg transition-colors"
+          style={{ background: '#C4956A' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#D4A578')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = '#C4956A')}
         >
           {showAdd ? 'Cancelar' : '+ Nova Config'}
         </button>
@@ -102,35 +105,41 @@ export default function SettingsPage() {
 
       {/* Add New Config */}
       {showAdd && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Nova Configuracao</h3>
+        <div className="rounded-xl p-6 mb-6" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: '#F0EAE0' }}>Nova Configuracao</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input
               type="text"
               value={newKey}
               onChange={(e) => setNewKey(e.target.value)}
               placeholder="Chave (ex: max_daily_bets)"
-              className="h-10 border border-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+              className="h-10 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 placeholder-gray-500"
             />
             <input
               type="text"
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
               placeholder="Valor"
-              className="h-10 border border-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+              className="h-10 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 placeholder-gray-500"
             />
             <input
               type="text"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
               placeholder="Descricao (opcional)"
-              className="h-10 border border-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+              className="h-10 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 placeholder-gray-500"
             />
           </div>
           <button
             onClick={addConfig}
             disabled={saving || !newKey || !newValue}
-            className="mt-3 px-6 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+            className="mt-3 px-6 py-2 text-white text-sm font-semibold rounded-lg disabled:opacity-50 transition-colors"
+            style={{ background: saving || !newKey || !newValue ? '#888' : '#4ade80' }}
+            onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.background = '#22c55e')}
+            onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.background = '#4ade80')}
           >
             {saving ? 'Salvando...' : 'Salvar'}
           </button>
@@ -138,54 +147,59 @@ export default function SettingsPage() {
       )}
 
       {/* Config List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="rounded-xl overflow-hidden" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
+          <thead style={{ background: '#14142B', borderBottom: '1px solid #2A2A45' }}>
             <tr>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Chave</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Valor</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Descricao</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Atualizado</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Acoes</th>
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Chave</th>
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Valor</th>
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Descricao</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Atualizado</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Acoes</th>
             </tr>
           </thead>
           <tbody>
             {configs.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-8 text-gray-400">Nenhuma configuracao encontrada</td>
+                <td colSpan={5} className="text-center py-8" style={{ color: '#9A94A8' }}>Nenhuma configuracao encontrada</td>
               </tr>
             ) : (
               configs.map((config) => (
-                <tr key={config.key} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-sm text-gray-900">{config.key}</td>
+                <tr key={config.key} style={{ borderBottom: '1px solid #2A2A45' }} onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')} onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+                  <td className="px-4 py-3 font-mono text-sm" style={{ color: '#F0EAE0' }}>{config.key}</td>
                   <td className="px-4 py-3">
                     {editingKey === config.key ? (
                       <input
                         type="text"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="w-full h-8 border border-brand-300 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        style={{ background: '#14142B', border: '1px solid #C4956A', color: '#F0EAE0' }}
+                        className="w-full h-8 rounded px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                         autoFocus
                       />
                     ) : (
-                      <span className="text-gray-700">{config.value}</span>
+                      <span style={{ color: '#F0EAE0' }}>{config.value}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{config.description || '-'}</td>
-                  <td className="px-4 py-3 text-center text-gray-400 text-xs">{formatDate(config.updatedAt)}</td>
+                  <td className="px-4 py-3" style={{ color: '#9A94A8' }}>{config.description || '-'}</td>
+                  <td className="px-4 py-3 text-center text-xs" style={{ color: '#9A94A8' }}>{formatDate(config.updatedAt)}</td>
                   <td className="px-4 py-3 text-center">
                     {editingKey === config.key ? (
                       <div className="flex gap-2 justify-center">
                         <button
                           onClick={() => saveEdit(config.key)}
                           disabled={saving}
-                          className="text-green-600 hover:text-green-800 text-xs font-semibold"
+                          className="text-xs font-semibold"
+                          style={{ color: saving ? '#999' : '#4ade80' }}
                         >
                           {saving ? '...' : 'Salvar'}
                         </button>
                         <button
                           onClick={() => setEditingKey(null)}
-                          className="text-gray-400 hover:text-gray-600 text-xs font-semibold"
+                          className="text-xs font-semibold"
+                          style={{ color: '#9A94A8' }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0EAE0')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = '#9A94A8')}
                         >
                           Cancelar
                         </button>
@@ -193,7 +207,10 @@ export default function SettingsPage() {
                     ) : (
                       <button
                         onClick={() => startEdit(config)}
-                        className="text-brand-700 hover:text-brand-900 text-xs font-semibold"
+                        className="text-xs font-semibold"
+                        style={{ color: '#C4956A' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#D4A578')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#C4956A')}
                       >
                         Editar
                       </button>

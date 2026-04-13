@@ -170,8 +170,8 @@ export default function LeaguesPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ligas</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold" style={{ color: '#F0EAE0' }}>Ligas</h1>
+          <p className="text-sm mt-1" style={{ color: '#9A94A8' }}>
             Habilite as ligas que deseja mostrar no app. Ao habilitar, escolha a modalidade esportiva.
           </p>
         </div>
@@ -179,7 +179,7 @@ export default function LeaguesPage() {
 
       {/* Sport Tabs — select sport first */}
       {sports.length === 0 ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-sm text-yellow-700">
+        <div style={{ background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', color: '#FBBF24' }} className="rounded-xl p-4 mb-6 text-sm">
           Nenhuma modalidade cadastrada. Vá em <strong>Modalidades</strong> e crie pelo menos uma (ex: Futebol) antes de habilitar ligas.
         </div>
       ) : (
@@ -190,9 +190,10 @@ export default function LeaguesPage() {
               onClick={() => { setSelectedSport(s); setFilterCountry(''); setSearch(''); }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
                 selectedSport?.id === s.id
-                  ? 'border-brand-700 bg-brand-700 text-white shadow-md'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                  ? 'border-brand-400 bg-brand-400 text-white shadow-md'
+                  : 'text-gray-300 hover:bg-white/5'
               }`}
+              style={selectedSport?.id === s.id ? {} : { borderColor: '#2A2A45', background: 'transparent' }}
             >
               {s.icon && (
                 s.icon.startsWith('http')
@@ -201,8 +202,10 @@ export default function LeaguesPage() {
               )}
               {s.name}
               <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                selectedSport?.id === s.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
-              }`}>
+                selectedSport?.id === s.id ? 'bg-white/20 text-white' : ''
+              }`}
+              style={selectedSport?.id === s.id ? {} : { background: 'rgba(156, 163, 175, 0.15)', color: '#9CA3AF' }}
+              >
                 {sportEnabledCounts[s.id] || 0}
               </span>
             </button>
@@ -212,36 +215,38 @@ export default function LeaguesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-gray-500 font-medium uppercase">Total Disponivel</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{leagues.length.toLocaleString()}</p>
+        <div style={{ background: '#1E1E38', border: '1px solid #2A2A45' }} className="rounded-xl p-4">
+          <p className="text-xs font-medium uppercase" style={{ color: '#9A94A8' }}>Total Disponivel</p>
+          <p className="text-2xl font-bold mt-1" style={{ color: '#F0EAE0' }}>{leagues.length.toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-green-600 font-medium uppercase">Habilitadas{selectedSport ? ` (${selectedSport.name})` : ''}</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div style={{ background: '#1E1E38', border: '1px solid #2A2A45' }} className="rounded-xl p-4">
+          <p className="text-xs font-medium uppercase" style={{ color: '#10B981' }}>Habilitadas{selectedSport ? ` (${selectedSport.name})` : ''}</p>
+          <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>
             {enabledCount}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-gray-400 font-medium uppercase">Desabilitadas</p>
-          <p className="text-2xl font-bold text-gray-400 mt-1">{leagues.length - enabledCount}</p>
+        <div style={{ background: '#1E1E38', border: '1px solid #2A2A45' }} className="rounded-xl p-4">
+          <p className="text-xs font-medium uppercase" style={{ color: '#9A94A8' }}>Desabilitadas</p>
+          <p className="text-2xl font-bold mt-1" style={{ color: '#9A94A8' }}>{leagues.length - enabledCount}</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <div style={{ background: '#1E1E38', border: '1px solid #2A2A45' }} className="rounded-xl p-4 mb-6">
         <div className="flex flex-wrap gap-3 items-center">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou pais..."
-            className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent"
+            style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
           />
           <select
             value={filterCountry}
             onChange={(e) => setFilterCountry(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+            style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+            className="px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
           >
             <option value="">Todos os paises</option>
             {countries.map((c) => (
@@ -251,44 +256,45 @@ export default function LeaguesPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+            style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+            className="px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
           >
             <option value="all">Todos status</option>
             <option value="enabled">Habilitadas</option>
             <option value="disabled">Desabilitadas</option>
           </select>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs" style={{ color: '#9A94A8' }}>
             {filtered.length.toLocaleString()} ligas
           </span>
         </div>
       </div>
 
       {/* Leagues Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div style={{ background: '#1E1E38', border: '1px solid #2A2A45' }} className="rounded-xl overflow-hidden">
         <div className="max-h-[600px] overflow-y-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
+            <thead style={{ background: '#14142B', borderBottom: '1px solid #2A2A45' }} className="sticky top-0 z-10">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Liga</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Pais</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Tipo</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600">Modalidade</th>
-                <th className="text-center px-3 py-3 font-semibold text-gray-600 w-32">Acao</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Liga</th>
+                <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Pais</th>
+                <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Tipo</th>
+                <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Modalidade</th>
+                <th className="text-center px-3 py-3 font-semibold w-32" style={{ color: '#9A94A8' }}>Acao</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-400">
+                  <td colSpan={5} className="text-center py-12" style={{ color: '#9A94A8' }}>
                     <div className="flex flex-col items-center gap-2">
-                      <div className="animate-spin w-6 h-6 border-2 border-gray-300 border-t-brand-700 rounded-full"></div>
+                      <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: '#2A2A45', borderTopColor: '#C4956A' }}></div>
                       Carregando ligas do API-Football...
                     </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-gray-400">
+                  <td colSpan={5} className="text-center py-12" style={{ color: '#9A94A8' }}>
                     Nenhuma liga encontrada com os filtros selecionados.
                   </td>
                 </tr>
@@ -296,16 +302,15 @@ export default function LeaguesPage() {
                 filtered.map((league) => (
                   <tr
                     key={league.apiFootballId}
-                    className={`border-b border-gray-50 hover:bg-gray-50/80 transition-colors ${
-                      league.isEnabled ? 'bg-green-50/30' : ''
-                    }`}
+                    style={{ borderBottom: '1px solid #2A2A45', background: league.isEnabled ? 'rgba(16, 185, 129, 0.08)' : 'transparent' }}
+                    className="hover:bg-white/5 transition-colors"
                   >
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2.5">
                         {league.logo && (
                           <img src={league.logo} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                         )}
-                        <span className={`font-medium text-xs ${league.isEnabled ? 'text-gray-900' : 'text-gray-500'}`}>
+                        <span className="font-medium text-xs" style={{ color: league.isEnabled ? '#F0EAE0' : '#9A94A8' }}>
                           {league.name}
                         </span>
                       </div>
@@ -315,21 +320,21 @@ export default function LeaguesPage() {
                         {league.countryFlag && (
                           <img src={league.countryFlag} alt="" className="w-4 h-3 object-contain" />
                         )}
-                        <span className="text-gray-600 text-xs">{league.country}</span>
+                        <span className="text-xs" style={{ color: '#9A94A8' }}>{league.country}</span>
                       </div>
                     </td>
                     <td className="px-4 py-2.5 text-center">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs" style={{ color: '#9A94A8' }}>
                         {league.type === 'League' ? 'Liga' : league.type === 'Cup' ? 'Copa' : league.type}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       {league.isEnabled && league.sportName ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full bg-brand-700/10 text-brand-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full" style={{ background: 'rgba(196, 149, 106, 0.2)', color: '#C4956A' }}>
                           {league.sportName}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-300">—</span>
+                        <span className="text-xs" style={{ color: '#9A94A8' }}>—</span>
                       )}
                     </td>
                     <td className="px-3 py-2.5 text-center">
@@ -337,7 +342,8 @@ export default function LeaguesPage() {
                         <button
                           onClick={() => handleDisable(league)}
                           disabled={actionLoading === league.apiFootballId}
-                          className="w-full px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                          className="w-full px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                          style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#F87171' }}
                         >
                           {actionLoading === league.apiFootballId ? '...' : 'Desabilitar'}
                         </button>
@@ -345,7 +351,8 @@ export default function LeaguesPage() {
                         <button
                           onClick={() => handleEnable(league)}
                           disabled={actionLoading === league.apiFootballId || !selectedSport}
-                          className="w-full px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors disabled:opacity-50"
+                          className="w-full px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                          style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}
                           title={!selectedSport ? 'Selecione uma modalidade acima' : `Habilitar para ${selectedSport.name}`}
                         >
                           {actionLoading === league.apiFootballId ? '...' : 'Habilitar'}

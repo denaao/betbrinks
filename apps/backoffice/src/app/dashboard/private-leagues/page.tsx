@@ -130,8 +130,8 @@ export default function PrivateLeaguesPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ligas Privadas</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold" style={{ color: '#F0EAE0' }}>Ligas Privadas</h1>
+          <p className="text-sm mt-1" style={{ color: '#9A94A8' }}>
             Gerencie todas as ligas privadas criadas pelos usuários
           </p>
         </div>
@@ -139,26 +139,26 @@ export default function PrivateLeaguesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-gray-500 font-medium uppercase">Total de Ligas</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{leagues.length}</p>
+        <div className="rounded-xl p-4" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
+          <p className="text-xs font-medium uppercase" style={{ color: '#9A94A8' }}>Total de Ligas</p>
+          <p className="text-2xl font-bold mt-1" style={{ color: '#F0EAE0' }}>{leagues.length}</p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-green-600 font-medium uppercase">Ligas Abertas</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="rounded-xl p-4" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
+          <p className="text-xs font-medium uppercase" style={{ color: 'text-green-400' }}>Ligas Abertas</p>
+          <p className="text-2xl font-bold mt-1 text-green-400">
             {leagues.filter((l) => l.status === 'OPEN').length}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-          <p className="text-xs text-red-600 font-medium uppercase">Ligas Fechadas</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">
+        <div className="rounded-xl p-4" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
+          <p className="text-xs font-medium uppercase text-red-400">Ligas Fechadas</p>
+          <p className="text-2xl font-bold mt-1 text-red-400">
             {leagues.filter((l) => l.status === 'CLOSED').length}
           </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <div className="rounded-xl p-4 mb-6" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
         <div className="flex flex-wrap gap-3 items-center">
           <input
             type="text"
@@ -168,7 +168,8 @@ export default function PrivateLeaguesPage() {
               setPage(1);
             }}
             placeholder="Buscar por nome ou código..."
-            className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-700 focus:border-transparent"
+            style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent placeholder-gray-500"
           />
           <select
             value={filterStatus}
@@ -176,47 +177,48 @@ export default function PrivateLeaguesPage() {
               setFilterStatus(e.target.value as any);
               setPage(1);
             }}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-700"
+            style={{ background: '#14142B', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+            className="px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
           >
             <option value="all">Todos os status</option>
             <option value="OPEN">Abertas</option>
             <option value="CLOSED">Fechadas</option>
           </select>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs" style={{ color: '#9A94A8' }}>
             {leagues.length} ligas
           </span>
         </div>
       </div>
 
       {/* Leagues Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="rounded-xl overflow-hidden" style={{ background: '#1E1E38', border: '1px solid #2A2A45' }}>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
+          <thead style={{ background: '#14142B', borderBottom: '1px solid #2A2A45' }}>
             <tr>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Nome</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Proprietário</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Código Convite</th>
-              <th className="text-right px-4 py-3 font-semibold text-gray-600">Caixa Atual</th>
-              <th className="text-right px-4 py-3 font-semibold text-gray-600">Caixa Inicial</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Status</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Membros</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Data Criação</th>
-              <th className="text-center px-4 py-3 font-semibold text-gray-600">Ação</th>
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Nome</th>
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Proprietário</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Código Convite</th>
+              <th className="text-right px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Caixa Atual</th>
+              <th className="text-right px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Caixa Inicial</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Status</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Membros</th>
+              <th className="text-left px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Data Criação</th>
+              <th className="text-center px-4 py-3 font-semibold" style={{ color: '#9A94A8' }}>Ação</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={9} className="text-center py-8 text-gray-400">
+                <td colSpan={9} className="text-center py-8">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="animate-spin w-6 h-6 border-2 border-gray-300 border-t-brand-700 rounded-full"></div>
-                    Carregando ligas...
+                    <div className="animate-spin w-6 h-6 border-2 rounded-full" style={{ borderColor: '#2A2A45', borderTopColor: '#C4956A' }}></div>
+                    <span style={{ color: '#9A94A8' }}>Carregando ligas...</span>
                   </div>
                 </td>
               </tr>
             ) : leagues.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-8 text-gray-400">
+                <td colSpan={9} className="text-center py-8" style={{ color: '#9A94A8' }}>
                   Nenhuma liga privada encontrada
                 </td>
               </tr>
@@ -224,52 +226,56 @@ export default function PrivateLeaguesPage() {
               leagues.map((league) => (
                 <tr
                   key={league.id}
-                  className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                  className="transition-colors"
+                  style={{ borderBottom: '1px solid #2A2A45' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{league.name}</p>
+                    <p className="font-medium" style={{ color: '#F0EAE0' }}>{league.name}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-gray-600 text-xs">{league.ownerName || league.ownerId}</p>
+                    <p className="text-xs" style={{ color: '#9A94A8' }}>{league.ownerName || league.ownerId}</p>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono text-gray-700">
+                    <code className="px-2 py-1 rounded text-xs font-mono" style={{ background: '#14142B', color: '#C4956A', border: '1px solid #2A2A45' }}>
                       {league.inviteCode}
                     </code>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold" style={{ color: '#F0EAE0' }}>
                       {formatCurrency(league.cashbox)}
                     </p>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <p className="text-gray-600 text-xs">
+                    <p className="text-xs" style={{ color: '#9A94A8' }}>
                       {formatCurrency(league.cashboxInitial)}
                     </p>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
-                      className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full ${
-                        league.status === 'OPEN'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}
+                      className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full"
+                      style={{
+                        background: league.status === 'OPEN' ? 'rgba(74, 222, 128, 0.2)' : 'rgba(248, 113, 113, 0.2)',
+                        color: league.status === 'OPEN' ? '#4ade80' : '#f87171'
+                      }}
                     >
                       {league.status === 'OPEN' ? 'Aberta' : 'Fechada'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="font-semibold text-brand-700">
+                    <span className="font-semibold" style={{ color: '#C4956A' }}>
                       {league.memberCount}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs" style={{ color: '#9A94A8' }}>
                     {formatDate(league.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => openModal(league)}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-700 text-white hover:bg-brand-800 transition-colors"
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white hover:bg-brand-500 transition-colors"
+                      style={{ background: '#C4956A' }}
                     >
                       Detalhes
                     </button>
@@ -284,21 +290,27 @@ export default function PrivateLeaguesPage() {
       {/* Pagination */}
       {!loading && (
         <div className="flex items-center justify-between mt-4">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm" style={{ color: '#9A94A8' }}>
             Página {page} de {totalPages}
           </span>
           <div className="flex gap-2">
             <button
               disabled={page <= 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              className="px-3 py-1.5 text-sm rounded-lg disabled:opacity-40 transition-colors"
+              style={{ background: '#1E1E38', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+              onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#1E1E38')}
             >
               Anterior
             </button>
             <button
               disabled={page >= totalPages}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              className="px-3 py-1.5 text-sm rounded-lg disabled:opacity-40 transition-colors"
+              style={{ background: '#1E1E38', border: '1px solid #2A2A45', color: '#F0EAE0' }}
+              onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = '#1E1E38')}
             >
               Próximo
             </button>
@@ -309,13 +321,16 @@ export default function PrivateLeaguesPage() {
       {/* Detail Modal */}
       {modal.isOpen && modal.league && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ background: '#1E1E38', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white">
-              <h2 className="text-xl font-bold text-gray-900">{modal.league.name}</h2>
+            <div className="flex items-center justify-between p-6 sticky top-0" style={{ borderBottom: '1px solid #2A2A45', background: '#1E1E38' }}>
+              <h2 className="text-xl font-bold" style={{ color: '#F0EAE0' }}>{modal.league.name}</h2>
               <button
                 onClick={closeModal}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                className="text-2xl leading-none transition-colors"
+                style={{ color: '#9A94A8' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F0EAE0')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#9A94A8')}
               >
                 ×
               </button>
@@ -324,8 +339,8 @@ export default function PrivateLeaguesPage() {
             {modal.loading ? (
               <div className="p-8 text-center">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="animate-spin w-8 h-8 border-3 border-gray-300 border-t-brand-700 rounded-full"></div>
-                  <p className="text-gray-500">Carregando detalhes...</p>
+                  <div className="animate-spin w-8 h-8 border-[3px] rounded-full" style={{ borderColor: '#2A2A45', borderTopColor: '#C4956A' }}></div>
+                  <p style={{ color: '#9A94A8' }}>Carregando detalhes...</p>
                 </div>
               </div>
             ) : (
@@ -333,44 +348,44 @@ export default function PrivateLeaguesPage() {
                 {/* League Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase mb-1">Nome</p>
-                    <p className="text-sm font-semibold text-gray-900">{modal.league.name}</p>
+                    <p className="text-xs font-medium uppercase mb-1" style={{ color: '#9A94A8' }}>Nome</p>
+                    <p className="text-sm font-semibold" style={{ color: '#F0EAE0' }}>{modal.league.name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase mb-1">Proprietário</p>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-xs font-medium uppercase mb-1" style={{ color: '#9A94A8' }}>Proprietário</p>
+                    <p className="text-sm font-semibold" style={{ color: '#F0EAE0' }}>
                       {modal.league.ownerName || modal.league.ownerId}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase mb-1">Código Convite</p>
+                    <p className="text-xs font-medium uppercase mb-1" style={{ color: '#9A94A8' }}>Código Convite</p>
                     <div className="flex items-center gap-2">
-                      <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono text-gray-700">
+                      <code className="px-2 py-1 rounded text-xs font-mono" style={{ background: '#14142B', color: '#C4956A', border: '1px solid #2A2A45' }}>
                         {modal.league.inviteCode}
                       </code>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase mb-1">Status</p>
+                    <p className="text-xs font-medium uppercase mb-1" style={{ color: '#9A94A8' }}>Status</p>
                     <span
-                      className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-full ${
-                        modal.league.status === 'OPEN'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}
+                      className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full"
+                      style={{
+                        background: modal.league.status === 'OPEN' ? 'rgba(74, 222, 128, 0.2)' : 'rgba(248, 113, 113, 0.2)',
+                        color: modal.league.status === 'OPEN' ? '#4ade80' : '#f87171'
+                      }}
                     >
                       {modal.league.status === 'OPEN' ? 'Aberta' : 'Fechada'}
                     </span>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase mb-1">Data de Criação</p>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-xs font-medium uppercase mb-1" style={{ color: '#9A94A8' }}>Data de Criação</p>
+                    <p className="text-sm font-semibold" style={{ color: '#F0EAE0' }}>
                       {formatDate(modal.league.createdAt)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase mb-1">Total de Membros</p>
-                    <p className="text-sm font-semibold text-brand-700">{modal.league.memberCount}</p>
+                    <p className="text-xs font-medium uppercase mb-1" style={{ color: '#9A94A8' }}>Total de Membros</p>
+                    <p className="text-sm font-semibold" style={{ color: '#C4956A' }}>{modal.league.memberCount}</p>
                   </div>
                 </div>
 
@@ -378,15 +393,15 @@ export default function PrivateLeaguesPage() {
                 <div className="space-y-3">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-gray-500 font-medium uppercase">Saúde da Caixa</p>
-                      <span className="text-sm font-semibold text-gray-900">
+                      <p className="text-xs font-medium uppercase" style={{ color: '#9A94A8' }}>Saúde da Caixa</p>
+                      <span className="text-sm font-semibold" style={{ color: '#F0EAE0' }}>
                         {formatCurrency(modal.league.cashbox)} / {formatCurrency(modal.league.cashboxInitial)}
                       </span>
                     </div>
                     {(() => {
                       const health = getCashboxHealth(modal.league.cashbox, modal.league.cashboxInitial);
                       return (
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div className="w-full rounded-full h-2 overflow-hidden" style={{ background: '#14142B' }}>
                           <div
                             className={`h-full transition-all ${health.color}`}
                             style={{ width: `${health.percent}%` }}
@@ -397,16 +412,16 @@ export default function PrivateLeaguesPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <div>
-                      <p className="text-gray-500">Caixa Atual</p>
-                      <p className="font-bold text-gray-900">{formatCurrency(modal.league.cashbox)}</p>
+                      <p style={{ color: '#9A94A8' }}>Caixa Atual</p>
+                      <p className="font-bold" style={{ color: '#F0EAE0' }}>{formatCurrency(modal.league.cashbox)}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Caixa Inicial</p>
-                      <p className="font-bold text-gray-900">{formatCurrency(modal.league.cashboxInitial)}</p>
+                      <p style={{ color: '#9A94A8' }}>Caixa Inicial</p>
+                      <p className="font-bold" style={{ color: '#F0EAE0' }}>{formatCurrency(modal.league.cashboxInitial)}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Diferença</p>
-                      <p className={`font-bold ${modal.league.cashbox < modal.league.cashboxInitial ? 'text-red-600' : 'text-green-600'}`}>
+                      <p style={{ color: '#9A94A8' }}>Diferença</p>
+                      <p className="font-bold" style={{ color: modal.league.cashbox < modal.league.cashboxInitial ? '#f87171' : '#4ade80' }}>
                         {formatCurrency(modal.league.cashbox - modal.league.cashboxInitial)}
                       </p>
                     </div>
@@ -416,24 +431,26 @@ export default function PrivateLeaguesPage() {
                 {/* Cashbox Logs */}
                 {modal.league.cashboxLogs && modal.league.cashboxLogs.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-bold text-gray-900 mb-3">Histórico da Caixa</h3>
+                    <h3 className="text-sm font-bold mb-3" style={{ color: '#F0EAE0' }}>Histórico da Caixa</h3>
                     <div className="space-y-2 max-h-[250px] overflow-y-auto">
                       {modal.league.cashboxLogs.map((log, idx) => (
                         <div
                           key={`${log.id}-${idx}`}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+                          className="flex items-center justify-between p-3 rounded-lg"
+                          style={{ background: '#14142B', border: '1px solid #2A2A45' }}
                         >
                           <div className="flex-1">
-                            <p className="text-xs font-semibold text-gray-900">{log.type}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">{log.description}</p>
+                            <p className="text-xs font-semibold" style={{ color: '#F0EAE0' }}>{log.type}</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#9A94A8' }}>{log.description}</p>
                           </div>
                           <div className="text-right">
                             <p
-                              className={`text-sm font-bold ${log.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                              className="text-sm font-bold"
+                              style={{ color: log.amount >= 0 ? '#4ade80' : '#f87171' }}
                             >
                               {log.amount >= 0 ? '+' : ''}{formatCurrency(log.amount)}
                             </p>
-                            <p className="text-xs text-gray-500 mt-0.5">
+                            <p className="text-xs mt-0.5" style={{ color: '#9A94A8' }}>
                               {formatDate(log.createdAt)}
                             </p>
                           </div>
@@ -446,20 +463,21 @@ export default function PrivateLeaguesPage() {
                 {/* Members List */}
                 {modal.league.members && modal.league.members.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-bold text-gray-900 mb-3">Membros ({modal.league.members.length})</h3>
+                    <h3 className="text-sm font-bold mb-3" style={{ color: '#F0EAE0' }}>Membros ({modal.league.members.length})</h3>
                     <div className="space-y-2 max-h-[250px] overflow-y-auto">
                       {modal.league.members.map((member, idx) => (
                         <div
                           key={`${member.userId}-${idx}`}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+                          className="flex items-center justify-between p-3 rounded-lg"
+                          style={{ background: '#14142B', border: '1px solid #2A2A45' }}
                         >
                           <div>
-                            <p className="text-sm font-semibold text-gray-900">{member.username}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">
+                            <p className="text-sm font-semibold" style={{ color: '#F0EAE0' }}>{member.username}</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#9A94A8' }}>
                               Entrou em {formatDate(member.joinedAt)}
                             </p>
                           </div>
-                          <p className="text-sm font-bold text-brand-700">
+                          <p className="text-sm font-bold" style={{ color: '#C4956A' }}>
                             {formatCurrency(member.balance)}
                           </p>
                         </div>
@@ -470,7 +488,7 @@ export default function PrivateLeaguesPage() {
 
                 {(!modal.league.members || modal.league.members.length === 0) &&
                   (!modal.league.cashboxLogs || modal.league.cashboxLogs.length === 0) && (
-                  <div className="text-center py-8 text-gray-500 text-sm">
+                  <div className="text-center py-8 text-sm" style={{ color: '#9A94A8' }}>
                     Nenhum dado disponível
                   </div>
                 )}
@@ -478,13 +496,18 @@ export default function PrivateLeaguesPage() {
             )}
 
             {/* Modal Footer */}
-            <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-end">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300 transition-colors"
-              >
-                Fechar
-              </button>
+            <div className="p-6" style={{ borderTop: '1px solid #2A2A45', background: '#14142B' }}>
+              <div className="flex justify-end">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+                  style={{ background: '#2A2A45', color: '#F0EAE0' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#3A3A55')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#2A2A45')}
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
           </div>
         </div>
