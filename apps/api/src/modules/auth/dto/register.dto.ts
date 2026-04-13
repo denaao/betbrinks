@@ -26,15 +26,7 @@ export class RegisterDto {
   @Matches(/^\+55\d{10,11}$/, { message: 'Telefone deve estar no formato +55XXXXXXXXXXX' })
   phone: string;
 
-  @ApiProperty({ example: 'jogador@email.com', required: false })
-  @IsOptional()
-  @IsEmail({}, { message: 'Email invalido' })
-  email?: string;
-
   @ApiProperty({ example: 'Senha@123', minLength: 8 })
   @IsString()
   @IsNotEmpty()
-  @MinLength(8, { message: 'Senha deve ter no minimo 8 caracteres' })
-  @MaxLength(128, { message: 'Senha deve ter no maximo 128 caracteres' })
-  password: string;
-}
+  @MinLength(8, { mes
