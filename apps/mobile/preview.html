@@ -749,9 +749,35 @@
         <button class="games-back" onclick="closeLeagueManagePage()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
         <span class="games-league-name" id="managePageTitle" style="flex:1">Gerenciar Liga</span>
         <span id="managePageCode" style="display:none;font-size:12px;font-weight:700;color:var(--primary);letter-spacing:2px;cursor:pointer;background:rgba(196,149,106,0.1);padding:4px 10px;border-radius:8px;white-space:nowrap;" onclick="copyCode(this.dataset.code)"><span id="managePageCodeText"></span> <svg style="display:inline;vertical-align:middle;margin-left:2px" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
-        <button onclick="closeLeagueManagePage()" style="background:none;border:none;color:var(--text-sec);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1">✕</button>
       </div>
       <div id="managePageContent" style="flex:1;overflow-y:auto;padding:12px 16px 20px;"></div>
+    </div>
+
+    <!-- Affiliate Config Page -->
+    <div id="affiliateConfigPage" class="content" style="display:none; flex-direction:column;">
+      <div class="games-header" style="flex-shrink:0">
+        <button class="games-back" onclick="closeAffiliateConfig()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+        <span class="games-league-name" id="affConfigTitle" style="flex:1">📣 Configurar Afiliado</span>
+      </div>
+      <div id="affConfigContent" style="flex:1;overflow-y:auto;padding:16px 20px 20px;"></div>
+    </div>
+
+    <!-- Upgrade Stars Page -->
+    <div id="upgradeStarsPage" class="content" style="display:none; flex-direction:column;">
+      <div class="games-header" style="flex-shrink:0">
+        <button class="games-back" onclick="closeUpgradeStars()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+        <span class="games-league-name" id="upgradeStarsTitle" style="flex:1">Evoluir Liga</span>
+      </div>
+      <div id="upgradeStarsContent" style="flex:1;overflow-y:auto;padding:16px 20px 20px;"></div>
+    </div>
+
+    <!-- Manager Confirm Page -->
+    <div id="managerConfirmPage" class="content" style="display:none; flex-direction:column;">
+      <div class="games-header" style="flex-shrink:0">
+        <button class="games-back" onclick="closeManagerConfirm()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+        <span class="games-league-name" id="mgrConfirmTitle" style="flex:1">Confirmar</span>
+      </div>
+      <div id="mgrConfirmContent" style="flex:1;overflow-y:auto;padding:16px 20px 20px;"></div>
     </div>
 
     <div class="bet-slip" id="betSlip">
@@ -860,9 +886,13 @@
   <div class="modal" id="joinLeagueModal">
     <div class="modal-handle"></div><button class="modal-close" onclick="closeAllModals()">✕</button>
     <div class="modal-title" data-i18n="join_a_league">Entrar em Liga</div>
-    <div class="field" style="margin-bottom:20px">
+    <div class="field" style="margin-bottom:16px">
       <label>Codigo da Liga</label>
       <input type="text" id="joinLeagueCode" placeholder="000000" maxlength="6">
+    </div>
+    <div class="field" style="margin-bottom:20px">
+      <label style="color:var(--text-sec)">📣 Código de Afiliado <span style="font-weight:400;font-size:10px;color:var(--text-light)">(opcional)</span></label>
+      <input type="text" id="joinAffiliateCode" placeholder="Ex: ABC123" style="border-color:rgba(155,89,182,0.3)">
     </div>
     <button class="btn btn-primary" onclick="handleJoinLeague()">Solicitar Ingresso</button>
   </div>
@@ -900,8 +930,6 @@
     <div class="modal-title" data-i18n="diamond_store">Loja de Diamantes</div>
     <div id="diamondPackagesContent" style="margin:20px 0"></div>
     <div id="diamondConvertContent" style="display:none;padding:20px;background:var(--success-bg);border-radius:var(--radius);text-align:center;margin-top:20px">
-      <div style="font-size:13px;color:var(--text-sec);margin-bottom:12px">Voce ganhou diamantes!</div>
-      <button class="btn btn-primary" style="background:var(--success)" onclick="handleConvertDiamonds()">Converter para Saldo</button>
     </div>
   </div>
 </div>
@@ -960,8 +988,17 @@ const I18N={
     // League manage
     manage:'Gerenciar', manage_league:'Gerenciar Liga', members:'membros', member:'membro',
     send_balance:'Enviar Saldo', withdraw_balance:'Retirar Saldo', points_amount:'Quantidade de pontos',
-    send:'Enviar', owner:'Dono', admin:'Admin', points_sent:'pontos enviados', points_withdrawn:'pontos retirados',
-    how_it_works:'<b>Como funciona:</b> Membros iniciam com saldo 0. Você pode enviar saldo para eles ou eles podem comprar diamantes na loja e converter em saldo para esta liga.',
+    send:'Enviar', owner:'Dono', admin:'Admin', manager:'Gestor', points_sent:'pontos enviados', points_withdrawn:'pontos retirados',
+    promote_manager:'Promover a Gestor', demote_manager:'Rebaixar', upgrade_league:'Evoluir Liga',
+    stars_label:'estrelas', star_label:'estrela', upgrade_cost:'Custo', diamonds_short:'diamantes',
+    valid_30_days:'Válido por 30 dias', expires_in:'Expira em', days:'dias', star_expired:'Nível expirado!',
+    renew_now:'Renovar agora', over_limit:'Liga acima do limite de membros', manager_limit:'Limite de gestores atingido', manager_short:'gestores',
+    promote_affiliate:'Promover a Afiliado', edit_affiliate:'Editar Afiliado', affiliate:'Afiliado', sub_affiliate:'Sub-afiliado',
+    revenue_share:'Revenue Share %', affiliate_code:'Código de Afiliado', affiliate_password:'Senha do Afiliado',
+    enter_affiliate_code:'Código do afiliado', referral_registered:'Indicação registrada!',
+    auto_approve:'Auto-aprovar membros', auto_approve_on:'Ativado', auto_approve_off:'Desativado',
+    auto_approve_desc:'Novos membros entram automaticamente sem aprovação',
+    how_it_works:'<b>Como funciona:</b> Membros iniciam com saldo 0. O dono ou gestor da liga envia saldo para eles. Diamantes comprados na loja servem para upgrades no app.',
     // Require league
     require_league_msg:'Selecione uma liga na aba Ligas para acessar jogos, apostas e ranking',
     go_to_leagues:'Ir para Ligas',
@@ -1028,8 +1065,17 @@ const I18N={
     you_only_have:'You only have',
     manage:'Manage', manage_league:'Manage League', members:'members', member:'member',
     send_balance:'Send Balance', withdraw_balance:'Withdraw Balance', points_amount:'Points amount',
-    send:'Send', owner:'Owner', admin:'Admin', points_sent:'points sent', points_withdrawn:'points withdrawn',
-    how_it_works:'<b>How it works:</b> Members start with 0 balance. You can send balance to them or they can buy diamonds in the store and convert to balance for this league.',
+    send:'Send', owner:'Owner', admin:'Admin', manager:'Manager', points_sent:'points sent', points_withdrawn:'points withdrawn',
+    promote_manager:'Promote to Manager', demote_manager:'Demote', upgrade_league:'Upgrade League',
+    stars_label:'stars', star_label:'star', upgrade_cost:'Cost', diamonds_short:'diamonds',
+    valid_30_days:'Valid for 30 days', expires_in:'Expires in', days:'days', star_expired:'Level expired!',
+    renew_now:'Renew now', over_limit:'League over member limit', manager_limit:'Manager limit reached', manager_short:'managers',
+    promote_affiliate:'Promote to Affiliate', edit_affiliate:'Edit Affiliate', affiliate:'Affiliate', sub_affiliate:'Sub-affiliate',
+    revenue_share:'Revenue Share %', affiliate_code:'Affiliate Code', affiliate_password:'Affiliate Password',
+    enter_affiliate_code:'Affiliate code', referral_registered:'Referral registered!',
+    auto_approve:'Auto-approve members', auto_approve_on:'Enabled', auto_approve_off:'Disabled',
+    auto_approve_desc:'New members join automatically without approval',
+    how_it_works:'<b>How it works:</b> Members start with 0 balance. The owner or manager sends balance to them. Diamonds purchased in the store are for app upgrades.',
     require_league_msg:'Select a league in the Leagues tab to access games, bets and ranking',
     go_to_leagues:'Go to Leagues',
     simple:'Single', multiple:'Multiple', slip_type:'Slip',
@@ -1089,8 +1135,17 @@ const I18N={
     you_only_have:'Solo tienes',
     manage:'Gestionar', manage_league:'Gestionar Liga', members:'miembros', member:'miembro',
     send_balance:'Enviar Saldo', withdraw_balance:'Retirar Saldo', points_amount:'Cantidad de puntos',
-    send:'Enviar', owner:'Dueño', admin:'Admin', points_sent:'puntos enviados', points_withdrawn:'puntos retirados',
-    how_it_works:'<b>Cómo funciona:</b> Los miembros inician con saldo 0. Puedes enviarles saldo o ellos pueden comprar diamantes en la tienda y convertir en saldo para esta liga.',
+    send:'Enviar', owner:'Dueño', admin:'Admin', manager:'Gestor', points_sent:'puntos enviados', points_withdrawn:'puntos retirados',
+    promote_manager:'Promover a Gestor', demote_manager:'Degradar', upgrade_league:'Evolucionar Liga',
+    stars_label:'estrellas', star_label:'estrella', upgrade_cost:'Costo', diamonds_short:'diamantes',
+    valid_30_days:'Válido por 30 días', expires_in:'Expira en', days:'días', star_expired:'¡Nivel expirado!',
+    renew_now:'Renovar ahora', over_limit:'Liga por encima del límite de miembros', manager_limit:'Límite de gestores alcanzado', manager_short:'gestores',
+    promote_affiliate:'Promover a Afiliado', edit_affiliate:'Editar Afiliado', affiliate:'Afiliado', sub_affiliate:'Sub-afiliado',
+    revenue_share:'Revenue Share %', affiliate_code:'Código de Afiliado', affiliate_password:'Contraseña del Afiliado',
+    enter_affiliate_code:'Código del afiliado', referral_registered:'¡Referencia registrada!',
+    auto_approve:'Auto-aprobar miembros', auto_approve_on:'Activado', auto_approve_off:'Desactivado',
+    auto_approve_desc:'Nuevos miembros entran automáticamente sin aprobación',
+    how_it_works:'<b>Cómo funciona:</b> Los miembros inician con saldo 0. El dueño o gestor les envía saldo. Los diamantes comprados en la tienda son para mejoras en la app.',
     require_league_msg:'Selecciona una liga en la pestaña Ligas para acceder a juegos, apuestas y ranking',
     go_to_leagues:'Ir a Ligas',
     simple:'Simple', multiple:'Múltiple', slip_type:'Boleto',
@@ -1251,7 +1306,7 @@ async function api(path,opts={}){
   try{
     const r=await fetch(API+path,{...opts,headers:{...h,...(opts.headers||{})},signal:ctrl.signal});
     clearTimeout(timeout);
-    const j=await r.json();if(!r.ok)throw new Error(j.message||'Erro');return j.data!==undefined?j.data:j;
+    const j=await r.json();if(!r.ok){const msg=Array.isArray(j.message)?j.message.join(', '):j.message||'Erro';throw new Error(msg);}return j.data!==undefined?j.data:j;
   }catch(e){clearTimeout(timeout);throw e;}
 }
 
@@ -1267,25 +1322,45 @@ async function loadLeagues(){
   updateLeagueSelector();
 }
 
+function renderStars(count){
+  let s='';
+  for(let i=0;i<count;i++) s+='⭐';
+  return s?'<span style="font-size:10px;margin-left:4px">'+s+'</span>':'';
+}
+
 function renderLeagueItem(l,officialStyle){
   const isActive=l.id===curLeagueId;
   const code=l.inviteCode||'';
   const isOwner=l.role==='OWNER';
+  const isManager=l.role==='MANAGER';
+  const canManage=isOwner||isManager;
   const displayName=l.isOfficial?'Liga BetBrincadeira':l.name;
+  const starsHtml=!l.isOfficial&&l.stars?renderStars(l.stars):'';
+  const roleHtml=isOwner?' <span style="font-size:10px;color:var(--primary);font-weight:400">👑 '+t('owner')+'</span>'
+    :isManager?' <span style="font-size:10px;color:var(--warning);font-weight:400">🛡️ '+t('manager')+'</span>':'';
+  const expiryWarning=l.starsExpiringSoon?'<span style="font-size:9px;color:var(--warning);margin-left:4px">⚠️ '+t('expires_in')+' '+l.daysUntilExpiry+' '+t('days')+'</span>'
+    :l.starsExpired?'<span style="font-size:9px;color:var(--error);margin-left:4px">⚠️ '+t('star_expired')+'</span>':'';
   const extraStyle=officialStyle?'style="background:rgba(196,149,106,0.1);border:none;"':'';
   return '<div class="league-sel-item'+(isActive?' active':'')+'" '+extraStyle+' onclick="switchLeague('+l.id+')">'+
     '<div class="league-sel-crest">'+displayName[0]+'</div>'+
-    '<div class="league-sel-info"><div class="league-sel-name">'+displayName+(isOwner?' <span style="font-size:10px;color:var(--primary);font-weight:400">👑 '+t('owner')+'</span>':'')+'</div>'+
+    '<div class="league-sel-info"><div class="league-sel-name">'+displayName+starsHtml+roleHtml+expiryWarning+'</div>'+
     '<div class="league-sel-sub">'+t('balance')+': '+(l.balance||0).toLocaleString('pt-BR')+' · '+(l.memberCount||0)+' '+((l.memberCount||0)===1?t('member'):t('members'))+
     (!l.isOfficial?' · '+(l.isOpen?'<span style="color:var(--success)">Aberta</span>':'<span style="color:var(--error)">Fechada</span>'):'')+'</div></div>'+
-    (isOwner?'<div class="league-sel-manage" onclick="event.stopPropagation();openLeaguePanel('+l.id+')" style="display:flex;flex-direction:column;align-items:center;gap:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span style="font-size:9px;color:var(--primary);font-weight:600">'+t('manage')+'</span></div>':'')+
-    (code&&!l.isOfficial&&!isOwner?'<div class="league-sel-code" onclick="event.stopPropagation();copyCode(&quot;'+code+'&quot;)"><span class="code-text">'+code+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>':'')+
+    (canManage?'<div class="league-sel-manage" onclick="event.stopPropagation();openLeaguePanel('+l.id+')" style="display:flex;flex-direction:column;align-items:center;gap:2px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span style="font-size:9px;color:var(--primary);font-weight:600">'+t('manage')+'</span></div>':'')+
+    (code&&!l.isOfficial&&!canManage?'<div class="league-sel-code" onclick="event.stopPropagation();copyCode(&quot;'+code+'&quot;)"><span class="code-text">'+code+'</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>':'')+
     '</div>';
 }
 
 function updateLeagueSelector(){
   const sel=document.getElementById('leagueSelector');
-  sel.style.display='flex';
+  const mp=document.getElementById('leagueManagePage');
+  const affPage=document.getElementById('affiliateConfigPage');
+  // Don't show selector if manage page or affiliate config is open
+  if((mp&&mp.style.display==='flex')||(affPage&&affPage.style.display==='flex')) {
+    sel.style.display='none';
+  } else {
+    sel.style.display='flex';
+  }
   const privateLeagues=allLeagues.filter(l=>!l.isOfficial);
   const officialLeague=allLeagues.find(l=>l.isOfficial);
   document.getElementById('leagueCount').textContent=privateLeagues.length;
@@ -1309,7 +1384,14 @@ async function loadLeagueBalance(){
     if(b){
       const val=(b.balance||0).toLocaleString('pt-BR');
       document.getElementById('userPoints').textContent=val;
-      document.getElementById('gamesLeagueBal').textContent=val+' pts';
+      // Show league cashbox in header ONLY for owner/manager
+      const myRole=curLeague?.role||'MEMBER';
+      if(myRole==='OWNER'||myRole==='MANAGER'){
+        const cashbox=curLeague&&curLeague.cashbox!=null?curLeague.cashbox:0;
+        document.getElementById('gamesLeagueBal').textContent=cashbox.toLocaleString('pt-BR')+' pts';
+      } else {
+        document.getElementById('gamesLeagueBal').textContent='';
+      }
       // Update curLeague balance in memory
       if(curLeague)curLeague.balance=b.balance||0;
     }
@@ -1629,6 +1711,8 @@ function renderSlip(){
   const combined=selections.reduce((acc,s)=>acc*s.oVal,1);
   const slip=document.getElementById('betSlip');
   slip.classList.add('active');
+  // Add padding so last game isn't hidden behind bet slip
+  document.getElementById('gamesSection').style.paddingBottom='70px';
 
   const n=selections.length;
   document.getElementById('bsPreviewText').textContent=n+' '+(n===1?t('selection'):t('selections'));
@@ -1652,7 +1736,7 @@ function syncOddHighlights(){
 }
 
 function toggleBetSlip(){document.getElementById('betSlip').classList.toggle('expanded');}
-function closeBetSlip(){const s=document.getElementById('betSlip');s.classList.remove('active','expanded');selections=[];syncOddHighlights();document.querySelector('.bs-body').style.display='';document.getElementById('bsLeaguePicker').style.display='none';}
+function closeBetSlip(){const s=document.getElementById('betSlip');s.classList.remove('active','expanded');selections=[];syncOddHighlights();document.querySelector('.bs-body').style.display='';document.getElementById('bsLeaguePicker').style.display='none';document.getElementById('gamesSection').style.paddingBottom='0';}
 function getCombinedOdd(){return selections.reduce((acc,s)=>acc*s.oVal,1);}
 
 function openLeaguePicker(){
@@ -1880,8 +1964,17 @@ function switchLeague(id){
   betFromExplorar=false;
   closeAllModals();
   // Update games header
-  document.getElementById('gamesLeagueName').textContent=curLeague?(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name):'Liga';
-  document.getElementById('gamesLeagueBal').textContent=(curLeague?(curLeague.balance||0).toLocaleString('pt-BR'):'0')+' pts';
+  const leagueNameEl=document.getElementById('gamesLeagueName');
+  const leagueDisplayName=curLeague?(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name):'Liga';
+  leagueNameEl.innerHTML=leagueDisplayName+(!curLeague?.isOfficial&&curLeague?.stars?renderStars(curLeague.stars):'');
+  // Show cashbox only for owner/manager
+  const switchRole=curLeague?.role||'MEMBER';
+  if(switchRole==='OWNER'||switchRole==='MANAGER'){
+    const cashboxVal=curLeague?(curLeague.cashbox!=null?curLeague.cashbox:curLeague.balance||0):0;
+    document.getElementById('gamesLeagueBal').textContent=cashboxVal.toLocaleString('pt-BR')+' pts';
+  } else {
+    document.getElementById('gamesLeagueBal').textContent='';
+  }
   // Update header balance to selected league
   updateHeaderBalance();
   // Show games, hide leagues, restore game UI elements
@@ -2036,12 +2129,23 @@ async function handleCashboxWithdraw(){
 async function handleJoinLeague(){
   const c=document.getElementById('joinLeagueCode').value;
   if(!c||c.length!==6){showToast(t('enter_valid_code'),'error');return;}
+  const affCode=document.getElementById('joinAffiliateCode')?.value?.trim()||'';
   try{
-    await api('/user-leagues/join',{method:'POST',body:JSON.stringify({inviteCode:c})});
+    const result=await api('/user-leagues/join',{method:'POST',body:JSON.stringify({inviteCode:c})});
+    // If affiliate code provided, register referral after joining
+    if(affCode){
+      try{
+        await api('/affiliates/register-referral',{method:'POST',body:JSON.stringify({affiliateCode:affCode})});
+      }catch(affErr){
+        showToast('Aviso: '+affErr.message,'error');
+      }
+    }
     document.getElementById('joinLeagueCode').value='';
+    document.getElementById('joinAffiliateCode').value='';
     closeAllModals();
     await loadLeagues();
-    showToast(t('request_sent'),'success');
+    const msg=result.autoApproved?t('request_sent'):t('request_sent');
+    showToast(msg,'success');
   }catch(e){showToast(e.message,'error');}
 }
 
@@ -2066,7 +2170,8 @@ async function openLeaguePanel(leagueId){
   document.getElementById('gamesSection').style.display='none';
   const mp=document.getElementById('leagueManagePage');
   mp.style.display='flex';
-  document.getElementById('managePageTitle').textContent=t('manage_league')+' - '+(league?league.name:'Liga');
+  const starsStr=league&&!league.isOfficial&&league.stars?(' '+renderStars(league.stars)):'';
+  document.getElementById('managePageTitle').innerHTML=t('manage_league')+' - '+(league?league.name:'Liga')+starsStr;
   const codeEl=document.getElementById('managePageCode');
   const code=league?league.inviteCode:'';
   if(code){codeEl.style.display='';codeEl.dataset.code=code;document.getElementById('managePageCodeText').textContent=code;}
@@ -2091,6 +2196,10 @@ function closeLeagueManagePage(){
 }
 
 function renderLeaguePanel(leagueId,details,requests,league){
+  // Merge details (from API, most up-to-date) into league object
+  if(details){
+    league=Object.assign(league||{},details);
+  }
   const members=details.members||[];
   const pendingReqs=Array.isArray(requests)?requests:[];
   const code=league?league.inviteCode:'';
@@ -2132,6 +2241,22 @@ function renderLeaguePanel(leagueId,details,requests,league){
     html+='</div></div>';
   }
 
+  // Determine current user's role in this league
+  const myRole=league?league.role:(allLeagues.find(l=>l.id===leagueId)||{}).role||'MEMBER';
+  const imOwner=myRole==='OWNER';
+  const imManager=myRole==='MANAGER';
+
+  // Auto-approve toggle (owner only, private leagues)
+  if(imOwner&&league&&!league.isOfficial){
+    const isOn=league.autoApprove||false;
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card);border-radius:var(--radius-sm);margin-bottom:12px">';
+    html+='<div><div style="font-size:13px;font-weight:600;color:var(--text)">'+t('auto_approve')+'</div>';
+    html+='<div style="font-size:10px;color:var(--text-sec)">'+t('auto_approve_desc')+'</div></div>';
+    html+='<div onclick="handleToggleAutoApprove('+leagueId+')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:'+(isOn?'var(--success)':'var(--border)')+';position:relative;transition:background 0.2s">';
+    html+='<div style="width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:2px;'+(isOn?'right:2px':'left:2px')+';transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>';
+    html+='</div></div>';
+  }
+
   // Pending requests
   html+='<div class="panel-section"><div class="panel-section-title">'+t('pending_requests')+' '+(pendingReqs.length?'<span style="background:var(--error);color:white;border-radius:10px;padding:2px 8px;font-size:11px">'+pendingReqs.length+'</span>':'<span style="font-weight:400;font-size:11px;color:var(--text-light)">'+t('none_lbl')+'</span>')+'</div>';
   if(pendingReqs.length){
@@ -2153,27 +2278,115 @@ function renderLeaguePanel(leagueId,details,requests,league){
   if(!members.length){
     html+='<div style="text-align:center;padding:12px;color:var(--text-light);font-size:12px">'+t('no_members_yet')+'</div>';
   }
+
   members.forEach(m=>{
     const isMe=m.userId===user?.id;
     const mName=m.name||t('player');
     const mBal=(m.balance||0).toLocaleString('pt-BR');
-    const roleLabel=m.role==='OWNER'?t('owner'):m.role==='ADMIN'?t('admin'):t('member');
-    html+='<div class="panel-member"><div class="panel-member-av">'+mName[0].toUpperCase()+'</div>'+
-      '<div class="panel-member-info"><div class="panel-member-name">'+mName+(isMe?' ('+t('you_label')+')':'')+'</div>'+
-      '<div class="panel-member-sub">'+t('balance')+': '+mBal+' pts · '+roleLabel+'</div></div>';
+    const roleLabel=m.role==='OWNER'?t('owner'):m.role==='ADMIN'?t('admin'):m.role==='MANAGER'?t('manager'):t('member');
+    const roleBadge=m.role==='MANAGER'?' <span style="font-size:9px;color:var(--warning)">🛡️</span>':'';
+    const affBadge=m.isAffiliate?' <span style="font-size:9px;color:#9B59B6">📣</span>':'';
+    const isManagerRole=m.role==='MANAGER';
+    const isAff=m.isAffiliate||false;
+    const memberBg=isManagerRole&&isAff?'rgba(107,203,119,0.08)':isManagerRole?'rgba(224,122,95,0.08)':isAff?'rgba(226,184,102,0.08)':'transparent';
+    html+='<div class="panel-member" style="background:'+memberBg+'"><div class="panel-member-av">'+mName[0].toUpperCase()+'</div>'+
+      '<div class="panel-member-info"><div class="panel-member-name">'+mName+roleBadge+affBadge+(isMe?' ('+t('you_label')+')':'')+'</div>'+
+      '<div class="panel-member-sub">'+t('balance')+': '+mBal+' pts · '+roleLabel+(isAff?' · '+t('affiliate'):'')+'</div>';
+    if(isAff&&m.affiliateCode){
+      html+='<div style="font-size:10px;color:#9B59B6;margin-top:2px">📣 '+t('affiliate_code')+': <strong>'+m.affiliateCode+'</strong></div>';
+    }
+    if(!isAff&&m.linkedToAffiliateName){
+      html+='<div style="font-size:10px;color:#E2B866;margin-top:2px">🔗 Vinculado a: <strong>'+m.linkedToAffiliateName+'</strong> ('+m.linkedToAffiliateCode+')</div>';
+    }
+    html+='</div>';
     if(!isMe){
-      html+='<div class="panel-member-actions" style="flex-direction:column;gap:3px">'+
-        '<button class="panel-btn panel-btn-send" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;send&quot;)">'+t('send_btn')+'</button>'+
-        '<button class="panel-btn panel-btn-reject" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;withdraw&quot;)">'+t('withdraw_btn')+'</button>'+
-        '<button class="panel-btn panel-btn-remove" onclick="handleRemoveMember('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">'+t('remove')+'</button>'+
-        '</div>';
+      // Managers can: send/withdraw/remove members, but NOT managers/owners
+      const canSendWithdraw=imOwner||(imManager&&m.role==='MEMBER');
+      const canRemove=imOwner?m.role!=='OWNER':(imManager&&m.role==='MEMBER');
+      const canPromote=imOwner&&m.role==='MEMBER';
+      const canDemote=imOwner&&m.role==='MANAGER';
+      html+='<div class="panel-member-actions" style="flex-direction:column;gap:3px">';
+      if(canSendWithdraw){
+        html+='<button class="panel-btn panel-btn-send" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;send&quot;)">'+t('send_btn')+'</button>'+
+          '<button class="panel-btn panel-btn-reject" onclick="openBalanceAction('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;withdraw&quot;)">'+t('withdraw_btn')+'</button>';
+      }
+      if(canRemove){
+        html+='<button class="panel-btn panel-btn-remove" onclick="handleRemoveMember('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">'+t('remove')+'</button>';
+      }
+      if(canPromote){
+        html+='<button class="panel-btn" style="color:var(--warning);border-color:var(--warning);font-size:10px" onclick="handlePromoteManager('+leagueId+','+m.userId+')">🛡️ '+t('promote_manager')+'</button>';
+      }
+      if(canDemote){
+        html+='<button class="panel-btn" style="color:var(--text-light);border-color:var(--border);font-size:10px" onclick="handleDemoteManager('+leagueId+','+m.userId+')">'+t('demote_manager')+'</button>';
+      }
+      // Affiliate promotion (owner only, private leagues, for non-owner members)
+      if(imOwner&&league&&!league.isOfficial&&m.role!=='OWNER'){
+        if(!isAff){
+          html+='<button class="panel-btn" style="color:#9B59B6;border-color:#9B59B6;font-size:10px" onclick="handlePromoteAffiliate('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">📣 '+t('promote_affiliate')+'</button>';
+          if(m.linkedToAffiliateId){
+            html+='<button class="panel-btn" style="color:#E2B866;border-color:#E2B866;font-size:10px" onclick="handleLinkToAffiliate('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">🔗 Editar Vínculo</button>';
+          } else {
+            html+='<button class="panel-btn" style="color:#E2B866;border-color:#E2B866;font-size:10px" onclick="handleLinkToAffiliate('+leagueId+','+m.userId+',&quot;'+mName+'&quot;)">🔗 Vincular a afiliado</button>';
+          }
+        } else {
+          html+='<button class="panel-btn" style="color:#9B59B6;border-color:#9B59B6;font-size:10px" onclick="handleEditAffiliate('+leagueId+','+m.userId+',&quot;'+mName+'&quot;,&quot;'+(m.affiliateCode||'')+'&quot;,'+(m.revenueSharePct||30)+','+(m.creditLimit||0)+','+(m.creditUsed||0)+')">📣 '+t('edit_affiliate')+'</button>';
+        }
+      }
+      html+='</div>';
     }
     html+='</div>';
   });
   html+='</div>';
 
-  // Info box
-  // Removed "how it works" message
+  // Star upgrade section (owner only, private leagues)
+  if(imOwner&&league&&!league.isOfficial){
+    const curStars=league.stars||1;
+    html+='<div style="padding:14px;background:rgba(196,149,106,0.06);border-radius:var(--radius-sm);margin-top:12px">';
+    // Calculate days remaining
+    let daysLeft=null;
+    if(league.starsExpiresAt){
+      const now=new Date();
+      const exp=new Date(league.starsExpiresAt);
+      daysLeft=Math.max(0,Math.ceil((exp.getTime()-now.getTime())/(1000*60*60*24)));
+    }
+    // Header with stars + days remaining inline
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html+='<div style="font-size:13px;font-weight:700;color:var(--text)">'+t('upgrade_league')+' '+renderStars(curStars)+'</div>';
+    if(league.starsExpired){
+      html+='<span style="font-size:10px;font-weight:600;color:var(--error);background:var(--error-bg);padding:3px 8px;border-radius:20px">⚠️ Expirado</span>';
+    } else if(daysLeft!==null&&daysLeft<=7){
+      html+='<span style="font-size:10px;font-weight:600;color:var(--warning);background:var(--warning-bg);padding:3px 8px;border-radius:20px">⏱️ '+daysLeft+'d restantes</span>';
+    } else if(daysLeft!==null){
+      html+='<span style="font-size:10px;font-weight:600;color:var(--success);background:var(--success-bg);padding:3px 8px;border-radius:20px">✓ '+daysLeft+'d restantes</span>';
+    }
+    html+='</div>';
+    if(league.starsExpired){
+      html+='<div style="font-size:11px;color:var(--error);margin-bottom:8px">'+t('renew_now')+'</div>';
+    } else if(league.starsExpiresAt){
+      const expDate=new Date(league.starsExpiresAt);
+      html+='<div style="font-size:11px;color:var(--text-light);margin-bottom:8px">Válido até '+expDate.toLocaleDateString('pt-BR')+'</div>';
+    }
+    if(league.overLimit){
+      html+='<div style="font-size:11px;color:var(--error);margin-bottom:8px">⚠️ '+t('over_limit')+'</div>';
+    }
+    // Show upgrade buttons for levels above current
+    const tiers=[{s:0,m:15,g:0,c:0},{s:1,m:100,g:1,c:50},{s:2,m:250,g:2,c:125},{s:3,m:600,g:3,c:300},{s:4,m:1000,g:4,c:500},{s:5,m:1500,g:5,c:750}];
+    html+='<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">';
+    tiers.forEach(tier=>{
+      if(tier.s>=1){
+        const isActive=curStars===tier.s&&!league.starsExpired;
+        const canUpgrade=!isActive&&tier.s>curStars;
+        const label=renderStars(tier.s)+' '+tier.m+' '+t('members')+' · '+tier.g+' '+t('manager_short');
+        html+='<button class="btn" style="width:100%;padding:10px;font-size:12px;display:flex;justify-content:space-between;align-items:center;'
+          +(isActive?'background:var(--success-bg);color:var(--success);border:1px solid var(--success)':'background:var(--card);color:var(--text);border:1px solid var(--border)')
+          +';border-radius:var(--radius-xs)"'
+          +(canUpgrade?' onclick="handleUpgradeStars('+leagueId+','+tier.s+','+tier.c+')"':' disabled')+'>'+
+          '<span>'+label+'</span><span style="font-size:11px;color:var(--text-sec)">'+tier.c+' 💎</span></button>';
+      }
+    });
+    html+='</div></div>';
+  }
+
 
   document.getElementById('managePageContent').innerHTML=html;
 }
@@ -2233,6 +2446,394 @@ async function handleRemoveMember(leagueId,targetUserId,name){
   }catch(e){showToast(e.message,'error');}
 }
 
+let mgrConfirmLeagueId=null,mgrConfirmUserId=null,mgrConfirmAction=null;
+
+function handlePromoteManager(leagueId,targetUserId){
+  openManagerConfirm(leagueId,targetUserId,'promote');
+}
+
+function handleDemoteManager(leagueId,targetUserId){
+  openManagerConfirm(leagueId,targetUserId,'demote');
+}
+
+function openManagerConfirm(leagueId,targetUserId,action){
+  mgrConfirmLeagueId=leagueId;
+  mgrConfirmUserId=targetUserId;
+  mgrConfirmAction=action;
+  const isPromote=action==='promote';
+  const member=allLeagues.find(l=>l.id===leagueId);
+
+  document.getElementById('leagueManagePage').style.display='none';
+  document.getElementById('managerConfirmPage').style.display='flex';
+  document.getElementById('mgrConfirmTitle').textContent=isPromote?'🛡️ '+t('promote_manager'):''+t('demote_manager');
+
+  let html='';
+  html+='<div style="text-align:center;margin-bottom:24px">';
+  html+='<div style="width:56px;height:56px;border-radius:50%;background:'+(isPromote?'rgba(226,184,102,0.15)':'rgba(224,122,95,0.15)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">'+(isPromote?'🛡️':'👤')+'</div>';
+  html+='<div style="font-size:16px;font-weight:700;color:var(--text)">'+(isPromote?t('promote_manager'):t('demote_manager'))+'</div>';
+  html+='<div style="font-size:12px;color:var(--text-sec);margin-top:6px">'+(isPromote?'O membro poderá enviar/retirar saldo e gerenciar membros':'O gestor será rebaixado a membro comum')+'</div>';
+  html+='</div>';
+
+  // Password field
+  html+='<div class="field" style="margin-bottom:24px">';
+  html+='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Confirme sua senha</label>';
+  html+='<input type="password" id="mgrConfirmPassword" placeholder="Sua senha de acesso ao app" style="width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 16px;font-size:15px;color:var(--text);background:var(--card);font-family:inherit;outline:none">';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:6px">Digite sua senha para confirmar a ação</div>';
+  html+='</div>';
+
+  // Confirm button
+  const btnColor=isPromote?'var(--warning)':'var(--error)';
+  html+='<button class="btn" style="height:54px;font-size:16px;font-weight:700;background:'+btnColor+';color:white;border:none;border-radius:var(--radius-sm)" onclick="confirmManagerAction()">'+(isPromote?'🛡️ '+t('promote_manager'):t('demote_manager'))+'</button>';
+
+  document.getElementById('mgrConfirmContent').innerHTML=html;
+}
+
+async function confirmManagerAction(){
+  const pwd=document.getElementById('mgrConfirmPassword').value;
+  if(!pwd){showToast('Digite sua senha','error');return;}
+  const isPromote=mgrConfirmAction==='promote';
+  const endpoint=isPromote?'/promote':'/demote';
+  try{
+    await api('/user-leagues/'+mgrConfirmLeagueId+'/members/'+mgrConfirmUserId+endpoint,{
+      method:'POST',
+      body:JSON.stringify({password:pwd})
+    });
+    showToast((isPromote?t('promote_manager'):t('demote_manager'))+' ✓','success');
+    closeManagerConfirm();
+    openLeaguePanel(mgrConfirmLeagueId);
+    loadLeagues();
+  }catch(e){showToast(e.message,'error');}
+}
+
+function closeManagerConfirm(){
+  document.getElementById('managerConfirmPage').style.display='none';
+  document.getElementById('leagueManagePage').style.display='flex';
+}
+
+let upgradeStarsLeagueId=null;
+
+function handleUpgradeStars(leagueId,targetStars,cost){
+  upgradeStarsLeagueId=leagueId;
+  const league=allLeagues.find(l=>l.id===leagueId);
+  const curStars=league?league.stars||1:1;
+  const tiers=[{s:1,m:100,g:1,c:50},{s:2,m:250,g:2,c:125},{s:3,m:600,g:3,c:300},{s:4,m:1000,g:4,c:500},{s:5,m:1500,g:5,c:750}];
+  const tier=tiers.find(t=>t.s===targetStars);
+  if(!tier)return;
+
+  const diamondBal=userDiamondsCount||0;
+  const canAfford=diamondBal>=cost;
+
+  let html='<div style="padding:4px 0">';
+
+  // Header card
+  html+='<div style="background:linear-gradient(135deg,rgba(196,149,106,0.15),rgba(196,149,106,0.05));border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px">';
+  html+='<div style="font-size:32px;margin-bottom:8px">';
+  for(let i=0;i<targetStars;i++) html+='⭐';
+  html+='</div>';
+  html+='<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">'+t('upgrade_league')+' '+targetStars+' '+t(targetStars===1?'star_label':'stars_label')+'</div>';
+  html+='<div style="font-size:13px;color:var(--text-sec)">'+(league?.name||'Liga')+'</div>';
+  html+='</div>';
+
+  // Benefits card
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">';
+  html+='<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">Benefícios do plano</div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">';
+  html+='<span style="font-size:12px;color:var(--text-sec)">👥 '+t('members')+'</span>';
+  html+='<span style="font-size:13px;font-weight:600;color:var(--text)">'+tier.m+'</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">';
+  html+='<span style="font-size:12px;color:var(--text-sec)">🛡️ '+t('manager_short')+'</span>';
+  html+='<span style="font-size:13px;font-weight:600;color:var(--text)">'+tier.g+'</span></div>';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">⏱️ Válido por 30 dias após ativação</div>';
+  html+='</div>';
+
+  // Cost card
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+  html+='<span style="font-size:13px;color:var(--text-sec)">'+t('upgrade_cost')+'</span>';
+  html+='<span style="font-size:18px;font-weight:700;color:var(--primary)">'+cost+' 💎</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+  html+='<span style="font-size:12px;color:var(--text-sec)">Seu saldo</span>';
+  html+='<span style="font-size:13px;font-weight:600;color:'+(canAfford?'var(--success)':'var(--error)')+'">'+diamondBal+' 💎</span></div>';
+  if(!canAfford){
+    html+='<div style="font-size:11px;color:var(--error);margin-top:8px;padding:8px;background:var(--error-bg);border-radius:var(--radius-xs);text-align:center">'+t('diamonds_short')+' insuficientes. Faltam '+(cost-diamondBal)+' 💎</div>';
+  }
+  html+='</div>';
+
+  // Buttons
+  html+='<button class="btn" style="width:100%;padding:14px;font-size:14px;font-weight:700;border-radius:var(--radius-sm);border:none;cursor:pointer;'
+    +(canAfford?'background:var(--primary);color:#fff':'background:var(--border);color:var(--text-light);cursor:not-allowed')
+    +'" '+(canAfford?'onclick="confirmUpgradeStars('+leagueId+','+targetStars+')"':'disabled')+'>'
+    +(canAfford?'Confirmar Evolução':'Diamantes Insuficientes')+'</button>';
+  html+='<button class="btn" style="width:100%;padding:12px;font-size:13px;font-weight:500;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-sec);margin-top:8px;cursor:pointer" onclick="closeUpgradeStars()">Cancelar</button>';
+
+  html+='</div>';
+
+  document.getElementById('upgradeStarsTitle').textContent=t('upgrade_league')+' ⭐';
+  document.getElementById('upgradeStarsContent').innerHTML=html;
+  document.getElementById('leagueManagePage').style.display='none';
+  document.getElementById('upgradeStarsPage').style.display='flex';
+}
+
+async function confirmUpgradeStars(leagueId,targetStars){
+  try{
+    await api('/user-leagues/'+leagueId+'/upgrade-stars',{method:'POST',body:JSON.stringify({targetStars})});
+    showToast(t('upgrade_league')+' '+targetStars+'⭐ ✓','success');
+    await loadBalance();
+    await loadLeagues();
+    closeUpgradeStars();
+    openLeaguePanel(leagueId);
+  }catch(e){showToast(e.message,'error');}
+}
+
+function closeUpgradeStars(){
+  document.getElementById('upgradeStarsPage').style.display='none';
+  document.getElementById('leagueManagePage').style.display='flex';
+}
+
+// === AUTO-APPROVE TOGGLE ===
+async function handleToggleAutoApprove(leagueId){
+  try{
+    const res=await api('/user-leagues/'+leagueId+'/toggle-auto-approve',{method:'POST'});
+    const label=res.autoApprove?t('auto_approve_on'):t('auto_approve_off');
+    showToast(t('auto_approve')+': '+label,'success');
+    // Update local league data
+    const idx=allLeagues.findIndex(l=>l.id===leagueId);
+    if(idx>=0) allLeagues[idx].autoApprove=res.autoApprove;
+    openLeaguePanel(leagueId);
+  }catch(e){showToast(e.message,'error');}
+}
+
+// === AFFILIATE FUNCTIONS ===
+let affConfigLeagueId=null,affConfigUserId=null;
+
+function handlePromoteAffiliate(leagueId,targetUserId,targetName){
+  affConfigLeagueId=leagueId;
+  affConfigUserId=targetUserId;
+  // Show affiliate config page
+  document.getElementById('leagueManagePage').style.display='none';
+  document.getElementById('affiliateConfigPage').style.display='flex';
+  document.getElementById('affConfigTitle').textContent='📣 '+t('promote_affiliate');
+
+  let html='';
+  html+='<div style="text-align:center;margin-bottom:24px">';
+  html+='<div style="width:56px;height:56px;border-radius:50%;background:rgba(155,89,182,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">📣</div>';
+  html+='<div style="font-size:18px;font-weight:700;color:var(--text)">'+targetName+'</div>';
+  html+='<div style="font-size:12px;color:var(--text-sec);margin-top:4px">'+t('promote_affiliate')+'</div>';
+  html+='</div>';
+
+  // Revenue share field
+  html+='<div class="field" style="margin-bottom:20px">';
+  html+='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">'+t('revenue_share')+'</label>';
+  html+='<div style="position:relative">';
+  html+='<input type="number" id="affShareInput" value="30" min="1" max="100" style="width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 40px 0 16px;font-size:18px;font-weight:700;color:var(--text);background:var(--card);font-family:inherit;outline:none">';
+  html+='<span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:var(--text-sec)">%</span>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:6px">Porcentagem da comissão sobre apostas perdidas dos indicados</div>';
+  html+='</div>';
+
+  // Credit limit field
+  html+='<div class="field" style="margin-bottom:20px">';
+  html+='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Limite de crédito (fichas)</label>';
+  html+='<input type="number" id="affCreditLimitInput" value="0" min="0" style="width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 16px;font-size:18px;font-weight:700;color:var(--text);background:var(--card);font-family:inherit;outline:none">';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:6px">Máximo de fichas que o afiliado pode enviar do caixa (0 = sem limite)</div>';
+  html+='</div>';
+
+  // Password field
+  html+='<div class="field" style="margin-bottom:20px">';
+  html+='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">'+t('affiliate_password')+'</label>';
+  html+='<input type="password" id="affPasswordInput" placeholder="Mínimo 4 caracteres" style="width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 16px;font-size:15px;color:var(--text);background:var(--card);font-family:inherit;outline:none">';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:6px">Senha para acesso ao backoffice do afiliado</div>';
+  html+='</div>';
+
+  // Confirm button
+  html+='<button class="btn btn-primary" style="margin-top:12px;height:54px;font-size:16px" onclick="confirmPromoteAffiliate()">📣 '+t('promote_affiliate')+'</button>';
+
+  document.getElementById('affConfigContent').innerHTML=html;
+}
+
+async function confirmPromoteAffiliate(){
+  const pct=parseInt(document.getElementById('affShareInput').value);
+  if(isNaN(pct)||pct<1||pct>100){showToast(t('enter_valid_value'),'error');return;}
+  const pwd=document.getElementById('affPasswordInput').value;
+  if(!pwd||pwd.length<4){showToast('Senha mínima: 4 caracteres','error');return;}
+  try{
+    const creditLimit=parseInt(document.getElementById('affCreditLimitInput').value)||0;
+    await api('/affiliates/leagues/'+affConfigLeagueId+'/promote',{method:'POST',body:JSON.stringify({targetUserId:affConfigUserId,revenueSharePct:pct,password:pwd,creditLimit})});
+    showToast(t('promote_affiliate')+' ✓','success');
+    closeAffiliateConfig();
+    openLeaguePanel(affConfigLeagueId);
+  }catch(e){showToast(e.message,'error');}
+}
+
+function handleEditAffiliate(leagueId,targetUserId,targetName,affiliateCode,currentPct,currentCreditLimit,currentCreditUsed){
+  affConfigLeagueId=leagueId;
+  affConfigUserId=targetUserId;
+
+  document.getElementById('leagueManagePage').style.display='none';
+  document.getElementById('affiliateConfigPage').style.display='flex';
+  document.getElementById('affConfigTitle').textContent='📣 '+t('edit_affiliate');
+
+  let html='';
+  html+='<div style="text-align:center;margin-bottom:24px">';
+  html+='<div style="width:56px;height:56px;border-radius:50%;background:rgba(155,89,182,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">📣</div>';
+  html+='<div style="font-size:18px;font-weight:700;color:var(--text)">'+targetName+'</div>';
+  html+='<div style="font-size:12px;color:#9B59B6;margin-top:4px">'+t('affiliate_code')+': <strong>'+affiliateCode+'</strong></div>';
+  html+='</div>';
+
+  // Revenue share field
+  html+='<div class="field" style="margin-bottom:20px">';
+  html+='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">'+t('revenue_share')+'</label>';
+  html+='<div style="position:relative">';
+  html+='<input type="number" id="affShareInput" value="'+currentPct+'" min="1" max="100" style="width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 40px 0 16px;font-size:18px;font-weight:700;color:var(--text);background:var(--card);font-family:inherit;outline:none">';
+  html+='<span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:700;color:var(--text-sec)">%</span>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:6px">Porcentagem da comissão sobre apostas perdidas dos indicados</div>';
+  html+='</div>';
+
+  // Credit limit field
+  html+='<div class="field" style="margin-bottom:20px">';
+  html+='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Limite de crédito (fichas)</label>';
+  html+='<input type="number" id="affCreditLimitInput" value="'+currentCreditLimit+'" min="0" style="width:100%;height:52px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 16px;font-size:18px;font-weight:700;color:var(--text);background:var(--card);font-family:inherit;outline:none">';
+  html+='<div style="font-size:11px;color:var(--text-light);margin-top:6px">Máximo de fichas que o afiliado pode enviar do caixa (0 = sem limite)</div>';
+  if(currentCreditLimit>0){
+    const remaining=currentCreditLimit-currentCreditUsed;
+    html+='<div style="margin-top:8px;padding:8px 12px;background:var(--card);border-radius:var(--radius-xs);border:1px solid var(--border)">';
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text-sec)">Usado</span><span style="color:var(--text)">'+currentCreditUsed.toLocaleString('pt-BR')+' fichas</span></div>';
+    html+='<div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text-sec)">Disponível</span><span style="color:'+(remaining>0?'var(--success)':'var(--error)')+'">'+remaining.toLocaleString('pt-BR')+' fichas</span></div>';
+    html+='</div>';
+    html+='<button class="btn" style="margin-top:8px;height:36px;font-size:12px;background:transparent;color:var(--warning);border:1px solid var(--warning);border-radius:var(--radius-xs);width:100%" onclick="document.getElementById(\'affResetCredit\').value=\'1\'">Resetar crédito usado</button>';
+    html+='<input type="hidden" id="affResetCredit" value="0">';
+  }
+  html+='</div>';
+
+  // Save button
+  html+='<button class="btn btn-primary" style="margin-top:12px;height:54px;font-size:16px" onclick="confirmEditAffiliate()">Salvar alterações</button>';
+
+  document.getElementById('affConfigContent').innerHTML=html;
+}
+
+async function confirmEditAffiliate(){
+  const pct=parseInt(document.getElementById('affShareInput').value);
+  if(isNaN(pct)||pct<1||pct>100){showToast(t('enter_valid_value'),'error');return;}
+  try{
+    // Find affiliate ID — we use the league endpoint to update revenue share
+    const affList=await api('/affiliates/leagues/'+affConfigLeagueId);
+    const affArr=Array.isArray(affList)?affList:(affList.affiliates||affList.data||[]);
+    const aff=affArr.find(a=>a.userId===affConfigUserId);
+    if(!aff){showToast('Afiliado não encontrado','error');return;}
+    const creditLimit=parseInt(document.getElementById('affCreditLimitInput')?.value)||0;
+    const resetCredit=document.getElementById('affResetCredit')?.value==='1';
+    await api('/affiliates/leagues/'+affConfigLeagueId+'/'+aff.id+'/update',{method:'POST',body:JSON.stringify({revenueSharePct:pct,creditLimit,resetCreditUsed:resetCredit})});
+    showToast('Afiliado atualizado ✓','success');
+    closeAffiliateConfig();
+    openLeaguePanel(affConfigLeagueId);
+  }catch(e){showToast(e.message,'error');}
+}
+
+function closeAffiliateConfig(){
+  document.getElementById('affiliateConfigPage').style.display='none';
+  document.getElementById('leagueManagePage').style.display='flex';
+}
+
+// ─── Link Member to Affiliate (Owner) ────────────────────────────────────
+
+async function handleLinkToAffiliate(leagueId, targetUserId, targetName){
+  affConfigLeagueId=leagueId;
+  affConfigUserId=targetUserId;
+
+  document.getElementById('leagueManagePage').style.display='none';
+  document.getElementById('affiliateConfigPage').style.display='flex';
+  document.getElementById('affConfigTitle').textContent='🔗 Vincular indicado';
+
+  let html='<div style="text-align:center;margin-bottom:24px">';
+  html+='<div style="width:56px;height:56px;border-radius:50%;background:rgba(226,184,102,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px">🔗</div>';
+  html+='<div style="font-size:18px;font-weight:700;color:var(--text)">'+targetName+'</div>';
+  html+='<div style="font-size:12px;color:var(--text-sec);margin-top:4px">Vincular este membro como indicado de um afiliado</div>';
+  html+='</div>';
+
+  // Loading affiliates list
+  html+='<div id="linkAffiliateList" style="color:var(--text-sec);text-align:center">Carregando afiliados...</div>';
+  document.getElementById('affConfigContent').innerHTML=html;
+
+  try{
+    const affList=await api('/affiliates/leagues/'+leagueId);
+    const affArr=Array.isArray(affList)?affList:(affList.affiliates||affList.data||[]);
+    if(affArr.length===0){
+      document.getElementById('linkAffiliateList').innerHTML='<div style="color:var(--text-light);padding:20px">Nenhum afiliado encontrado nesta liga. Promova alguém primeiro.</div>';
+      return;
+    }
+    let listHtml='<label style="display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Escolha o afiliado</label>';
+    affArr.forEach(a=>{
+      if(a.userId===targetUserId) return; // skip if target is this affiliate
+      listHtml+='<button onclick="confirmLinkToAffiliate('+leagueId+','+a.id+','+targetUserId+')" style="width:100%;padding:14px 16px;margin-bottom:8px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left">';
+      listHtml+='<div style="width:40px;height:40px;border-radius:50%;background:rgba(155,89,182,0.15);display:flex;align-items:center;justify-content:center;font-size:16px">📣</div>';
+      listHtml+='<div style="flex:1">';
+      listHtml+='<div style="font-size:14px;font-weight:600;color:var(--text)">'+a.userName+'</div>';
+      listHtml+='<div style="font-size:11px;color:#9B59B6">'+a.affiliateCode+' · '+a.revenueSharePct+'%</div>';
+      listHtml+='</div>';
+      listHtml+='</button>';
+    });
+    document.getElementById('linkAffiliateList').innerHTML=listHtml;
+  }catch(e){
+    document.getElementById('linkAffiliateList').innerHTML='<div style="color:var(--error)">Erro ao carregar afiliados</div>';
+  }
+}
+
+async function confirmLinkToAffiliate(leagueId, affiliateId, targetUserId){
+  try{
+    await api('/affiliates/leagues/'+leagueId+'/'+affiliateId+'/link-member',{method:'POST',body:JSON.stringify({targetUserId})});
+    showToast('Membro vinculado ao afiliado ✓','success');
+    closeAffiliateConfig();
+    openLeaguePanel(leagueId);
+  }catch(e){showToast(e.message||'Erro ao vincular','error');}
+}
+
+async function handleRegisterReferral(leagueId){
+  const code=document.getElementById('affiliateCodeInput')?.value?.trim();
+  if(!code){showToast(t('enter_affiliate_code'),'error');return;}
+  try{
+    await api('/affiliates/register-referral',{method:'POST',body:JSON.stringify({affiliateCode:code,leagueId})});
+    showToast(t('referral_registered'),'success');
+    openLeaguePanel(leagueId);
+  }catch(e){showToast(e.message,'error');}
+}
+
+function openAffiliateManage(leagueId){
+  // Show a simple modal with affiliate list for the league
+  (async()=>{
+    try{
+      const data=await api('/affiliates/leagues/'+leagueId);
+      let html='<div style="padding:16px">';
+      html+='<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">📣 '+t('affiliate')+' — '+t('revenue_share')+'</div>';
+      if(!data.affiliates||!data.affiliates.length){
+        html+='<div style="font-size:12px;color:var(--text-light);text-align:center;padding:20px">Nenhum afiliado ainda</div>';
+      } else {
+        data.affiliates.forEach(a=>{
+          const name=a.user?.username||a.user?.name||'Afiliado';
+          html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">';
+          html+='<div><div style="font-size:13px;color:var(--text)">'+name+'</div>';
+          html+='<div style="font-size:10px;color:var(--text-sec)">'+t('revenue_share')+': '+a.revenueSharePercent+'%'+(a.parentId?' · '+t('sub_affiliate'):'')+'</div></div>';
+          html+='<div style="font-size:11px;color:#9B59B6">📣 '+(a.referralCount||0)+' ref</div>';
+          html+='</div>';
+        });
+      }
+      html+='<button class="btn btn-primary" style="margin-top:16px;height:40px;font-size:13px" onclick="closeModal(&quot;affiliateModal&quot;)">OK</button>';
+      html+='</div>';
+      // Use a generic modal approach
+      let modal=document.getElementById('affiliateModal');
+      if(!modal){
+        modal=document.createElement('div');
+        modal.id='affiliateModal';
+        modal.className='modal';
+        modal.innerHTML='<div class="modal-content" style="max-height:70vh;overflow-y:auto"></div>';
+        document.body.appendChild(modal);
+      }
+      modal.querySelector('.modal-content').innerHTML=html;
+      modal.classList.add('active');
+    }catch(e){showToast(e.message,'error');}
+  })();
+}
+
 function openDiamondConvertScreen(){ showDiamondStore(); }
 
 async function showDiamondStore(){
@@ -2252,7 +2853,8 @@ async function showDiamondStore(){
     return '<div class="diamond-package"><div class="dp-name">'+p.name+'</div><div class="dp-diamonds">'+p.diamonds+' 💎</div><div class="dp-price">'+price+'</div><button class="dp-btn" onclick="handleDiamondPurchase(\''+p.id+'\','+p.diamonds+')">'+t('buy')+'</button></div>';
   }).join('');
   const cvt=document.getElementById('diamondConvertContent');
-  if(userDiamondsCount>0&&curLeagueId){
+  const isOwnerOrManager = curLeague && (curLeague.role==='OWNER' || curLeague.role==='MANAGER');
+  if(userDiamondsCount>0&&curLeagueId&&isOwnerOrManager){
     pendingDiamonds=userDiamondsCount;
     const leagueName=curLeague?(curLeague.isOfficial?'Liga BetBrincadeira':curLeague.name):'Liga';
     cvt.style.display='block';
@@ -2287,19 +2889,18 @@ async function handleDiamondPurchase(pkgId,diamonds){
       pendingDiamonds=diamonds; // still show convert UI, diamonds may arrive later
     }
     await loadBalance();
-    document.getElementById('diamondConvertContent').style.display='block';
     const cvtText=document.getElementById('diamondConvertContent');
     if(cvtText){
-      // In private leagues, only owner can convert diamonds to balance
-      const canConvert = !curLeague || curLeague.isOfficial || curLeague.role==='OWNER';
+      const canConvert = curLeague && (curLeague.role==='OWNER' || curLeague.role==='MANAGER');
       let buttonsHtml='<div style="display:flex;flex-direction:column;gap:12px">';
       if(canConvert){
         buttonsHtml+='<button class="btn btn-primary" style="background:var(--success);width:100%;padding:14px;font-size:15px" onclick="showDiamondConvertUI('+diamonds+')">💰 '+t('convert_to_balance')+'</button>';
       }
       buttonsHtml+='<button class="btn btn-primary" style="background:var(--primary);width:100%;padding:14px;font-size:15px" onclick="goToLeaguesForUpgrade()">⚡ '+t('use_for_upgrades')+'</button>';
       buttonsHtml+='</div>';
+      cvtText.style.display='block';
       cvtText.innerHTML='<div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:8px">'+diamonds+' '+t('diamonds_added')+'</div>'
-        +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:16px">'+t('choose_diamond_use')+'</div>'
+        +'<div style="font-size:13px;color:var(--text-sec);margin-bottom:16px">'+(canConvert?t('choose_diamond_use'):t('use_for_upgrades'))+'</div>'
         +buttonsHtml;
     }
     showToast(diamonds+' '+t('diamonds_bought'),'success');
@@ -2308,9 +2909,9 @@ async function handleDiamondPurchase(pkgId,diamonds){
 
 async function handleConvertDiamonds(){
   if(!curLeagueId){showToast(t('select_league_first'),'error');return;}
-  // Block conversion in private leagues for non-owners
-  if(curLeague && !curLeague.isOfficial && curLeague.role!=='OWNER'){
-    showToast('Em ligas privadas, apenas o dono pode converter diamantes em saldo.','error');return;
+  // Only OWNER or MANAGER can convert diamonds to league balance
+  if(!curLeague || (curLeague.role!=='OWNER' && curLeague.role!=='MANAGER')){
+    showToast('Apenas o dono ou gestor da liga pode converter diamantes em saldo.','error');return;
   }
   const convertInput=document.getElementById('convertAmount');
   const amount=convertInput?parseInt(convertInput.value)||0:pendingDiamonds;
@@ -2349,7 +2950,7 @@ async function handleConvertDiamonds(){
 
 function showDiamondConvertUI(diamonds){
   // Block conversion in private leagues for non-owners
-  const canConvert = !curLeague || curLeague.isOfficial || curLeague.role==='OWNER';
+  const canConvert = curLeague && (curLeague.role==='OWNER' || curLeague.role==='MANAGER');
   if(!canConvert){
     showToast('Em ligas privadas, apenas o dono pode converter diamantes em saldo.','error');
     return;
