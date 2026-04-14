@@ -53,6 +53,9 @@ export default function LoginPage() {
         affiliates: res.affiliates || [],
       }));
 
+      // Set cookie for server-side middleware (proxy.ts) authentication
+      document.cookie = `admin_token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+
       if (res.isAffiliate && !res.isAdmin && !res.isOwner) {
         router.push('/affiliate');
       } else if (res.isAdmin) {

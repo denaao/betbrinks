@@ -53,6 +53,7 @@ export default function Sidebar() {
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
     localStorage.removeItem('admin_role');
+    document.cookie = 'admin_token=; path=/; max-age=0';
     router.push('/login');
   };
 
