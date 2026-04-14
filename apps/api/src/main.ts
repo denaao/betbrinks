@@ -18,10 +18,12 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // CORS: restrict to allowed origins from env (VULN-002 fix)
-  const allowedOrigins = (config.get<string>('CORS_ORIGINS') || 'http://localhost:3001')
+  const corsRaw = config.get<string>('CORS_ORIGINS') || 'http://localhost:3001';
+  const allowedOrigins = corsRaw
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
+  console.log('🌐 CORS allowed origins:', allowedOrigins);
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -32,9 +34,12 @@ async function bootstrap() {
       if (config.get<string>('NODE_ENV') === 'development' && origin.startsWith('http://localhost:')) {
         return callback(null, true);
       }
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
+      console.warn(`⚠️ CORS blocked origin: ${origin}`);
+      callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   // Global pipes
