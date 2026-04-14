@@ -4,7 +4,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
-import { RolesGuard } from './common/guards/roles.guard';
+// RolesGuard moved to AuthModule to ensure it runs after JwtAuthGuard
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
 import { HealthModule } from './modules/health/health.module';
@@ -76,7 +76,6 @@ import { AffiliateModule } from './modules/affiliate/affiliate.module';
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
-    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}
